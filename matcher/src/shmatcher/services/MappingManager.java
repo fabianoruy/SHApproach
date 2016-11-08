@@ -41,7 +41,8 @@ import shmatcher.model.Ontology.Level;
 /** Responsible for providing the services for the mapping tasks. */
 public class MappingManager {
 	private SHInitiative	initiative;
-
+	private String			parsingResults	= "";
+	
 	/* Reads an Astah file and parses the models. */
 	public String parseAstah(String filename) {
 		ProjectAccessor accessor = null;
@@ -65,7 +66,7 @@ public class MappingManager {
 			parseGeneralizations(initiative.getAllNotions());
 
 			// Importing the diagram images from the Astah file
-			importImages(filename);
+			//importImages(filename);
 
 		} catch (IOException | ClassNotFoundException | LicenseNotFoundException | ProjectNotFoundException | NonCompatibleException | ProjectLockedException e) {
 			e.printStackTrace();
@@ -240,9 +241,9 @@ public class MappingManager {
 				onto.addConcept(concept);
 				initiative.addNotion(concept);
 				// addResult(" . " + concept + "\n");
-				
+
 				System.out.println();
-				
+
 			}
 			// Recursivelly parsing packages
 			else if (node instanceof IPackage) {
@@ -370,7 +371,7 @@ public class MappingManager {
 			String desc = node.getDefinition();
 			Diagram diagram = new Diagram(name, desc, type, node);
 			pack.setDiagram(diagram);
-			//System.out.println("Diagram: " + diagram);
+			// System.out.println("Diagram: " + diagram);
 			return; // only one diagram for each package, in this case.
 		}
 	}
@@ -380,89 +381,4 @@ public class MappingManager {
 		System.out.print(result);
 		this.parsingResults += result.replaceAll("\n", "<br/>");
 	}
-
-	/* Imports the astah PNG images (from astah file) to the images directory. */
-	public void importImages(String astahFile) {
-		String targetPath = workingDir + "/images/tmp/";
-		File dir = new File(targetPath);
-		if (!dir.exists()) dir.mkdirs();
-		try {
-			// Exporting images from the Astah file (using command line).
-			System.out.println("\n# Exporting images from Astah to " + targetPath);
-			String command = '"' + astahInstallPath + "/astah-commandw.exe" + '"'; // command for exporting
-			command += " -image cl"; // selecting only Class diagrams
-			command += " -f " + astahFile; // defining input astah file
-			command += " -o " + targetPath; // defining output directory
-			System.out.println("$ " + command);
-
-			long start = System.currentTimeMillis();
-			Process process = Runtime.getRuntime().exec(command);
-			process.waitFor();
-			System.out.print("[-] Time: " + (System.currentTimeMillis() - start) + " - ");
-
-			// Getting the identified diagrams' paths
-			List<String> identDiagrams = new ArrayList<String>();
-			for (Package pack : initiative.getAllPackages()) {
-				Diagram diagram = pack.getDiagram();
-				if (diagram != null) {
-					String relativePath = "/" + diagram.getAstahDiagram().getFullName("/") + ".png";
-					identDiagrams.add(relativePath);
-					//System.out.println("\n#ID: " + relativePath);
-				}
-			}
-
-			// TODO: test images exportation in other machines/conditions.
-			// Waiting for all files being copied.
-			int files = 0;
-			int before = 0;
-			int diff = 0;
-			while (files == 0 || diff > 0) {
-				waitFor(3, 1000);
-				files = FileUtils.listFiles(dir, new String[] { "png" }, true).size();
-				diff = files - before;
-				before = files;
-				System.out.print("[" + files + "] Time: " + (System.currentTimeMillis() - start) + " - ");
-			}
-
-			// Copying the .PNG files (of the identified diagrams) from the tmp directory to the images directory
-			String target = workingDir + "/images/";
-			int count = 0;
-			System.out.println("\nCopying the .PNG files from " + dir.getPath() + " and subdirectories to " + target);
-			List<File> allFiles = (List<File>) FileUtils.listFiles(dir, new String[] { "png" }, true);
-			for (File file : allFiles) {
-				String path = file.getAbsolutePath();
-				String relativePath = path.substring(path.indexOf('\\', path.indexOf("Uploaded_"))).replace('\\', '/');
-				//System.out.println("#FILE: " + relativePath);
-				if (identDiagrams.contains(relativePath)) {
-					File dest = new File(target + file.getName());
-					FileUtils.copyFile(file, dest); // copies each PNG file
-					System.out.print(++count + " ");
-					System.out.println(dest);
-				}
-			}
-			addResult(count +" diagrams imported.\n");
-			System.out.println("");
-
-			// Scheduling the Deletion of temporary astahdoc images directory
-			System.out.println("Deleting " + dir.getName());
-			FileUtils.forceDeleteOnExit(dir);
-		} catch (IOException | InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
-
-	/* Waits for a period (millis) a number of times (times). */
-	private void waitFor(int times, long millis) {
-		System.out.print("Waiting (" + times + "*" + millis + ") ");
-		try {
-			for (int i = 0; i < times; i++) {
-				Thread.sleep(millis); // 1000 milliseconds is one second.
-				System.out.print(".");
-			}
-			System.out.println("");
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
-
 }

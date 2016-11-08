@@ -16,52 +16,28 @@
 <script>
 	$(document).ready(function() {
 		$('#uploadbutton').click(function() {
-			performAjaxSubmit();
+			$.ajax({
+				url : 'AstahUploader', //Server script to process data
+				type : 'POST',
+				data : new FormData($('#upform')[0]),
+				xhr : function() { // Custom XMLHttpRequest
+					return $.ajaxSettings.xhr();
+				},
+				//Ajax events
+				beforeSend : function() {
+					$('#astahparsingdiv').append("Please wait. Astah file is being processed. It can take some seconds.<br/>");
+				},
+				success : function(servletResponse) {
+					$('#astahparsingdiv').append(servletResponse);
+				},
+				error : {},
+				//telling jQuery not to process data or worry about content-type.
+				cache : false,
+				contentType : false,
+				processData : false
+			});
 		});
 	});
-
-	function performAjaxSubmit() {
-		var text = $('#textinput').val();
-		var file = $('#fileinput')[0].files[0];
-
-		$('#astahprocessingdiv').append("Please wait. Astah file is being processed. It can take some seconds.");
-
-		var formdata = new FormData();
-		formdata.append("text", text);
-		formdata.append("file", file);
-		//formdata.append("action", "Parse Astah");
-		//console.log(formdata);
-
-		var xhr = new XMLHttpRequest();
-		xhr.open("POST", "AstahUploader", true);
-		xhr.send(formdata);
-
-		xhr.onload = function(e) {
-			if (this.status == 200) {
-				$('#astahprocessingdiv').append("<br/>" + this.responseText);
-				//alert();
-			}
-		};
-
-		// Importing the images
-		//importAstahImages();
-	}
-
-	/* Calls the Servlet via Ajax for importing the astah images. */
-	// NOT USED
-	function importAstahImages() {
-		$.ajax({
-			type : 'POST',
-			url : 'AstahUploader',
-			data : {
-				action : 'import',
-			},
-			success : function(responseXml) {
-				console.log(responseXml);
-				$('#astahprocessingdiv').append("<br/>" + this.responseText);
-			}
-		});
-	}
 
 	/* Shows a message dialog. */
 	function message(text) {
@@ -84,26 +60,33 @@
   <h3 align="center">Approach for Harmonizing SE Standards</h3>
   <h1 align="center">Astah Model Reader</h1>
 
-  <h2><b>Content Mapping</b></h2>
+  <h2>
+    <b>Content Mapping</b>
+  </h2>
   <h2>Map the Standards' Models to the Domain Ontologies</h2>
-  <p align="justify"><b>The standards' elements shall be mapped to the domain ontologies' concepts (vertical
-      mapping).</b><br /> This tool supports the mapping by providing features for selecting the desired elements and
-    concepts and establishing the allowed types of matches between then. Select a element from the left-hand side model
-    (the Standard Model) and select a concept from the right-hand side model (the SEON View). Then, choose the suitable
-    match type and add comments for the match (required for PARTIAL and INTERSECTION). When the matches are finished,
-    list the not covered elements, which will be used in the next activity.</p>
+  <p align="justify">
+    <b>The standards' elements shall be mapped to the domain ontologies' concepts (vertical mapping).</b>
+    <br />
+    This tool supports the mapping by providing features for selecting the desired elements and concepts and
+    establishing the allowed types of matches between then. Select a element from the left-hand side model (the Standard
+    Model) and select a concept from the right-hand side model (the SEON View). Then, choose the suitable match type and
+    add comments for the match (required for PARTIAL and INTERSECTION). When the matches are finished, list the not
+    covered elements, which will be used in the next activity.
+  </p>
 
   <!-- ##### Reading Blocks ##### -->
-  <form id="form" enctype="multipart/form-data">
-    <label for="textlabel">Please, provide a title for your harmonization initiative (e.g.: "Quality
-      Assurance").</label> <input id="textinput" type="text" /> <br /> <label for="filelabel">Select your .astah file</label>
-    <input id="fileinput" type="file" accept=".asta" /> <br /> <input id="uploadbutton" type="button"
-      value="Start Parsing"></input>
+  <!-- <label for="textlabel">Please, provide a title for your harmonization initiative (e.g.: "Quality Assurance").</label> -->
+
+  <form id="upform" enctype="multipart/form-data">
+    <label for="filelabel">Select the .astah file for your harmonization initiative.</label>
+    <input id="fileinput" type="file" name="file" accept=".asta" />
+    <br />
+    <input id="uploadbutton" type="button" value="Start Parsing" />
   </form>
 
 
-  <div style="display: inline-block; overflow: auto; border: 1px solid blue; width: 100%; height: 400px">
-    <div id="astahprocessingdiv"></div>
+  <div style="display: inline-block; overflow: auto; border: 1px solid blue; width: 100%; height: 500px">
+    <div id="astahparsingdiv"></div>
   </div>
   <div style="text-align: center">
     <button id="mappingbutton" onclick="location.href='verticalmapper.jsp'">Start Mapping</button>
@@ -114,10 +97,12 @@
   <!-- ##### Dialog Boxes ##### -->
   <!-- Simple Message -->
   <div id="dialog-message" title="Message" hidden>
-    <p><span class="ui-icon ui-icon-circle-check" style="float: left; margin: 0 7px 50px 0;"></span>
+    <p>
+      <span class="ui-icon ui-icon-circle-check" style="float: left; margin: 0 7px 50px 0;"></span>
     <div id="messageText"></div>
     </p>
   </div>
+  <!-- ***** Dialog Boxes ***** -->
 
 </BODY>
 </HTML>

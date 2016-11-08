@@ -24,48 +24,52 @@ import shmatcher.services.AstahParser;
 /** Servlet implementation class AstahUploader */
 @WebServlet("/AstahUploader")
 public class AstahUploader extends HttpServlet {
-	private static final long	serialVersionUID	= 1L;
-	private AstahParser			parser				= new AstahParser();
-	private String				ajaxResults;
+    private static final long serialVersionUID = 1L;
+    private AstahParser parser = new AstahParser();
+    private String ajaxResults;
 
-	/* doPost method, for processing the upload and calling the parsers. */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// Processing the uploaded astah file.
-		String domain = null;
-		String filename = null;
-		Path path = null;
-		try {
-			List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(request);
+    /* doPost method, for processing the upload and calling the parsers. */
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+	    throws ServletException, IOException {
+	// Processing the uploaded astah file.
+	String domain = null;
+	String filename = null;
+	Path path = null;
+	try {
+	    List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(request);
 
-			for (FileItem item : items) {
-				if (item.isFormField()) {
-					domain = item.getString();
-				} else {
-					filename = item.getName();
-					InputStream content = item.getInputStream();
+	    for (FileItem item : items) {
+		if (item.isFormField()) {
+		    domain = item.getString();
+		} else {
+		    filename = item.getName();
+		    InputStream content = item.getInputStream();
 
-					response.setContentType("text/plain");
-					response.setCharacterEncoding("UTF-8");
+		    response.setContentType("text/plain");
+		    response.setCharacterEncoding("UTF-8");
 
-					// Saving file on disk
-					System.out.println(filename);
-					// path = Paths.get("C:/Users/Fabiano/workspace/matcher/ASTAH_" + filename);
-					path = Paths.get(System.getProperty("user.dir").replace('\\', '/') + "/Uploaded_" + filename);
-					Files.copy(content, path, StandardCopyOption.REPLACE_EXISTING);
-					System.out.println("#Path: " + path.toAbsolutePath().toString());
-				}
-			}
-		} catch (FileUploadException e) {
-			throw new ServletException("Parsing file upload failed.", e);
+		    // Saving file on disk
+		    System.out.println(filename);
+		    // path = Paths.get("C:/Users/Fabiano/workspace/matcher/ASTAH_" + filename);
+		    path = Paths.get(System.getProperty("user.dir").replace('\\', '/') + "/Uploaded_" + filename);
+		    Files.copy(content, path, StandardCopyOption.REPLACE_EXISTING);
+		    System.out.println("#Path: " + path.toAbsolutePath().toString());
 		}
-
-		ajaxResults = "File <code>" + filename + "</code> uploaded for the initiative <b>" + domain + "</b>.<br/>";
-
-		// Parsing Models
-		ajaxResults += parser.parseAstah(path.toString());
-
-		// Sending answer for the page
-		response.getWriter().print(ajaxResults);
+	    }
+	} catch (FileUploadException e) {
+	    throw new ServletException("Parsing file upload failed.", e);
 	}
+
+	ajaxResults = "File <code>" + filename + "</code> uploaded for the initiative.<br/>";
+
+	// Parsing Models
+	ajaxResults += parser.parseAstah(path.toString());
+
+	// Setting the initiative to the session.
+	request.getSession().setAttribute("initiative", parser.getInitiative());
+
+	// Sending answer for the page
+	response.getWriter().print(ajaxResults);
+    }
 
 }
