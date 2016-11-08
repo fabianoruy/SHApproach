@@ -49,12 +49,15 @@ public class AstahParser {
     public String parseAstah(String filename) {
 	ProjectAccessor accessor = null;
 	try {
+	    System.out.println("1");
 	    // Accessing the astah model
 	    accessor = AstahAPI.getAstahAPI().getProjectAccessor();
-
+	    System.out.println("2");
 	    // Opening a project (name, true not to check model version, false not to lock a project file,
 	    // true to open a project file with the read only mode if the file is locked.)
 	    accessor.open(filename, true, false, true);
+	    //	    accessor.open(filename);
+	    System.out.println("3");
 	    IModel model = accessor.getProject();
 	    addResult("Astah Model accessed.\n");
 
@@ -68,7 +71,7 @@ public class AstahParser {
 	    parseGeneralizations(initiative.getAllNotions());
 
 	    // Importing the diagram images from the Astah file
-	    //importImages(filename);
+	    importImages(filename);
 
 	} catch (IOException | ClassNotFoundException | LicenseNotFoundException | ProjectNotFoundException
 		| NonCompatibleException | ProjectLockedException e) {

@@ -89,7 +89,10 @@
     <div id="astahparsingdiv"></div>
   </div>
   <div style="text-align: center">
-    <button id="mappingbutton" onclick="location.href='verticalmapper.jsp'">Start Mapping</button>
+  <form action="MatcherServlet" method="POST">
+    <input type="hidden" name="action" value="openPage">
+    <button id="mappingbutton">Start Mapping</button>
+    </form>
   </div>
   <!-- ***** Reading Blocks ***** -->
 

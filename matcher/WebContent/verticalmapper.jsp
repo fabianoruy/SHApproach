@@ -13,6 +13,11 @@
 <script src="js/maphilight.js"></script>
 
 <script>
+
+
+var retJson = JSON.parse('<%=request.getAttribute("json")%>');
+	console.log(retJson);
+
 	$(document).ready(function() {
 		$('#matchbutton').click(function() {
 			if (checkFields()) {
@@ -53,6 +58,9 @@
 			var name = e.target.id;
 			name = name.substring(name.indexOf('_') + 1).replace(/\+/g, ' ');
 			if (this.name == "Standard") {
+				//        document.getElementById("elementfield").value = name;
+				name = retJson.concepts['id3'].name;
+
 				document.getElementById("elementfield").value = name;
 			} else if (this.name == "Ontology") {
 				document.getElementById("conceptfield").value = name;
@@ -126,6 +134,9 @@
 </HEAD>
 
 <BODY>
+
+
+
   <h3 align="center">Approach for Harmonizing SE Standards</h3>
   <h1 align="center">Quality Assurance Process</h1>
 
@@ -133,12 +144,15 @@
     <b>Content Mapping</b>
   </h2>
   <h2>Map the Standards' Models to the Domain Ontologies</h2>
-  <p align="justify"><b>The standards' elements shall be mapped to the domain ontologies' concepts (vertical
-      mapping).</b><br /> This tool supports the mapping by providing features for selecting the desired elements and
-    concepts and establishing the allowed types of matches between then. Select a element from the left-hand side model
-    (the Standard Model) and select a concept from the right-hand side model (the SEON View). Then, choose the suitable
-    match type and add comments for the match (required for PARTIAL and INTERSECTION). When the matches are finished,
-    list the not covered elements, which will be used in the next activity.</p>
+  <p align="justify">
+    <b>The standards' elements shall be mapped to the domain ontologies' concepts (vertical mapping).</b>
+    <br />
+    This tool supports the mapping by providing features for selecting the desired elements and concepts and
+    establishing the allowed types of matches between then. Select a element from the left-hand side model (the Standard
+    Model) and select a concept from the right-hand side model (the SEON View). Then, choose the suitable match type and
+    add comments for the match (required for PARTIAL and INTERSECTION). When the matches are finished, list the not
+    covered elements, which will be used in the next activity.
+  </p>
 
 
   <!-- ##### Diagrams Blocks ##### -->
@@ -187,8 +201,8 @@
       </MAP>
     </div>
     <!-- 
-	<div style="width:0.1%; height:780px; overflow:hidden; display:inline-block;"></div>
-	-->
+  <div style="width:0.1%; height:780px; overflow:hidden; display:inline-block;"></div>
+  -->
 
     <div style="width: 49%; height: 780px; overflow: auto; display: inline-block; border: 3px solid blue">
       <IMG id="fig1" src="images/QAPO.png" width="1093" class="map" usemap="#Ontology">
@@ -238,13 +252,16 @@
   <h3>How is this Standard covered by the Ontologies?</h3>
   <div style="display: inline-block; border: 1px solid red; width: 100%">
     <div style="width: 320px; display: inline-block">
-      <b>Standard Element</b><br /> <input id="elementfield" type="text" value="Manager"
-        title="Select an Element from the Standard model" size="40" readonly="readonly" />
+      <b>Standard Element</b>
+      <br />
+      <input id="elementfield" type="text" value="Manager" title="Select an Element from the Standard model" size="40"
+        readonly="readonly" />
     </div>
 
     <div style="width: 140px; display: inline-block;">
-      <b>Coverage</b><br /> <select id="coveringfield" title="Which is the coverage of the Element on the Concept?"
-        onchange="cleanOC(this)">
+      <b>Coverage</b>
+      <br />
+      <select id="coveringfield" title="Which is the coverage of the Element on the Concept?" onchange="cleanOC(this)">
         <option value="EQUIVALENT">EQUIVALENT</option>
         <option value="PARTIAL">PARTIAL</option>
         <option value="WIDER">WIDER</option>
@@ -254,17 +271,21 @@
     </div>
 
     <div style="width: 320px; display: inline-block;">
-      <b>Ontology Concept</b><br /> <input id="conceptfield" type="text" value="Project Manager"
-        title="Select a Concept from the Ontology model" size="40" readonly="readonly" />
+      <b>Ontology Concept</b>
+      <br />
+      <input id="conceptfield" type="text" value="Project Manager" title="Select a Concept from the Ontology model"
+        size="40" readonly="readonly" />
     </div>
 
     <div style="display: inline-block">
       <button id="matchbutton">Match</button>
     </div>
 
-    <br /> <br />
+    <br />
+    <br />
     <div style="width: 600px">
-      <b>Covering Comments</b><br />
+      <b>Covering Comments</b>
+      <br />
       <textarea id="commentsfield" title="Describe the non-covered portions of the Element." rows="4" cols="108">Comments about the match</textarea>
     </div>
   </div>
@@ -280,14 +301,16 @@
   <!-- ##### Dialog Boxes ##### -->
   <!-- Simple Message -->
   <div id="dialog-message" title="Message" hidden>
-    <p><span class="ui-icon ui-icon-circle-check" style="float: left; margin: 0 7px 50px 0;"></span>
+    <p>
+      <span class="ui-icon ui-icon-circle-check" style="float: left; margin: 0 7px 50px 0;"></span>
     <div id="messageText"></div>
     </p>
   </div>
 
   <!-- Confirmation Message -->
   <div id="dialog-confirm" title="Confirmation" hidden>
-    <p><span class="ui-icon ui-icon-alert" style="float: left; margin: 12px 12px 20px 0;"></span>
+    <p>
+      <span class="ui-icon ui-icon-alert" style="float: left; margin: 12px 12px 20px 0;"></span>
     <div id="confirmText"></div>
     </p>
   </div>
