@@ -1,0 +1,5 @@
+Your astah file must follow the structure presented in the figure.
+Regardless of other packages, this tool will read the package named "Initiative". It must have a single subpackage for your initiative (e.g. Quality Assurance) and 3 subpackages:
+"1.SEON View": with the selected portion of SEON and a single diagram representing this view.
+"2.Structure": no special requirements here.
+"3.Content"  : with a package for each selected standard (each containing the standard elements and a single diagram); and the resulting diagram "Integrated Content Model".
