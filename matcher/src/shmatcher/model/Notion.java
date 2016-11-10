@@ -27,7 +27,7 @@ public abstract class Notion {
 	this.relations = new ArrayList<Relation>();
 	this.astahClass = astahClass;
     }
-    
+
     public String getId() {
 	return id;
     }
@@ -69,6 +69,11 @@ public abstract class Notion {
     @Override
     public String toString() {
 	return this.name;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+	return (other instanceof Notion && ((Notion) other).id.equals(this.id));
     }
 
 }

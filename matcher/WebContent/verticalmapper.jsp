@@ -1,12 +1,12 @@
 <%@page import="org.apache.jasper.tagplugins.jstl.core.ForEach"%>
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
 "http://www.w3.org/TR/html4/loose.dtd">
 <HTML>
 <HEAD>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>SH Matcher</title>
+<title>SH Approach</title>
 
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/jquery-ui.css">
@@ -15,7 +15,7 @@
 <script src="js/maphilight.js"></script>
 
 <script>
-<%-- var retJson = JSON.parse('<%=request.getAttribute("json")%>'); --%>
+<%-- var json = JSON.parse('<%=request.getAttribute("json")%>'); --%>
 	var json = JSON.parse('${json}');
 	console.log(json);
 
@@ -36,12 +36,15 @@
 				action : 'match',
 				elem : $('#elementidfield').val(),
 				conc : $('#conceptidfield').val(),
-				cover : $('#coveringfield').val(),
+				cover: $('#coveringfield').val(),
 				comm : $('#commentsfield').val(),
 			},
 			success : function(responseXml) {
 				console.log(responseXml);
 				$('#matchingsdiv').html($(responseXml).find('data').html());
+				//$('#messagediv').html($(responseXml).find('message').html());
+				//var msg = '${message}';
+				//$("#messagediv").empty().append(msg);
 				//$("#matchingsdiv").empty().append(responseXml);
 			}
 		});
@@ -72,11 +75,11 @@
 	
 	/* Cleans the Ontology Concept when Not Covered is selected. */
 	function cleanOC() {
-		if ($('#coveringfield :selected').val() == 'NOTCOVERED') {
+		if ($('#coveringfield :selected').val() == 'NOCOVERAGE') {
+			$('#conceptidfield').val('');
 			$('#conceptfield').val('');
 		}
 	}
-
 
 	/* Check if the fields are well filled. */
 	function checkFields() {
@@ -88,19 +91,19 @@
 
 		// verifying
 		if (elem == '' || conc == '') {
-			//message("Select an element from each diagram.");
-			confirmationMessage("In a Standard Model, distinct elements should have different meaning. You already matched A1 [E] O.<br/><b>Are you sure that also A2 [E] O, and, hence A2 [E] A1?</b><br/><i>It will merge A1 and A2 as a single element (A1 = A2).</i>");
+			//showMessage("Select an element from each diagram.");
+			showConfMessage("In a Standard Model, distinct elements should have different meaning. You already matched A1 [E] O.<br/><b>Are you sure that also A2 [E] O, and, hence A2 [E] A1?</b><br/><i>It will merge A1 and A2 as a single element (A1 = A2).</i>");
 			return false;
 		}
 		if (comm == '' && (relc == 'WIDER' || relc == 'INTERSECTION')) {
-			message("WIDER and INTERSECTION matchings require a comment explaining the non-covered part(s).");
+			showMessage("WIDER and INTERSECTION matchings require a comment explaining the non-covered part(s).");
 			return false;
 		}
 		return true;
 	}
 
 	/* Shows a message dialog. */
-	function message(text) {
+	function showMessage(text) {
 		$('#messageText').empty().append(text);
 		$('#dialog-message').show();
 		$('#dialog-message').dialog({
@@ -115,7 +118,7 @@
 	}
 
 	/* Shows a confimation message dialog. */
-	function confirmationMessage(text) {
+	function showConfMessage(text) {
 		$('#confirmText').empty().append(text);
 		$('#dialog-confirm').dialog({
 			resizable : false,
@@ -163,7 +166,7 @@
   </div>
 
   <div style="width: 100%; height: 100%">
-    <div style="width: 49%; height: 780px; overflow: auto; display: inline-block; border: 3px solid red">
+    <div style="width: 49%; height: 780px; overflow: auto; display: inline-block; border: 3px solid blue">
       <IMG src="images/${standard.diagram.name}.png" width="${standard.diagram.astahDiagram.boundRect.width}"
         class="map" usemap="#Standard">
       <MAP id="StandardMap" name="Standard">
@@ -173,7 +176,7 @@
       </MAP>
     </div>
 
-    <div style="width: 49%; height: 780px; overflow: auto; display: inline-block; border: 3px solid blue">
+    <div style="width: 49%; height: 780px; overflow: auto; display: inline-block; border: 3px solid red">
       <IMG src="images/${ontology.diagram.name}.png" width="${ontology.diagram.astahDiagram.boundRect.width}"
         class="map" usemap="#Ontology">
       <MAP id="OntologyMap" name="Ontology">
@@ -186,7 +189,7 @@
   <!-- ***** Diagrams Blocks ***** -->
 
   <!-- ##### Match Blocks ##### -->
-  <h3>How is this Standard covered by the Ontologies?</h3>
+  <h3>How do the Standard's Elements cover the Ontology's Concepts?</h3>
   <div style="display: inline-block; border: 1px solid red; width: 100%">
     <div style="width: 320px; display: inline-block">
       <b>Standard Element</b> <br />
@@ -199,10 +202,10 @@
       <b>Coverage</b> <br /> <select id="coveringfield" title="Which is the coverage of the Element on the Concept?"
         onchange="cleanOC(this)">
         <option value="EQUIVALENT">EQUIVALENT</option>
-        <option value="PARTIAL">PARTIAL</option>
+        <option value="PARTIAL">PART OF</option>
         <option value="WIDER">WIDER</option>
         <option value="INTERSECTION">INTERSECTION</option>
-        <option value="NOTCOVERED">NOT COVERED</option>
+        <option value="NOCOVERAGE">NO COVERAGE</option>
       </select>
     </div>
 
@@ -225,8 +228,14 @@
   </div>
 
   <br />
+  <div style="display: inline-block; overflow: auto; border: 1px solid blue; width: 100%; height: 100px">
+    <strong>Message</strong>:
+    <div id="messagediv"></div>
+  </div>
+
+  <br />
   <div style="display: inline-block; overflow: auto; border: 1px solid blue; width: 100%; height: 400px">
-    <strong>Maches Established</strong>:
+    <strong>Matches Established</strong>:
     <div id="matchingsdiv"></div>
   </div>
   <!-- ***** Match Blocks ***** -->

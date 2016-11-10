@@ -49,5 +49,11 @@ public abstract class Package {
     public String toString() {
 	return this.name;
     }
+    
+    @Override
+    public boolean equals(Object other) {
+	return (other instanceof Package && ((Package) other).id.equals(this.id));
+    }
+
 
 }

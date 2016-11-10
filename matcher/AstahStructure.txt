@@ -21,7 +21,14 @@ Phases:
 Nov.09
 + Include ID to the astah imported objects
 + Fix figures
-/ Match creation on Application
-- Step-by-step parsing
 + Renaming
+
+
+Nov.10
+/ Match creation on Application
+- Match validation
+- Step-by-step parsing
+- Coverage presentation
+- Initital / menu page
+
  

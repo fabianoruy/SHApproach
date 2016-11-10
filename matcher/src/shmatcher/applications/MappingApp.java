@@ -1,7 +1,9 @@
 package shmatcher.applications;
 
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.change_vision.jude.api.inf.exception.InvalidUsingException;
@@ -9,19 +11,33 @@ import com.change_vision.jude.api.inf.model.IClass;
 import com.change_vision.jude.api.inf.presentation.INodePresentation;
 import com.change_vision.jude.api.inf.presentation.IPresentation;
 
+import shmatcher.model.Concept;
+import shmatcher.model.Coverage;
 import shmatcher.model.Diagram;
+import shmatcher.model.Element;
 import shmatcher.model.Notion;
 import shmatcher.model.SHInitiative;
+import shmatcher.model.SimpleMatch;
 
 /** Responsible for providing the services for the mapping tasks. */
 public class MappingApp {
     private SHInitiative initiative;
+    private List<SimpleMatch> currentMatches = new ArrayList<SimpleMatch>(); //TODO: get from the initiative mapping
+    private String message;
 
     public MappingApp(SHInitiative initiative) {
 	this.initiative = initiative;
     }
 
-    /* Creates a hash containg all the diagram notions (as keys) and their respective coords in the diagram. */ 
+    public List<SimpleMatch> getCurrentMatches() {
+	return currentMatches;
+    }
+
+    public String getMessage() {
+	return message;
+    }
+
+    /* Creates a hash containg all the diagram notions (as keys) and their respective coords in the diagram. */
     public Map<Notion, String> createNotionsCoordsHash(Diagram diagram) {
 	Map<Notion, String> coordsHash = new HashMap<Notion, String>();
 	// Getting each Notion (Class) in the diagram and its position.
@@ -58,27 +74,45 @@ public class MappingApp {
 	return "" + x + "," + y + "," + (x + w) + "," + (y + h);
     }
 
-    //    public JsonElement createJSON() {
-    //	JsonObject root = new JsonObject();
-    //	JsonArray elements = new JsonArray();
-    //	JsonArray concepts = new JsonArray();
-    //	int i = 0;
-    //	for (Notion notion : initiative.getAllNotions()) {
-    //	    JsonObject jnotion = new JsonObject();
-    //	    jnotion.addProperty("id", "id"+i);
-    //	    jnotion.addProperty("name", notion.getName());
-    //	    jnotion.addProperty("definition", notion.getDefinition());
-    //	    if (notion instanceof Element) {
-    //		jnotion.addProperty("model", "Model");
-    //		elements.add(jnotion);
-    //	    } else if (notion instanceof Concept) {
-    //		jnotion.addProperty("ontology", "Ontology");
-    //		concepts.add(jnotion);
-    //	    }
-    //	    i++;
-    //	}
-    //	root.add("elements", elements);
-    //	root.add("concepts", concepts);
-    //	return root;
-    //    }
+    /* Creates a new (simple) Match. */
+    public SimpleMatch createMatch(String elemId, String concId, String coverName, String comm) {
+	Element elem = (Element) initiative.getNotionById(elemId);
+	Concept conc = (Concept) initiative.getNotionById(concId);
+	Coverage cover = Coverage.valueOf(coverName);
+
+	SimpleMatch match = new SimpleMatch(elem, conc, cover, comm);
+	if (!validateOntologyDisjointness(match)) {
+	    return null;
+	}
+
+	currentMatches.add(match);
+	System.out.println("(" + currentMatches.size() + ") " + match);
+	message = "Match " + match + " created!";
+	return match;
+    }
+
+    /* Validates the Ontology Disjointness (T1). */
+    private boolean validateOntologyDisjointness(SimpleMatch match) {
+	Element elem = match.getSource();
+	message = "";
+	for (SimpleMatch otherMatch : currentMatches) {
+	    Element otherElem = otherMatch.getSource();
+	    if (otherElem.equals(elem)) {
+		message += "The element " + elem + " is already matched with other concept (" + otherMatch + ").\n";
+		Coverage cover = match.getCoverage();
+		Coverage othercover = otherMatch.getCoverage();
+		// both coverages must be [W] or [I]
+		if ((cover == Coverage.WIDER || cover == Coverage.INTERSECTION)
+			&& (othercover == Coverage.WIDER || othercover == Coverage.INTERSECTION)) {
+		    message += " Do these matches together fully cover the element " + elem + "?\n";
+		} else {
+		    message += " Multiple matches for the same element are allowed only for WIDER and INTERSECTION coverages.\n";
+		    return false;
+		}
+		message += "\n";
+	    }
+	}
+	return true;
+    }
+
 }

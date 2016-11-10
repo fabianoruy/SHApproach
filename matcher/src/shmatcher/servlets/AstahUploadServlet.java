@@ -31,6 +31,8 @@ public class AstahUploadServlet extends HttpServlet {
     /* doPost method, for processing the upload and calling the parsers. */
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
 	    throws ServletException, IOException {
+	System.out.println(">AstahUploadServlet");
+	
 	// Processing the uploaded astah file.
 	String domain = null;
 	String filename = null;

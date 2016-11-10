@@ -3,14 +3,14 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <data>
-    <table>
-        <c:forEach items="${matches}" var="match">
-            <tr>
-                <td><b>${match.source}</b></td>
-                <td>${match.coverage}</td>
-                <td><b>${match.target}</b></td>
-                <td>{<i>${match.comment}</i>}</td>
-            </tr>
-        </c:forEach>
-    </table>
+  <table>
+    <c:forEach items="${matches}" var="match">
+      <tr>
+        <td><b>${match.source}</b></td>
+        <td>${match.coverage}</td>
+        <td><b>${match.target}</b></td>
+        <td>{<i>${match.comment}</i>}</td>
+      </tr>
+    </c:forEach>
+  </table>
 </data>
