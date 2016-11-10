@@ -7,7 +7,7 @@
         <c:forEach items="${matches}" var="match">
             <tr>
                 <td><b>${match.source}</b></td>
-                <td>${match.coverage.toString()}</td>
+                <td>${match.coverage}</td>
                 <td><b>${match.target}</b></td>
                 <td>{<i>${match.comment}</i>}</td>
             </tr>

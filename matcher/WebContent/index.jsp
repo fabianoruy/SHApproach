@@ -17,8 +17,8 @@
 	$(document).ready(function() {
 		$('#uploadbutton').click(function() {
 			$.ajax({
-				url : 'AstahUploader', //Server script to process data
 				type : 'POST',
+				url : 'AstahUploadServlet',
 				data : new FormData($('#upform')[0]),
 				xhr : function() { // Custom XMLHttpRequest
 					return $.ajaxSettings.xhr();
@@ -58,30 +58,46 @@
 
 <BODY>
   <h3 align="center">Approach for Harmonizing SE Standards</h3>
-  <h1 align="center">Astah Model Reader</h1>
+  <h1 align="center">(2) Model Reading</h1>
 
-  <h2>
-    <b>Content Mapping</b>
-  </h2>
-  <h2>Map the Standards' Models to the Domain Ontologies</h2>
-  <p align="justify">
-    <b>The standards' elements shall be mapped to the domain ontologies' concepts (vertical mapping).</b>
-    <br />
-    This tool supports the mapping by providing features for selecting the desired elements and concepts and
-    establishing the allowed types of matches between then. Select a element from the left-hand side model (the Standard
-    Model) and select a concept from the right-hand side model (the SEON View). Then, choose the suitable match type and
-    add comments for the match (required for PARTIAL and INTERSECTION). When the matches are finished, list the not
-    covered elements, which will be used in the next activity.
-  </p>
+  <h2><b>Astah Model Reader</b></h2>
+  <div style="width: 100%; display: inline-block">
+    <div style="display: inline-block; width: 60%">
+      <p align="justify">In this step, <b>the Astah file will be read and parsed</b>, gathering the models and
+        information to support the mapping activities.
+      </p> The submitted file must follow the structure presented in the figure.<br /> Regardless of other packages, this
+      tool will read the packages named <i>Initiative</i> and <i>Standards Structural Models</i>.
+      <ul>
+        <li><i>Initiative</i> package: must have a single subpackage for your initiative (e.g. Quality Assurance)
+          and 3 subpackages:
+          <ul>
+            <li><i>1.SEON View</i>: with a single diagram representing this view, and the selected portion of SEON
+              (in subpackages).</li>
+            <li><i>2.Structure</i>: with a diagram for each Standard and one for the Integrated Structural Model
+              (ISM). The ISM aditional elements stay here.</li>
+            <li><i>3.Content</i>: with a package for each selected Standard (each containing the Standard elements
+              and a single diagram); and, optionally, the resulting diagram Integrated Content Model (ICM) with the
+              added new elements.</li>
+          </ul></li>
+        <li><i>Standards Structural Models</i> package: must have a subpackage for each Standard, each one
+          containing a single diagram and the related concepts.</li>
+      </ul>
+      Allways try to avoid not used classes and relations.
+    </div>
+    <div style="display: inline-block; text-align: right; float: right">
+      <IMG src="images/AstahStructure.png" />
+    </div>
+  </div>
+  <br />
+
+
 
   <!-- ##### Reading Blocks ##### -->
   <!-- <label for="textlabel">Please, provide a title for your harmonization initiative (e.g.: "Quality Assurance").</label> -->
 
   <form id="upform" enctype="multipart/form-data">
-    <label for="filelabel">Select the .astah file for your harmonization initiative.</label>
-    <input id="fileinput" type="file" name="file" accept=".asta" />
-    <br />
-    <input id="uploadbutton" type="button" value="Start Parsing" />
+    <label for="filelabel">Select the .astah file for your harmonization initiative.</label> <input id="fileinput"
+      type="file" name="file" accept=".asta" /> <br /> <input id="uploadbutton" type="button" value="Start Parsing" />
   </form>
 
 
@@ -89,9 +105,9 @@
     <div id="astahparsingdiv"></div>
   </div>
   <div style="text-align: center">
-  <form action="MatcherServlet" method="POST">
-    <input type="hidden" name="action" value="openPage">
-    <button id="mappingbutton">Start Mapping</button>
+    <form action="VerticalMapServlet" method="POST">
+      <input type="hidden" name="action" value="openPage">
+      <button id="mappingbutton">Start Mapping</button>
     </form>
   </div>
   <!-- ***** Reading Blocks ***** -->
@@ -100,8 +116,7 @@
   <!-- ##### Dialog Boxes ##### -->
   <!-- Simple Message -->
   <div id="dialog-message" title="Message" hidden>
-    <p>
-      <span class="ui-icon ui-icon-circle-check" style="float: left; margin: 0 7px 50px 0;"></span>
+    <p><span class="ui-icon ui-icon-circle-check" style="float: left; margin: 0 7px 50px 0;"></span>
     <div id="messageText"></div>
     </p>
   </div>

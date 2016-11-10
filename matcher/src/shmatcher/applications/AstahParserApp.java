@@ -1,12 +1,11 @@
-package shmatcher.services;
+package shmatcher.applications;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-
-import java.io.File;
-import java.io.IOException;
 
 import com.change_vision.jude.api.inf.AstahAPI;
 import com.change_vision.jude.api.inf.exception.LicenseNotFoundException;
@@ -26,38 +25,41 @@ import com.change_vision.jude.api.inf.project.ProjectAccessor;
 
 import shmatcher.model.Concept;
 import shmatcher.model.Diagram;
+import shmatcher.model.Diagram.DiagramType;
 import shmatcher.model.Element;
 import shmatcher.model.IntegratedModel;
 import shmatcher.model.Notion;
 import shmatcher.model.Ontology;
+import shmatcher.model.Ontology.Level;
 import shmatcher.model.Package;
 import shmatcher.model.Relation;
 import shmatcher.model.SHInitiative;
 import shmatcher.model.SeonView;
 import shmatcher.model.StandardModel;
-import shmatcher.model.Diagram.DiagramType;
-import shmatcher.model.Ontology.Level;
 
 /** Responsible for parsing the provided Astah file, creating the objects' model. */
-public class AstahParser {
+public class AstahParserApp {
     private SHInitiative initiative;
-    private String parsingResults = "";
-    private String workingDir = System.getProperty("user.dir").replace('\\', '/');
-    private static String astahInstallPath = "C:/Program Files/astah-professional";
+    private StringBuffer parsingResults = new StringBuffer();
+    //private String workingDir = System.getProperty("user.dir").replace('\\', '/');
+    private static String astahInstallPath = "C:/Program Files/astah-professional"; //TODO: get the real path
+
+    public SHInitiative getInitiative() {
+	return this.initiative;
+    }
 
     /* Reads an Astah file and parses the models. */
-    public String parseAstah(String filename) {
+    public void parseAstah(String filename) {
 	ProjectAccessor accessor = null;
 	try {
-	    System.out.println("1");
 	    // Accessing the astah model
 	    accessor = AstahAPI.getAstahAPI().getProjectAccessor();
-	    System.out.println("2");
+	    System.out.println("before open");
 	    // Opening a project (name, true not to check model version, false not to lock a project file,
 	    // true to open a project file with the read only mode if the file is locked.)
 	    accessor.open(filename, true, false, true);
 	    //	    accessor.open(filename);
-	    System.out.println("3");
+	    System.out.println("after open");
 	    IModel model = accessor.getProject();
 	    addResult("Astah Model accessed.\n");
 
@@ -70,21 +72,18 @@ public class AstahParser {
 	    // Reading the model Generalizations
 	    parseGeneralizations(initiative.getAllNotions());
 
-	    // Importing the diagram images from the Astah file
-	    importImages(filename);
-
+	} catch (IllegalStateException e) {
+	    //TODO: deal with that
+	    System.out.println("!Exception! " + e.getMessage());
 	} catch (IOException | ClassNotFoundException | LicenseNotFoundException | ProjectNotFoundException
 		| NonCompatibleException | ProjectLockedException e) {
+	    System.out.println("!Exception! " + e.getMessage());
 	    e.printStackTrace();
 	} finally {
 	    accessor.close();
 	}
-	addResult("\n<b>Astah File successfully read and parsed! Please, proceed to the Mapping.<b>");
-	return parsingResults;
-    }
 
-    public SHInitiative getInitiative() {
-	return this.initiative;
+	addResult("\n<b>Astah File successfully read and parsed! Please, proceed to the Mapping.<b>");
     }
 
     /* Reads the packages and creates the Ontologies and Standards Models. */
@@ -159,8 +158,8 @@ public class AstahParser {
 	for (INamedElement node : ssmpack.getOwnedElements()) {
 	    if (node instanceof IPackage) {
 		IPackage stdpack = (IPackage) node;
-		StandardModel stdmodel = new StandardModel(stdpack.getName() + " SM", stdpack.getDefinition(), true,
-			(IPackage) stdpack);
+		StandardModel stdmodel = new StandardModel(true, stdpack);
+		stdmodel.setName(stdmodel.getName() + " SM");
 		initiative.addPackage(stdmodel);
 		addResult(" - " + stdmodel + "\n");
 		parseElements(stdmodel, stdpack);
@@ -168,9 +167,10 @@ public class AstahParser {
 	}
 
 	// Creates the Integrated Structural Model (ISM) and its (specific) elements.
-	IntegratedModel ism = new IntegratedModel("Integrated Structural Model", "", true, ismpack);
+	IntegratedModel ism = new IntegratedModel(true, ismpack);
+	ism.setName("Integrated Structural Model");
 	initiative.addPackage(ism);
-	addResult(" * ISM created.\n\n");
+	addResult(" * Integrated SM created.\n\n");
 	parseIMElements(ism, ismpack);
 
     }
@@ -182,9 +182,10 @@ public class AstahParser {
 	for (INamedElement node : contentpack.getOwnedElements()) {
 	    if (node instanceof IPackage) {
 		IPackage stdpack = (IPackage) node;
-		StandardModel stdmodel = new StandardModel(stdpack.getName() + " - " + initiative.getDomain() + " CM",
-			stdpack.getDefinition(), false, (IPackage) stdpack);
+		StandardModel stdmodel = new StandardModel(false, stdpack);
+		stdmodel.setName(stdmodel.getName() + " CM");
 		initiative.addPackage(stdmodel);
+		//System.out.print(stdmodel.getId());
 		addResult(" - " + stdmodel + "\n");
 
 		// Parse the SCM Diagrams and elements.
@@ -194,9 +195,10 @@ public class AstahParser {
 	}
 
 	// Creates the Integrated Content Model (ICM) and its (specific) elements.
-	IntegratedModel icm = new IntegratedModel("Integrated Content Model", "", false, contentpack);
+	IntegratedModel icm = new IntegratedModel(false, contentpack);
+	icm.setName("Integrated Content Model");
 	initiative.addPackage(icm);
-	addResult(" * ICM created.\n\n");
+	addResult(" * Integrated CM created.\n\n");
 
 	// Parse the ICM Diagram and elements
 	parseDiagram(icm, DiagramType.ICM);
@@ -207,7 +209,7 @@ public class AstahParser {
     /* Reads the SEON View package and creates the Ontologies. */
     private void parseOntologies(IPackage seonpack) {
 	// Creates the SEON View and its ontologies.
-	SeonView seonview = new SeonView("SEON View", seonpack.getDefinition(), seonpack);
+	SeonView seonview = new SeonView(seonpack);
 	initiative.addPackage(seonview);
 	addResult("SEON View created. ");
 
@@ -229,7 +231,7 @@ public class AstahParser {
 		for (INamedElement pack : levelpack.getOwnedElements()) {
 		    if (pack instanceof IPackage) {
 			IPackage ontopack = (IPackage) pack;
-			Ontology onto = new Ontology(pack.getName(), pack.getDefinition(), level, ontopack);
+			Ontology onto = new Ontology(level, ontopack);
 			seonview.addOntology(onto);
 			initiative.addPackage(onto);
 			addResult(" - " + onto + "\n");
@@ -246,13 +248,7 @@ public class AstahParser {
 	for (INamedElement node : pack.getOwnedElements()) {
 	    // Parsing classes and creating Concepts
 	    if (node instanceof IClass) {
-		String name = node.getName();
-		String def = node.getDefinition();
-		String ster = "";
-		if ((node.getStereotypes()).length > 0) {
-		    ster = node.getStereotypes()[0]; // only the first for while
-		}
-		Concept concept = new Concept(name, def, ster, onto, (IClass) node);
+		Concept concept = new Concept(onto, (IClass) node);
 		onto.addConcept(concept);
 		initiative.addNotion(concept);
 		// addResult(" . " + concept + "\n");
@@ -269,13 +265,7 @@ public class AstahParser {
 	for (INamedElement node : pack.getOwnedElements()) {
 	    // Parsing classes and creating Elements
 	    if (node instanceof IClass) {
-		String name = node.getName();
-		String def = node.getDefinition();
-		String ster = "";
-		if ((node.getStereotypes()).length > 0) {
-		    ster = node.getStereotypes()[0]; // only the first for while
-		}
-		Element element = new Element(name, def, ster, model, (IClass) node);
+		Element element = new Element(model, (IClass) node);
 		model.addElement(element);
 		initiative.addNotion(element);
 		// addResult(" . " + element + "\n");
@@ -292,13 +282,7 @@ public class AstahParser {
 	for (INamedElement node : pack.getOwnedElements()) {
 	    // Parsing classes and creating Elements
 	    if (node instanceof IClass) {
-		String name = node.getName();
-		String def = node.getDefinition();
-		String ster = "";
-		if ((node.getStereotypes()).length > 0) {
-		    ster = node.getStereotypes()[0]; // only the first for while
-		}
-		Element element = new Element(name, def, ster, null, (IClass) node);
+		Element element = new Element(null, (IClass) node);
 		im.addElement(element);
 		initiative.addNotion(element);
 		// addResult(" . " + element + "\n");
@@ -312,7 +296,7 @@ public class AstahParser {
 	for (Notion child : notions) {
 	    // Reading and setting generalizations
 	    for (IGeneralization node : child.getAstahClass().getGeneralizations()) {
-		Notion parent = initiative.getNotionByAstah(node.getSuperType());
+		Notion parent = initiative.getNotionById(node.getSuperType().getId());
 		child.addGeneralization(parent);
 		gcount++;
 	    }
@@ -348,7 +332,7 @@ public class AstahParser {
 			    tmult = multiplicityToString(secondEnd.getMultiplicity()[0]);
 			}
 
-			Notion target = initiative.getNotionByAstah(attrib.getType());
+			Notion target = initiative.getNotionById(attrib.getType().getId());
 			// System.out.println(source + " [S] " + name + " [T] " + attrib.getType().toString());
 			// Creating the Relation object
 			Relation relation = new Relation(name, def, ster, composition, source, target, smult, tmult);
@@ -392,15 +376,9 @@ public class AstahParser {
 	}
     }
 
-    /* Adds a result to be returned to the page. */
-    private void addResult(String result) {
-	System.out.print(result);
-	this.parsingResults += result.replaceAll("\n", "<br/>");
-    }
-
     /* Imports the astah PNG images (from astah file) to the images directory. */
-    public void importImages(String astahFile) {
-	String targetPath = workingDir + "/images/tmp/";
+    public void importImages(String astahFile, String workingDir) {
+	String targetPath = workingDir + "images/tmp/";
 	File dir = new File(targetPath);
 	if (!dir.exists())
 	    dir.mkdirs();
@@ -443,7 +421,7 @@ public class AstahParser {
 	    }
 
 	    // Copying the .PNG files (of the identified diagrams) from the tmp directory to the images directory
-	    String target = workingDir + "/images/";
+	    String target = workingDir + "images/";
 	    int count = 0;
 	    System.out.println("\nCopying the .PNG files from " + dir.getPath() + " and subdirectories to " + target);
 	    List<File> allFiles = (List<File>) FileUtils.listFiles(dir, new String[] { "png" }, true);
@@ -481,5 +459,16 @@ public class AstahParser {
 	} catch (InterruptedException e) {
 	    e.printStackTrace();
 	}
+    }
+
+    /* Adds a result to be returned to the page. */
+    private void addResult(String result) {
+	System.out.print(result);
+	this.parsingResults.append(result.replaceAll("\n", "<br/>"));
+    }
+
+    /* Gets the results of the parsing tasks. */
+    public String getResults() {
+	return parsingResults.toString();
     }
 }

@@ -19,13 +19,13 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
-import shmatcher.services.AstahParser;
+import shmatcher.applications.AstahParserApp;
 
-/** Servlet implementation class AstahUploader */
-@WebServlet("/AstahUploader")
-public class AstahUploader extends HttpServlet {
+/** Servlet implementation class AstahUploadServlet */
+@WebServlet("/AstahUploadServlet")
+public class AstahUploadServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    private AstahParser parser = new AstahParser();
+    private AstahParserApp parser;
     private String ajaxResults;
 
     /* doPost method, for processing the upload and calling the parsers. */
@@ -34,6 +34,7 @@ public class AstahUploader extends HttpServlet {
 	// Processing the uploaded astah file.
 	String domain = null;
 	String filename = null;
+	String workingDir = "";
 	Path path = null;
 	try {
 	    List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(request);
@@ -49,11 +50,15 @@ public class AstahUploader extends HttpServlet {
 		    response.setCharacterEncoding("UTF-8");
 
 		    // Saving file on disk
-		    System.out.println(filename);
-		    // path = Paths.get("C:/Users/Fabiano/workspace/matcher/ASTAH_" + filename);
-		    path = Paths.get(System.getProperty("user.dir").replace('\\', '/') + "/Uploaded_" + filename);
+
+		    workingDir = request.getSession().getServletContext().getRealPath("/");
+		    //path = Paths.get(System.getProperty("user.dir").replace('\\', '/') + "/Uploaded_" + filename);
+		    path = Paths.get(workingDir + "/Uploaded_" + filename);
+		    System.out.println("Filename: " + filename);
+		    System.out.println("WorkingDir: " + workingDir);
+		    System.out.println("Path: " + path.toAbsolutePath().toString());
+
 		    Files.copy(content, path, StandardCopyOption.REPLACE_EXISTING);
-		    System.out.println("#Path: " + path.toAbsolutePath().toString());
 		}
 	    }
 	} catch (FileUploadException e) {
@@ -62,8 +67,11 @@ public class AstahUploader extends HttpServlet {
 
 	ajaxResults = "File <code>" + filename + "</code> uploaded for the initiative.<br/>";
 
-	// Parsing Models
-	ajaxResults += parser.parseAstah(path.toString());
+	// Initializing the Application and Parsing the Models
+	parser = new AstahParserApp();
+	parser.parseAstah(path.toString());
+	//parser.importImages(path.toString(), workingDir);
+	ajaxResults += parser.getResults();
 
 	// Setting the initiative to the session.
 	request.getSession().setAttribute("initiative", parser.getInitiative());
