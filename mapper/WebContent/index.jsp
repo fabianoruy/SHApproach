@@ -29,6 +29,7 @@
 				},
 				success : function(servletResponse) {
 					$('#astahparsingdiv').append(servletResponse);
+					importImages();
 				},
 				error : {},
 				//telling jQuery not to process data or worry about content-type.
@@ -38,6 +39,23 @@
 			});
 		});
 	});
+
+	/* Imports the diagrams' images from the astha file. */
+	function importImages() {
+		$.ajax({
+			type : 'POST',
+			url : 'AstahUploadServlet',
+			data : {
+				action : 'images',
+			},
+			beforeSend : function() {
+				$('#astahparsingdiv').append("Importing images... ");
+			},
+			success : function(servletResponse) {
+				$('#astahparsingdiv').append(servletResponse);
+			}
+		});
+	}
 
 	/* Shows a message dialog. */
 	function message(text) {

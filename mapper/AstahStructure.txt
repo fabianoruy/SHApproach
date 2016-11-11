@@ -17,6 +17,17 @@ Phases:
 7) Harmonization Results				Show results (main table, ICM modifications)
 
 
+# Match validation
+* Match
+  - inputs ok?
+    - no: stop
+    - yes: concept repeated?
+      - no: finish
+      - not allowed: stop
+      - no problem: finish
+      - composite match: call again
+      
+
 # CHANGES
 Nov.09
 + Include ID to the astah imported objects
@@ -25,10 +36,13 @@ Nov.09
 
 
 Nov.10
-/ Match creation on Application
++ Match creation on Application
++ Step-by-step parsing
++ Error control (basic)
 - Match validation
-- Step-by-step parsing
 - Coverage presentation
 - Initital / menu page
+
+
 
  
