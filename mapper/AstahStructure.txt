@@ -34,15 +34,16 @@ Nov.09
 + Fix figures
 + Renaming
 
-
 Nov.10
 + Match creation on Application
 + Step-by-step parsing
 + Error control (basic)
+
+Nov.11
++ Deployed on Server
 - Match validation
 - Coverage presentation
 - Initital / menu page
-
 
 
  
