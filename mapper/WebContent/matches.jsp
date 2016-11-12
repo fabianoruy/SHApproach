@@ -4,20 +4,21 @@
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <data>
   <matchestable>
-  <table>
-    <c:forEach items="${matches}" var="match">
-      <tr>
-        <td><b>${match.source}</b></td>
-        <td>${match.coverage.text}</td>
-        <td><b>${match.target}</b></td>
-        <td>{<i>${match.comment}</i>}</td>
-      </tr>
-    </c:forEach>
-  </table>
+    <table>
+      <c:forEach items="${matches}" var="match">
+        <tr>
+          <td><b>${match.source}</b></td>
+          <td>${match.coverage.text}</td>
+          <td><b>${match.target}</b></td>
+          <td>{<i>${match.comment}</i>}</td>
+        </tr>
+      </c:forEach>
+    </table>
   </matchestable>
   
-  <message>
-    <p>${message}</p>
-  </message>
+  <messagetext><p>${message}</p></messagetext>
+  
+  <questiontext>${question}</questiontext>
+  
   
 </data>

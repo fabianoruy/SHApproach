@@ -21,98 +21,115 @@ import shmapper.model.SimpleMatch;
 
 /** Responsible for providing the services for the mapping tasks. */
 public class MappingApp {
-    private SHInitiative initiative;
-    private List<SimpleMatch> currentMatches = new ArrayList<SimpleMatch>(); //TODO: get from the initiative mapping
-    private String message;
+	private SHInitiative		initiative;
+	private List<SimpleMatch>	currentMatches	= new ArrayList<SimpleMatch>();	// TODO: get from the initiative mapping
+	private String				message;
+	private String				question;
 
-    public MappingApp(SHInitiative initiative) {
-	this.initiative = initiative;
-    }
+	public MappingApp(SHInitiative initiative) {
+		this.initiative = initiative;
+	}
 
-    public List<SimpleMatch> getCurrentMatches() {
-	return currentMatches;
-    }
+	public List<SimpleMatch> getCurrentMatches() {
+		return currentMatches;
+	}
 
-    public String getMessage() {
-	return message;
-    }
+	public String getMessage() {
+		return message;
+	}
 
-    /* Creates a hash containg all the diagram notions (as keys) and their respective coords in the diagram. */
-    public Map<Notion, String> createNotionsCoordsHash(Diagram diagram) {
-	Map<Notion, String> coordsHash = new HashMap<Notion, String>();
-	// Getting each Notion (Class) in the diagram and its position.
-	try {
-	    for (IPresentation present : diagram.getAstahDiagram().getPresentations()) {
-		if (present instanceof INodePresentation && present.getType().equals("Class")) {
-		    INodePresentation node = (INodePresentation) present;
-		    Notion notion = getNotionById(((IClass) node.getModel()).getId());
-		    coordsHash.put(notion, getMapCoords(node, diagram.getAstahDiagram().getBoundRect()));
+	public String getQuestion() {
+		return question;
+	}
+
+	/* Creates a hash containg all the diagram notions (as keys) and their respective coords in the diagram. */
+	public Map<Notion, String> createNotionsCoordsHash(Diagram diagram) {
+		Map<Notion, String> coordsHash = new HashMap<Notion, String>();
+		// Getting each Notion (Class) in the diagram and its position.
+		try {
+			for (IPresentation present : diagram.getAstahDiagram().getPresentations()) {
+				if (present instanceof INodePresentation && present.getType().equals("Class")) {
+					INodePresentation node = (INodePresentation) present;
+					Notion notion = getNotionById(((IClass) node.getModel()).getId());
+					// it is not a Structural Element
+					if (notion instanceof Concept || (notion instanceof Element && !((Element) notion).getStandardModel().isStructural())) {
+						coordsHash.put(notion, getMapCoords(node, diagram.getAstahDiagram().getBoundRect()));
+					}
+				}
+			}
+		} catch (InvalidUsingException e) {
+			e.printStackTrace();
 		}
-	    }
-	} catch (InvalidUsingException e) {
-	    e.printStackTrace();
-	}
-	return coordsHash;
-    }
-
-    /* Returns a Notion by the id. */
-    private Notion getNotionById(String id) {
-	//TODO: doesn't need to search from all the initiative notions.
-	for (Notion notion : initiative.getAllNotions()) {
-	    if (notion.getId().equals(id))
-		return notion;
-	}
-	return null;
-    }
-
-    /* Returns the String Coords of a html image MAP diagram. */
-    private String getMapCoords(INodePresentation node, Rectangle2D adjust) {
-	int x = (int) Math.round(node.getLocation().getX() - adjust.getX());
-	int y = (int) Math.round(node.getLocation().getY() - adjust.getY());
-	int w = (int) Math.round(node.getWidth());
-	int h = (int) Math.round(node.getHeight());
-	return "" + x + "," + y + "," + (x + w) + "," + (y + h);
-    }
-
-    /* Creates a new (simple) Match. */
-    public SimpleMatch createMatch(String elemId, String concId, String coverName, String comm) {
-	Element elem = (Element) initiative.getNotionById(elemId);
-	Concept conc = (Concept) initiative.getNotionById(concId);
-	Coverage cover = Coverage.valueOf(coverName);
-
-	SimpleMatch match = new SimpleMatch(elem, conc, cover, comm);
-	if (!validateOntologyDisjointness(match)) {
-	    return null;
+		return coordsHash;
 	}
 
-	currentMatches.add(match);
-	System.out.println("(" + currentMatches.size() + ") " + match);
-	message = "Match " + match + " created!";
-	return match;
-    }
-
-    /* Validates the Ontology Disjointness (T1). */
-    private boolean validateOntologyDisjointness(SimpleMatch match) {
-	Element elem = match.getSource();
-	message = "";
-	for (SimpleMatch otherMatch : currentMatches) {
-	    Element otherElem = otherMatch.getSource();
-	    if (otherElem.equals(elem)) {
-		message += "The element " + elem + " is already matched with other concept (" + otherMatch + ").\n";
-		Coverage cover = match.getCoverage();
-		Coverage othercover = otherMatch.getCoverage();
-		// both coverages must be [W] or [I]
-		if ((cover == Coverage.WIDER || cover == Coverage.INTERSECTION)
-			&& (othercover == Coverage.WIDER || othercover == Coverage.INTERSECTION)) {
-		    message += " Do these matches together fully cover the element " + elem + "?\n";
-		} else {
-		    message += " Multiple matches for the same element are allowed only for WIDER and INTERSECTION coverages.\n";
-		    return false;
+	/* Returns a Notion by the id. */
+	private Notion getNotionById(String id) {
+		// TODO: doesn't need to search from all the initiative notions.
+		for (Notion notion : initiative.getAllNotions()) {
+			if (notion.getId().equals(id)) return notion;
 		}
-		message += "\n";
-	    }
+		return null;
 	}
-	return true;
-    }
+
+	/* Returns the String Coords of a html image MAP diagram. */
+	private String getMapCoords(INodePresentation node, Rectangle2D adjust) {
+		int x = (int) Math.round(node.getLocation().getX() - adjust.getX());
+		int y = (int) Math.round(node.getLocation().getY() - adjust.getY());
+		int w = (int) Math.round(node.getWidth());
+		int h = (int) Math.round(node.getHeight());
+		return "" + x + "," + y + "," + (x + w) + "," + (y + h);
+	}
+
+	/* Creates a new (simple) Match. */
+	public SimpleMatch createMatch(String elemId, String concId, String coverName, String comm) {
+		Element elem = (Element) initiative.getNotionById(elemId);
+		Concept conc = (Concept) initiative.getNotionById(concId);
+		Coverage cover = Coverage.valueOf(coverName);
+
+		SimpleMatch match = new SimpleMatch(elem, conc, cover, comm);
+		if (validateOntologyDisjointness(match)) {
+			currentMatches.add(match);
+			System.out.println("(" + currentMatches.size() + ") " + match);
+			message = "Match <b>" + match + "</b> created!";
+			return match;
+		}
+		return null;
+	}
+
+	/* Validates the Ontology Disjointness (T1). */
+	private boolean validateOntologyDisjointness(SimpleMatch match) {
+		Element elem = match.getSource();
+		int repeat = 0;
+		boolean allowed = true;
+		message = "";
+		question = "";
+		for (SimpleMatch otherMatch : currentMatches) {
+			Element otherElem = otherMatch.getSource();
+			// repeated source
+			if (elem.equals(otherElem)) {
+				// repeated source and target
+				if (match.getTarget().equals(otherMatch.getTarget())) {
+					message += "<span style='color:red'><b>(!)</b></span> The element <b>" + elem + "</b> is already matched with the same concept (" + otherMatch + ")";
+					return false;
+				}
+				message += "The element <b>" + elem + "</b> is already matched with other concept (" + otherMatch + ").<br/>";
+				repeat++;
+				Coverage cover = match.getCoverage();
+				Coverage othercover = otherMatch.getCoverage();
+				// both coverages must be [W] or [I]
+				if (!((cover == Coverage.WIDER || cover == Coverage.INTERSECTION) && (othercover == Coverage.WIDER || othercover == Coverage.INTERSECTION))) {
+					allowed = false;
+				}
+			}
+		}
+		if (!allowed) {
+			message += "<span style='color:red'><b>(!)</b></span> Multiple matches for the same element are allowed only for WIDER and INTERSECTION coverages.";
+			return false;
+		} else if (repeat > 0) {
+			question += "The element <b>" + elem + "</b> has now " + (repeat + 1) + " matches.<br/>Do these matches together <b>fully cover</b> this element?";
+		}
+		return true;
+	}
 
 }

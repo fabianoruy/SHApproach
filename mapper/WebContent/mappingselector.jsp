@@ -83,8 +83,8 @@
   <!-- Simple Message -->
   <div id="dialog-message" title="Message" hidden>
     <p><span class="ui-icon ui-icon-circle-check" style="float: left; margin: 0 7px 50px 0;"></span>
-    <div id="messageText"></div>
-    </p>
+      <div id="messageText"></div>
+      </p>
   </div>
 
 </BODY>

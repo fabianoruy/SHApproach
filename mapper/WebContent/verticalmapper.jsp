@@ -15,20 +15,19 @@
 <script src="js/maphilight.js"></script>
 
 <script>
-<%-- var json = JSON.parse('<%=request.getAttribute("json")%>'); --%>
 	var json = JSON.parse('${json}');
-	console.log(json);
+	//console.log(json);
 
 	$(document).ready(function() {
 		$('#matchbutton').click(function() {
 			if (checkFields()) {
-				doAjax();
+				doMatch();
 			}
 		});
 	});
 
-	/* Calls the Servlet via Ajax for processing each match data. */
-	function doAjax() {
+	/* Calls (the servlet via ajax) for creating a Match. */
+	function doMatch() {
 		$.ajax({
 			type : 'POST',
 			url : 'VerticalMapServlet',
@@ -36,16 +35,24 @@
 				action : 'match',
 				elem : $('#elementidfield').val(),
 				conc : $('#conceptidfield').val(),
-				cover: $('#coveringfield').val(),
+				cover : $('#coveringfield').val(),
 				comm : $('#commentsfield').val(),
 			},
 			success : function(responseXml) {
 				console.log(responseXml);
+				var question = $(responseXml).find('questiontext').html();
+				if (question != "") {
+					showQuestion(question, doCompositeMatch);
+				}
 				$('#matchingsdiv').html($(responseXml).find('matchestable').html());
-				$('#messagediv').html($(responseXml).find('message').html());
-				//$("#matchingsdiv").empty().append(responseXml);
+				$('#messagediv').html($(responseXml).find('messagetext').html());
 			}
 		});
+	}
+
+	/* Calls (the servlet via ajax) for creating a Composite Match. */
+	function doCompositeMatch() {
+		alert("It is a Composite Match");
 	}
 
 	/* Highlight the diagrams' elements/concepts and make then selectable. */
@@ -56,7 +63,7 @@
 		}).mouseout(function(e) {
 			$('#squidhead').mouseout();
 		});
-		
+
 		// Fills the Element field from the map click
 		$('#StandardMap').click(function(e) {
 			var name = json.elements[e.target.id].name;
@@ -70,7 +77,7 @@
 			$('#conceptfield').val(name);
 		});
 	});
-	
+
 	/* Cleans the Ontology Concept when Not Covered is selected. */
 	function cleanOC() {
 		if ($('#coveringfield :selected').val() == 'NOCOVERAGE') {
@@ -82,19 +89,18 @@
 	/* Check if the fields are well filled. */
 	function checkFields() {
 		// getting values
-		var elem = $('#elementfield').val();
-		var conc = $('#conceptfield').val();
+		var elem = $('#elementidfield').val();
+		var conc = $('#conceptidfield').val();
 		var relc = $('#coveringfield').val();
 		var comm = $('#commentsfield').val();
 
 		// verifying
 		if (elem == '' || conc == '') {
-			//showMessage("Select an element from each diagram.");
-			showConfMessage("In a Standard Model, distinct elements should have different meaning. You already matched A1 [E] O.<br/><b>Are you sure that also A2 [E] O, and, hence A2 [E] A1?</b><br/><i>It will merge A1 and A2 as a single element (A1 = A2).</i>");
+			showMessage("Select an element from each diagram.");
 			return false;
 		}
 		if (comm == '' && (relc == 'WIDER' || relc == 'INTERSECTION')) {
-			showMessage("WIDER and INTERSECTION matchings require a comment explaining the non-covered part(s).");
+			showMessage("WIDER and INTERSECTION matches require a comment explaining the non-covered part(s).");
 			return false;
 		}
 		return true;
@@ -115,10 +121,10 @@
 		});
 	}
 
-	/* Shows a confimation message dialog. */
-	function showConfMessage(text) {
-		$('#confirmText').empty().append(text);
-		$('#dialog-confirm').dialog({
+	/* Shows a question message dialog. */
+	function showQuestion(text, yesFunction) {
+		$('#questionText').empty().append(text);
+		$('#dialog-question').dialog({
 			resizable : false,
 			height : "auto",
 			width : 600,
@@ -126,7 +132,7 @@
 			buttons : {
 				Yes : function() {
 					$(this).dialog('close');
-					// do something
+					yesFunction();
 				},
 				No : function() {
 					$(this).dialog('close');
@@ -134,7 +140,6 @@
 			}
 		});
 	}
-
 </script>
 </HEAD>
 
@@ -164,7 +169,7 @@
   </div>
 
   <div style="width: 100%; height: 100%">
-    <div style="width: 49%; height: 780px; overflow: auto; display: inline-block; border: 3px solid blue">
+    <div style="width: 49%; height: 600px; overflow: auto; display: inline-block; border: 3px solid blue">
       <IMG src="images/${standard.diagram.name}.png" width="${standard.diagram.astahDiagram.boundRect.width}"
         class="map" usemap="#Standard">
       <MAP id="StandardMap" name="Standard">
@@ -174,7 +179,7 @@
       </MAP>
     </div>
 
-    <div style="width: 49%; height: 780px; overflow: auto; display: inline-block; border: 3px solid red">
+    <div style="width: 49%; height: 600px; overflow: auto; display: inline-block; border: 3px solid red">
       <IMG src="images/${ontology.diagram.name}.png" width="${ontology.diagram.astahDiagram.boundRect.width}"
         class="map" usemap="#Ontology">
       <MAP id="OntologyMap" name="Ontology">
@@ -190,10 +195,8 @@
   <h3>How do the Standard's Elements cover the Ontology's Concepts?</h3>
   <div style="display: inline-block; width: 100%">
     <div style="width: 320px; display: inline-block">
-      <b>Standard Element</b> <br />
-      <input id="elementidfield" type="hidden">
-      <input id="elementfield" type="text" value="Manager" title="Select an Element from the Standard model" size="40"
-        readonly="readonly" />
+      <b>Standard Element</b> <br /> <input id="elementidfield" type="hidden"> <input id="elementfield"
+        type="text" value="select an element" title="Select an Element from the Standard model" size="40" readonly="readonly" />
     </div>
 
     <div style="width: 140px; display: inline-block">
@@ -208,10 +211,9 @@
     </div>
 
     <div style="width: 320px; display: inline-block">
-      <b>Ontology Concept</b> <br />
-      <input id="conceptidfield" type="hidden">
-      <input id="conceptfield" type="text" value="Project Manager" title="Select a Concept from the Ontology model."
-        size="40" readonly="readonly" />
+      <b>Ontology Concept</b> <br /> <input id="conceptidfield" type="hidden"> <input id="conceptfield"
+        type="text" value="select a concept" title="Select a Concept from the Ontology model." size="40"
+        readonly="readonly" />
     </div>
 
     <div style="display: inline-block">
@@ -226,15 +228,15 @@
   </div>
 
   <br />
-  <div style="display: inline-block; overflow: auto; border: 1px solid blue; width: 100%; height: 100px">
+  <div style="display: inline-block; overflow: auto; width: 100%; height: 100px">
     <strong>Message</strong>:
-    <div id="messagediv"></div>
+    <div id="messagediv" style="font-size: 90%"></div>
   </div>
 
   <br />
   <div style="display: inline-block; overflow: auto; border: 1px solid blue; width: 100%; height: 400px">
     <strong>Matches Established</strong>:
-    <div id="matchingsdiv"></div>
+    <div id="matchingsdiv" style="font-size: 95%"></div>
   </div>
   <!-- ***** Match Blocks ***** -->
 
@@ -248,9 +250,9 @@
   </div>
 
   <!-- Confirmation Message -->
-  <div id="dialog-confirm" title="Confirmation" hidden>
-    <p><span class="ui-icon ui-icon-alert" style="float: left; margin: 12px 12px 20px 0;"></span>
-    <div id="confirmText"></div>
+  <div id="dialog-question" title="Question" hidden>
+    <p><span class="ui-icon ui-icon-help" style="float: left; margin: 12px 12px 20px 0;"></span>
+    <div id="questionText"></div>
     </p>
   </div>
   <!-- ***** Dialog Boxes ***** -->

@@ -24,7 +24,7 @@ public class SimpleMatch extends Match {
 
     @Override
     public String toString() {
-	return getSource().getName() + " [" + getCoverage().name().charAt(0) + "] " + target.getName();
+	return getSource() + " [" + getCoverage().name().charAt(0) + "] " + target;
     }
 
 }

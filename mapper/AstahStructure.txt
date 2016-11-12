@@ -41,7 +41,7 @@ Nov.10
 
 Nov.11
 + Deployed on Server
-- Match validation
++ Match validation (partial: T0, T1)
 - Coverage presentation
 - Initital / menu page
 

@@ -78,19 +78,13 @@
   <h3 align="center">Approach for Harmonizing SE Standards</h3>
   <h1 align="center">(2) Model Reading</h1>
 
-  <h2>
-    <b>Astah Model Reader</b>
-  </h2>
+  <h2><b>Astah Model Reader</b></h2>
   <div style="width: 100%; display: inline-block">
     <div style="display: inline-block; width: 60%">
-      <p align="justify">
-        In this step, <b>the Astah file will be read and parsed</b>, gathering the models and information to support the
-        mapping activities.
-      </p>
-      The submitted file must follow the structure presented in the figure.
-      <br />
-      Regardless of other packages, this tool will read the packages named <i>Initiative</i> and <i>Standards
-        Structural Models</i>.
+      <p align="justify">In this step, <b>the Astah file will be read and parsed</b>, gathering the models and
+        information to support the mapping activities.
+      </p> The submitted file must follow the structure presented in the figure. <br /> Regardless of other packages, this
+      tool will read the packages named <i>Initiative</i> and <i>Standards Structural Models</i>.
       <ul>
         <li><i>Initiative</i> package: must have a single subpackage for your initiative (e.g. Quality Assurance)
           and 3 subpackages:
@@ -120,15 +114,13 @@
   <!-- <label for="textlabel">Please, provide a title for your harmonization initiative (e.g.: "Quality Assurance").</label> -->
 
   <form id="upform" enctype="multipart/form-data">
-    <label for="filelabel">Select the .astah file for your harmonization initiative.</label>
-    <input id="fileinput" type="file" name="file" accept=".asta" />
-    <br />
-    <input id="uploadbutton" type="button" value="Start Parsing" />
+    <label for="filelabel">Select the .astah file for your harmonization initiative.</label> <input id="fileinput"
+      type="file" name="file" accept=".asta" /> <br /> <input id="uploadbutton" type="button" value="Start Parsing" />
   </form>
 
 
   <div style="display: inline-block; overflow: auto; border: 1px solid blue; width: 100%; height: 600px">
-    <div id="astahparsingdiv"></div>
+    <div id="astahparsingdiv" style="font-size: 90%"></div>
   </div>
   <div style="text-align: center">
     <form action="VerticalMapServlet" method="POST">
@@ -142,8 +134,7 @@
   <!-- ##### Dialog Boxes ##### -->
   <!-- Simple Message -->
   <div id="dialog-message" title="Message" hidden>
-    <p>
-      <span class="ui-icon ui-icon-circle-check" style="float: left; margin: 0 7px 50px 0;"></span>
+    <p><span class="ui-icon ui-icon-circle-check" style="float: left; margin: 0 7px 50px 0;"></span>
     <div id="messageText"></div>
     </p>
   </div>
