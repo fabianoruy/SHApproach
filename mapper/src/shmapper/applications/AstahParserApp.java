@@ -59,6 +59,7 @@ public class AstahParserApp {
 
 	/* Reads an Astah file for parsing the models (1). */
 	public void parseAstah(String filename) throws ParserException {
+		System.out.println("Astah: "+ filename);
 		ProjectAccessor accessor = null;
 		try {
 			// Accessing the astah model
@@ -70,11 +71,7 @@ public class AstahParserApp {
 			addResult("Astah Model accessed.\n");
 
 			// Reading the model Packages (Ontologies and Models) and Notions (Concepts and Elements)
-			parsePackages(model);
-
-			// Reading the model Relations and Generalizations
-			parseRelations(initiative.getAllNotions());
-			parseGeneralizations(initiative.getAllNotions());
+			parseAstahModel(model);
 
 		} catch (IOException | ClassNotFoundException | LicenseNotFoundException | ProjectNotFoundException | NonCompatibleException | ProjectLockedException e) {
 			e.printStackTrace();
@@ -83,21 +80,10 @@ public class AstahParserApp {
 		}
 	}
 
-	/* Reads the packages and creates the Ontologies and Standards Models. */
-	private IPackage getPackage(IPackage superpack, String packname) throws ParserException {
-		IPackage pack = null;
-		for (INamedElement node : superpack.getOwnedElements()) {
-			if (node instanceof IPackage && node.getName().equals(packname)) {
-				pack = (IPackage) node;
-				addResult("Package found: " + packname + ".\n");
-				return pack;
-			}
-		}
-		throw new ParserException("Package not found: " + packname + ".\n");
-	}
+	//////////////////// PARSING MODELS ////////////////////
 
 	/* Reads the packages and creates the Ontologies and Standards Models. */
-	private void parsePackages(IModel model) throws ParserException {
+	private void parseAstahModel(IModel model) throws ParserException {
 		// Get the Structural and Initiative packages.
 		IPackage ssmpack = getPackage(model, "Standards Structural Models");
 		IPackage initpack = getPackage(model, "Initiative");
@@ -123,6 +109,23 @@ public class AstahParserApp {
 		parseContentModels(contentpack);
 
 		addResult(initiative.getAllNotions().size() + " concepts and elements parsed.\n");
+
+		// Reading the model Relations and Generalizations
+		parseRelations(initiative.getAllNotions());
+		parseGeneralizations(initiative.getAllNotions());
+	}
+
+	/* Reads the packages and creates the Ontologies and Standards Models. */
+	private IPackage getPackage(IPackage superpack, String packname) throws ParserException {
+		IPackage pack = null;
+		for (INamedElement node : superpack.getOwnedElements()) {
+			if (node instanceof IPackage && node.getName().equals(packname)) {
+				pack = (IPackage) node;
+				addResult("Package found: " + packname + ".\n");
+				return pack;
+			}
+		}
+		throw new ParserException("Package not found: " + packname + ".\n");
 	}
 
 	/* Reads the SEON View package and creates the Ontologies. */
@@ -347,6 +350,8 @@ public class AstahParserApp {
 		throw new ParserException("Diagram not found in package " + pack.getName() + ".\n");
 	}
 
+	//////////////////// IMPORTING IMAGES ////////////////////
+
 	/* Imports the astah PNG images (from astah file) to the images directory. */
 	public void importImages(String astahFile, String workingDir) throws ParseException {
 		String targetPath = workingDir + "images/tmp/";
@@ -400,7 +405,7 @@ public class AstahParserApp {
 				String relativePath = path.substring(path.indexOf(File.separator, path.indexOf("Uploaded_")));
 				if (identDiagrams.contains(relativePath)) {
 					File dest = new File(target + file.getName());
-					//TODO: check if the file is being overwrite (IMPORTANT!)
+					// TODO: check if the file is being overwrite (IMPORTANT!)
 					FileUtils.copyFile(file, dest); // copies each PNG file
 					System.out.print(++count + " ");
 					System.out.println(dest);
@@ -411,7 +416,7 @@ public class AstahParserApp {
 			// Scheduling the Deletion of temporary astahdoc images directory
 			System.out.println("Deleting " + dir.getName());
 			FileUtils.forceDeleteOnExit(dir);
-			//throw new Exception("It is an Exception! :-/");
+			// throw new Exception("It is an Exception! :-/");
 		} catch (Exception e) {
 			throw new ParseException("Failed during astah images importing/copying.");
 		}
@@ -430,6 +435,8 @@ public class AstahParserApp {
 			e.printStackTrace();
 		}
 	}
+
+	//////////////////// MANAGING RESULTS ////////////////////
 
 	/* Adds a result to be returned to the page. */
 	private void addResult(String result) {

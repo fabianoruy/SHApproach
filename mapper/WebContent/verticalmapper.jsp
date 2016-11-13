@@ -15,131 +15,168 @@
 <script src="js/maphilight.js"></script>
 
 <script>
-	var json = JSON.parse('${json}');
-	//console.log(json);
+  var json = JSON.parse('${json}');
+  //console.log(json);
 
-	$(document).ready(function() {
-		$('#matchbutton').click(function() {
-			if (checkFields()) {
-				doMatch();
-			}
-		});
-	});
+  $(document).ready(function() {
+    $('#matchbutton').click(function() {
+      if (checkFields()) {
+        doMatch();
+      }
+    });
+  });
 
-	/* Calls (the servlet via ajax) for creating a Match. */
-	function doMatch() {
-		$.ajax({
-			type : 'POST',
-			url : 'VerticalMapServlet',
-			data : {
-				action : 'match',
-				elem : $('#elementidfield').val(),
-				conc : $('#conceptidfield').val(),
-				cover : $('#coveringfield').val(),
-				comm : $('#commentsfield').val(),
-			},
-			success : function(responseXml) {
-				console.log(responseXml);
-				var question = $(responseXml).find('questiontext').html();
-				if (question != "") {
-					showQuestion(question, doCompositeMatch);
-				}
-				$('#matchingsdiv').html($(responseXml).find('matchestable').html());
-				$('#messagediv').html($(responseXml).find('messagetext').html());
-			}
-		});
-	}
+  /* Calls (the servlet via ajax) for creating a Match. */
+  function doMatch() {
+    $.ajax({
+      type : 'POST',
+      url : 'VerticalMapServlet',
+      data : {
+        action : 'match',
+        elem : $('#elementidfield').val(),
+        conc : $('#conceptidfield').val(),
+        cover : $('#coveringfield').val(),
+        comm : $('#commentsfield').val(),
+      },
+      success : function(responseXml) {
+        console.log(responseXml);
+        var question = $(responseXml).find('questiontext').html();
+        if (question != "") {
+          showCompositeMatchQuestion(question, doCompositeMatch);
+        }
+        $('#matchingsdiv').html($(responseXml).find('matchestable').html());
+        $('#messagediv').html($(responseXml).find('messagetext').html());
+      }
+    });
+  }
 
-	/* Calls (the servlet via ajax) for creating a Composite Match. */
-	function doCompositeMatch() {
-		alert("It is a Composite Match");
-	}
+  /* Calls (the servlet via ajax) for creating a Composite Match. */
+  function doCompositeMatch(cover) {
+    $.ajax({
+      type : 'POST',
+      url : 'VerticalMapServlet',
+      data : {
+        action : 'compositeMatch',
+        elem : $('#elementidfield').val(),
+        cover : cover,
+      },
+      success : function(responseXml) {
+        console.log(responseXml);
+        $('#matchingsdiv').html($(responseXml).find('matchestable').html());
+        $('#messagediv').html($(responseXml).find('messagetext').html());
+      }
+    });
+  }
 
-	/* Highlight the diagrams' elements/concepts and make then selectable. */
-	$(function() {
-		$('.map').maphilight();
-		$('#squidheadlink').mouseover(function(e) {
-			$('#squidhead').mouseover();
-		}).mouseout(function(e) {
-			$('#squidhead').mouseout();
-		});
+  /* Highlight the diagrams' elements/concepts and make then selectable. */
+  $(function() {
+    $('.map').maphilight();
+    $('#squidheadlink').mouseover(function(e) {
+      $('#squidhead').mouseover();
+    }).mouseout(function(e) {
+      $('#squidhead').mouseout();
+    });
 
-		// Fills the Element field from the map click
-		$('#StandardMap').click(function(e) {
-			var name = json.elements[e.target.id].name;
-			$('#elementidfield').val(e.target.id);
-			$('#elementfield').val(name);
-		});
-		// Fill the Concept field from the map click
-		$('#OntologyMap').click(function(e) {
-			var name = json.concepts[e.target.id].name;
-			$('#conceptidfield').val(e.target.id);
-			$('#conceptfield').val(name);
-		});
-	});
+    // Fills the Element field from the map click
+    $('#StandardMap').click(function(e) {
+      var name = json.elements[e.target.id].name;
+      $('#elementidfield').val(e.target.id);
+      $('#elementfield').val(name);
+    });
+    // Fill the Concept field from the map click
+    $('#OntologyMap').click(function(e) {
+      var name = json.concepts[e.target.id].name;
+      $('#conceptidfield').val(e.target.id);
+      $('#conceptfield').val(name);
+    });
+  });
 
-	/* Cleans the Ontology Concept when Not Covered is selected. */
-	function cleanOC() {
-		if ($('#coveringfield :selected').val() == 'NOCOVERAGE') {
-			$('#conceptidfield').val('');
-			$('#conceptfield').val('');
-		}
-	}
+  /* Cleans the Ontology Concept when Not Covered is selected. */
+  function cleanOC() {
+    if ($('#coveringfield :selected').val() == 'NOCOVERAGE') {
+      $('#conceptidfield').val('');
+      $('#conceptfield').val('');
+    }
+  }
 
-	/* Check if the fields are well filled. */
-	function checkFields() {
-		// getting values
-		var elem = $('#elementidfield').val();
-		var conc = $('#conceptidfield').val();
-		var relc = $('#coveringfield').val();
-		var comm = $('#commentsfield').val();
+  /* Check if the fields are well filled. */
+  function checkFields() {
+    // getting values
+    var elem = $('#elementidfield').val();
+    var conc = $('#conceptidfield').val();
+    var relc = $('#coveringfield').val();
+    var comm = $('#commentsfield').val();
 
-		// verifying
-		if (elem == '' || conc == '') {
-			showMessage("Select an element from each diagram.");
-			return false;
-		}
-		if (comm == '' && (relc == 'WIDER' || relc == 'INTERSECTION')) {
-			showMessage("WIDER and INTERSECTION matches require a comment explaining the non-covered part(s).");
-			return false;
-		}
-		return true;
-	}
+    // verifying
+    if (elem == '' || conc == '') {
+      showMessage("Select an element from each diagram.");
+      return false;
+    }
+    if (comm == '' && (relc == 'WIDER' || relc == 'INTERSECTION')) {
+      showMessage("WIDER and INTERSECTION matches require a comment explaining the non-covered part(s).");
+      return false;
+    }
+    return true;
+  }
 
-	/* Shows a message dialog. */
-	function showMessage(text) {
-		$('#messageText').empty().append(text);
-		$('#dialog-message').show();
-		$('#dialog-message').dialog({
-			modal : true,
-			width : 500,
-			buttons : {
-				Ok : function() {
-					$(this).dialog('close');
-				}
-			}
-		});
-	}
+  /* Shows a message dialog. */
+  function showMessage(text) {
+    $('#messageText').empty().append(text);
+    $('#dialog-message').show();
+    $('#dialog-message').dialog({
+      modal : true,
+      width : 500,
+      buttons : {
+        Ok : function() {
+          $(this).dialog('close');
+        }
+      }
+    });
+  }
 
-	/* Shows a question message dialog. */
-	function showQuestion(text, yesFunction) {
-		$('#questionText').empty().append(text);
-		$('#dialog-question').dialog({
-			resizable : false,
-			height : "auto",
-			width : 600,
-			modal : true,
-			buttons : {
-				Yes : function() {
-					$(this).dialog('close');
-					yesFunction();
-				},
-				No : function() {
-					$(this).dialog('close');
-				}
-			}
-		});
-	}
+  /* Shows a question message dialog. */
+  function showQuestion(text, yesFunction) {
+    $('#questionText').empty().append(text);
+    $('#dialog-question').dialog({
+      resizable : false,
+      height : "auto",
+      width : 600,
+      modal : true,
+      buttons : {
+        Yes : function() {
+          $(this).dialog('close');
+          yesFunction();
+        },
+        No : function() {
+          $(this).dialog('close');
+        }
+      }
+    });
+  }
+
+  /* Shows a question message dialog. */
+  function showCompositeMatchQuestion(text, compositeFunction) {
+    $('#compositeText').empty().append(text);
+    $('#dialog-composite').dialog({
+      resizable : false,
+      height : "auto",
+      width : 600,
+      modal : true,
+      buttons : {
+        "Yes, the element is EQUIVALENT to the sun of the concepts." : function() {
+          $(this).dialog('close');
+          compositeFunction('EQUIVALENT');
+        },
+        "Yes, the element is PART OF the sun of the concepts." : function() {
+          $(this).dialog('close');
+          compositeFunction('PARTIAL');
+        },
+        "No, the element remains not fully covered." : function() {
+          $(this).dialog('close');
+        }
+      }
+    });
+  }
 </script>
 </HEAD>
 
@@ -196,7 +233,8 @@
   <div style="display: inline-block; width: 100%">
     <div style="width: 320px; display: inline-block">
       <b>Standard Element</b> <br /> <input id="elementidfield" type="hidden"> <input id="elementfield"
-        type="text" value="select an element" title="Select an Element from the Standard model" size="40" readonly="readonly" />
+        type="text" value="(select an element)" title="Select an Element from the Standard model" size="40"
+        readonly="readonly" />
     </div>
 
     <div style="width: 140px; display: inline-block">
@@ -212,7 +250,7 @@
 
     <div style="width: 320px; display: inline-block">
       <b>Ontology Concept</b> <br /> <input id="conceptidfield" type="hidden"> <input id="conceptfield"
-        type="text" value="select a concept" title="Select a Concept from the Ontology model." size="40"
+        type="text" value="(select a concept)" title="Select a Concept from the Ontology model." size="40"
         readonly="readonly" />
     </div>
 
@@ -223,7 +261,7 @@
     <br /> <br />
     <div style="width: 600px">
       <b>Covering Comments</b> <br />
-      <textarea id="commentsfield" title="Describe the non-covered portions of the Element." rows="4" cols="108">Comments about the match</textarea>
+      <textarea id="commentsfield" title="Describe the non-covered portions of the Element." rows="4" cols="108"></textarea>
     </div>
   </div>
 
@@ -249,14 +287,21 @@
     </p>
   </div>
 
-  <!-- Confirmation Message -->
+  <!-- Question Message -->
   <div id="dialog-question" title="Question" hidden>
     <p><span class="ui-icon ui-icon-help" style="float: left; margin: 12px 12px 20px 0;"></span>
+    <p>
     <div id="questionText"></div>
     </p>
   </div>
+
+  <!-- Composite Match Question Message -->
+  <div id="dialog-composite" title="Is it a Composite Match?" hidden>
+    <p>
+    <div id="compositeText"></div>
+    </p>
+  </div>
+
   <!-- ***** Dialog Boxes ***** -->
-
-
 </BODY>
 </HTML>

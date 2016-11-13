@@ -14,63 +14,57 @@
 <script src="js/jquery.form.js"></script>
 
 <script>
-	$(document).ready(function() {
-		$('#uploadbutton').click(function() {
-			$.ajax({
-				type : 'POST',
-				url : 'AstahUploadServlet',
-				data : new FormData($('#upform')[0]),
-				xhr : function() { // Custom XMLHttpRequest
-					return $.ajaxSettings.xhr();
-				},
-				//Ajax events
-				beforeSend : function() {
-					$('#astahparsingdiv').append("Please wait. Astah file is being processed. It can take some seconds.<br/>");
-				},
-				success : function(servletResponse) {
-					$('#astahparsingdiv').append(servletResponse);
-					importImages();
-				},
-				error : {},
-				//telling jQuery not to process data or worry about content-type.
-				cache : false,
-				contentType : false,
-				processData : false
-			});
-		});
-	});
+  $(document).ready(
+      function() {
+        $('#uploadbutton').click(
+            function() {
+              $.ajax({
+                type : 'POST',
+                url : 'AstahUploadServlet',
+                data : new FormData($('#upform')[0]),
+                xhr : function() { // Custom XMLHttpRequest
+                  return $.ajaxSettings.xhr();
+                },
+                //Ajax events
+                beforeSend : function() {
+                  if ($('#fileinput').val() == "") {
+                    $('#astahparsingdiv').append("Please, select an Astah file.<br/>");
+                    return false;
+                  } else {
+                    $('#astahparsingdiv').empty().append(
+                        "Please wait. Astah file is being processed. It can take some seconds.<br/>");
+                  }
+                },
+                success : function(servletResponse) {
+                  $('#astahparsingdiv').append(servletResponse);
+                  //importImages();
+                  $('#mappingbutton').prop('disabled', false);
+                },
+                error : {},
+                //telling jQuery not to process data or worry about content-type.
+                cache : false,
+                contentType : false,
+                processData : false
+              });
+            });
+      });
 
-	/* Imports the diagrams' images from the astha file. */
-	function importImages() {
-		$.ajax({
-			type : 'POST',
-			url : 'AstahUploadServlet',
-			data : {
-				action : 'images',
-			},
-			beforeSend : function() {
-				$('#astahparsingdiv').append("Importing images... ");
-			},
-			success : function(servletResponse) {
-				$('#astahparsingdiv').append(servletResponse);
-			}
-		});
-	}
-
-	/* Shows a message dialog. */
-	function message(text) {
-		$('#messageText').empty().append(text);
-		$('#dialog-message').show();
-		$('#dialog-message').dialog({
-			modal : true,
-			width : 500,
-			buttons : {
-				Ok : function() {
-					$(this).dialog('close');
-				}
-			}
-		});
-	}
+  /* Imports the diagrams' images from the astha file. */
+  function importImages() {
+    $.ajax({
+      type : 'POST',
+      url : 'AstahUploadServlet',
+      data : {
+        action : 'images',
+      },
+      beforeSend : function() {
+        $('#astahparsingdiv').append("Importing images... ");
+      },
+      success : function(servletResponse) {
+        $('#astahparsingdiv').append(servletResponse);
+      }
+    });
+  }
 </script>
 </HEAD>
 
@@ -108,37 +102,24 @@
   </div>
   <br />
 
-
-
   <!-- ##### Reading Blocks ##### -->
-  <!-- <label for="textlabel">Please, provide a title for your harmonization initiative (e.g.: "Quality Assurance").</label> -->
-
   <form id="upform" enctype="multipart/form-data">
     <label for="filelabel">Select the .astah file for your harmonization initiative.</label> <input id="fileinput"
       type="file" name="file" accept=".asta" /> <br /> <input id="uploadbutton" type="button" value="Start Parsing" />
   </form>
 
-
-  <div style="display: inline-block; overflow: auto; border: 1px solid blue; width: 100%; height: 600px">
+  <div style="display: inline-block; overflow: auto; border: 1px solid blue; width: 100%; height: 550px">
     <div id="astahparsingdiv" style="font-size: 90%"></div>
   </div>
+  
+  <br />
   <div style="text-align: center">
     <form action="VerticalMapServlet" method="POST">
       <input type="hidden" name="action" value="openPage">
-      <button id="mappingbutton">Start Mapping</button>
+      <button id="mappingbutton" disabled>Start Mapping</button>
     </form>
   </div>
   <!-- ***** Reading Blocks ***** -->
-
-
-  <!-- ##### Dialog Boxes ##### -->
-  <!-- Simple Message -->
-  <div id="dialog-message" title="Message" hidden>
-    <p><span class="ui-icon ui-icon-circle-check" style="float: left; margin: 0 7px 50px 0;"></span>
-    <div id="messageText"></div>
-    </p>
-  </div>
-  <!-- ***** Dialog Boxes ***** -->
 
 </BODY>
 </HTML>

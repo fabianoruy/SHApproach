@@ -7,29 +7,37 @@ import com.change_vision.jude.api.inf.model.IPackage;
 
 /* Represents a View extracted the SEON Ontologies. */
 public class SeonView extends Package {
-    private String scope;
-    private List<Ontology> ontologies;
+	private String			scope;
+	private List<Ontology>	ontologies;
 
-    public SeonView(IPackage astahPack) {
-	super(astahPack);
-	this.setName("SEON View");
-	this.ontologies = new ArrayList<Ontology>();
-    }
+	public SeonView(IPackage astahPack) {
+		super(astahPack);
+		this.setName("SEON View");
+		this.ontologies = new ArrayList<Ontology>();
+	}
 
-    public String getScope() {
-	return scope;
-    }
+	public String getScope() {
+		return scope;
+	}
 
-    public void setScope(String scope) {
-	this.scope = scope;
-    }
+	public void setScope(String scope) {
+		this.scope = scope;
+	}
 
-    public List<Ontology> getOntologies() {
-	return this.ontologies;
-    }
+	public List<Ontology> getOntologies() {
+		return this.ontologies;
+	}
 
-    public void addOntology(Ontology onto) {
-	this.ontologies.add(onto);
-    }
+	public void addOntology(Ontology onto) {
+		this.ontologies.add(onto);
+	}
+	
+	public List<Concept> getConcepts() {
+		List<Concept> concepts = new ArrayList<Concept>();
+		for (Ontology onto : ontologies) {
+			concepts.addAll(onto.getConcepts());
+		}
+		return concepts;
+	}
 
 }

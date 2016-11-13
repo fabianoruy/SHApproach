@@ -12,13 +12,16 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import shmapper.applications.MappingApp;
+import shmapper.model.CompositeMatch;
 import shmapper.model.Concept;
 import shmapper.model.Element;
+import shmapper.model.Mapping;
 import shmapper.model.Ontology;
 import shmapper.model.SHInitiative;
 import shmapper.model.SeonView;
 import shmapper.model.SimpleMatch;
 import shmapper.model.StandardModel;
+import shmapper.model.VerticalMapping;
 
 /* Servlet implementation class VerticalMapServlet */
 @WebServlet("/VerticalMapServlet")
@@ -29,7 +32,7 @@ public class VerticalMapServlet extends HttpServlet {
 
 	/* HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response). */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		System.out.println(">VerticalMapServlet");
+		//System.out.println(">VerticalMapServlet");
 		// Accessing the initiative from the Session
 		initiative = (SHInitiative) request.getSession().getAttribute("initiative");
 
@@ -38,12 +41,18 @@ public class VerticalMapServlet extends HttpServlet {
 			// Initializing the application
 			mapp = new MappingApp(initiative);
 
-			// Getting the first standard for the mapping. TODO: Fix to get the selected and create the corresponding
-			// mapping.
+			// Creating a mapping for the first standard.
+			// TODO: Fix to get the selected mapping.
+			VerticalMapping mapping = null;
 			String stdId = "ykzr-9a6d5429f393b13d9aebe6086e091e4d"; // change to the selected ID.
-			StandardModel std = (StandardModel) initiative.getPackage(stdId);
-			System.out.println("# CMMI Standard: " + std);
-			SeonView seon = initiative.getSeonView();
+			for (Mapping map : initiative.getMappings()) {
+				if (map instanceof VerticalMapping && map.getBase().equals(initiative.getPackage(stdId))) {
+					mapping = (VerticalMapping) map;
+				}
+			}
+			mapp.setCurrentMapping(mapping);
+			StandardModel std = mapping.getBase();
+			SeonView seon = mapping.getTarget();
 
 			// Creating the JSON
 			JsonElement json = createNotionsJSON(std, seon);
@@ -62,19 +71,26 @@ public class VerticalMapServlet extends HttpServlet {
 			String cover = request.getParameter("cover");
 			String comm = request.getParameter("comm");
 
-			SimpleMatch match = mapp.createMatch(elemId, concId, cover, comm);
-			String message = mapp.getMessage();
-			String question = mapp.getQuestion();
+			SimpleMatch match = mapp.createSimpleMatch(elemId, concId, cover, comm);
 
-			//request.setAttribute("current", match);
-			request.setAttribute("message", message);
-			request.setAttribute("question", question);
-			request.setAttribute("matches", mapp.getCurrentMatches());
+			request.setAttribute("message", mapp.getMessage());
+			request.setAttribute("question", mapp.getQuestion());
+			request.setAttribute("matches", mapp.getCurrentMapping().getMatches());
 
-			System.out.println("Message: " + request.getAttribute("message"));
-			System.out.println("Question: " + request.getAttribute("question"));
-			System.out.println("Matches: " + request.getAttribute("matches"));
+			request.getRequestDispatcher("matches.jsp").forward(request, response);
 
+			// If it is a Composite Match.
+		} else if (request.getParameter("action").equals("compositeMatch")) {
+			System.out.println("Servlet: Composite Match");
+			String elemId = request.getParameter("elem");
+			String cover = request.getParameter("cover");
+
+			CompositeMatch match = mapp.createCompositeMatch(elemId, cover);
+
+			request.setAttribute("message", mapp.getMessage());
+			//request.setAttribute("question", "");
+			request.setAttribute("matches", mapp.getCurrentMapping().getMatches());
+			
 			request.getRequestDispatcher("matches.jsp").forward(request, response);
 		}
 	}

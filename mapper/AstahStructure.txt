@@ -26,7 +26,16 @@ Phases:
       - not allowed: stop
       - no problem: finish
       - composite match: call again
-      
+
+The element A has now 3 matches:
+A [I] O1
+A [W] O2
+A [W] O3
+Do these matches together fully cover the element?
+( ) Yes, the element is EQUIVALENT to the sun of the concepts.
+( ) Yes, the element is PART OF the sun of the concepts.
+( ) No, the element remains not fully covered.
+		[OK]
 
 # CHANGES
 Nov.09
@@ -42,8 +51,11 @@ Nov.10
 Nov.11
 + Deployed on Server
 + Match validation (partial: T0, T1)
+
+Nov.12
++ Composite match
+- Match validation (T2)
+- Match exclusion
 - Coverage presentation
-- Initital / menu page
+- Initital / menu page (mapping selector)
 
-
- 

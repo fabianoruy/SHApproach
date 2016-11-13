@@ -2,29 +2,41 @@ package shmapper.model;
 
 /* Represents a Match between an Element and a Concept/Element. */
 public class SimpleMatch extends Match {
-    private Notion target;
+	private Notion target;
 
-    public SimpleMatch(Element elem, Concept conc, Coverage cover, String comm) {
-	super(elem, cover, comm);
-	this.target = conc;
-    }
+	/* Constructor for Vertical Mappings. */
+	public SimpleMatch(Element source, Concept target, Coverage cover, String comm) {
+		super(source, cover, comm);
+		this.target = target;
+	}
 
-    public SimpleMatch(Element source, Element target, Coverage cover, String comm) {
-	super(source, cover, comm);
-	this.target = target;
-    }
+	/* Constructor for Horizontal Mappings. */
+	public SimpleMatch(Element source, Element target, Coverage cover, String comm) {
+		super(source, cover, comm);
+		this.target = target;
+	}
 
-    public Notion getTarget() {
-	return target;
-    }
+	public Notion getTarget() {
+		return target;
+	}
 
-    public String getType() {
-	return "E [" + getCoverage().name().charAt(0) + "] " + target.getClass().getName().charAt(0);
-    }
+	public String getType() {
+		return "E [" + getCoverage().name().charAt(0) + "] " + target.getClass().getName().charAt(0);
+	}
 
-    @Override
-    public String toString() {
-	return getSource() + " [" + getCoverage().name().charAt(0) + "] " + target;
-    }
+	@Override
+	public String toString() {
+		return getSource() + " [" + getCoverage().name().charAt(0) + "] " + target;
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		SimpleMatch omatch;
+		if (other instanceof SimpleMatch) {
+			omatch = (SimpleMatch) other;
+			return (this.getSource().equals(omatch.getSource()) && this.target.equals(omatch.target));
+		}
+		return false;
+	}
 
 }
