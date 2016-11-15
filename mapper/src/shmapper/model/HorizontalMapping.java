@@ -2,21 +2,22 @@ package shmapper.model;
 
 /* Represents a Horizontal Mapping between two Models. */
 public class HorizontalMapping extends Mapping {
-	private Model target;
+	private StandardModel target;
 
-	public HorizontalMapping(StandardModel base, Model target) {
+	public HorizontalMapping(StandardModel base, StandardModel target) {
 		super(base);
 		this.target = target;
 	}
 
 	@Override
-	public Model getTarget() {
+	public StandardModel getTarget() {
 		return target;
 	}
-
-	@Override
-	public String toString() {
-		return "HM: " + getBase() + " x " + getTarget();
-	}
 	
+	@Override
+	public int getCoverage() {
+		//TODO: coverage (%): baseModel.elements / baseModel.elements.([E] + [P] + [W]/2 + [I]/2);
+		return 80;
+	}
+
 }

@@ -10,12 +10,38 @@
 
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/jquery-ui.css">
+
+<style>
+.elembox {
+  border-radius: 8px;
+  border: 2px solid blue;
+  padding: 8px;
+  min-height: 150px;
+}
+
+.concbox {
+  border-radius: 8px;
+  border: 2px solid red;
+  padding: 8px;
+  min-height: 150px;
+}
+
+/* .fully { */
+/*     position: absolute; */
+/*     width: 30px; */
+/*     height: 30px; */
+/*     border: 1px solid blue; */
+/*     background: rgba(0, 102, 255, 0.3); */
+/* } */
+
+</style>
 <script src="js/jquery.min.js"></script>
 <script src="js/jquery-ui.js"></script>
 <script src="js/maphilight.js"></script>
 
 <script>
-  var json = JSON.parse('${json}');
+  var stdJson = JSON.parse('${stdJson}');
+  var ontoJson = JSON.parse('${ontoJson}');
   //console.log(json);
 
   $(document).ready(function() {
@@ -30,7 +56,7 @@
   function doMatch() {
     $.ajax({
       type : 'POST',
-      url : 'VerticalMapServlet',
+      url : 'VerticalMappingServlet',
       data : {
         action : 'match',
         elem : $('#elementidfield').val(),
@@ -39,34 +65,47 @@
         comm : $('#commentsfield').val(),
       },
       success : function(responseXml) {
-        console.log(responseXml);
-        var question = $(responseXml).find('questiontext').html();
-        if (question != "") {
-          showCompositeMatchQuestion(question, doCompositeMatch);
-        }
-        $('#matchingsdiv').html($(responseXml).find('matchestable').html());
-        $('#messagediv').html($(responseXml).find('messagetext').html());
+        updateMapping(responseXml);
+        
       }
     });
   }
-
+  
   /* Calls (the servlet via ajax) for creating a Composite Match. */
   function doCompositeMatch(cover) {
     $.ajax({
       type : 'POST',
-      url : 'VerticalMapServlet',
+      url : 'VerticalMappingServlet',
       data : {
         action : 'compositeMatch',
         elem : $('#elementidfield').val(),
         cover : cover,
       },
       success : function(responseXml) {
-        console.log(responseXml);
-        $('#matchingsdiv').html($(responseXml).find('matchestable').html());
-        $('#messagediv').html($(responseXml).find('messagetext').html());
+        updateMapping(responseXml);
+//         console.log(responseXml);
+//         $('#matchingsdiv').html($(responseXml).find('matchestable').html());
+//         $('#messagediv').html($(responseXml).find('messagetext').html());
       }
     });
   }
+  
+  /* Updates the page with the current information. */
+  function updateMapping(responseXml) {
+    console.log(responseXml);
+    var question = $(responseXml).find('questiontext').html();
+    if (question != "") {
+      showCompositeMatchQuestion(question, doCompositeMatch);
+    }
+    $('#matchingsdiv').html($(responseXml).find('matchestable').html());
+    $('#messagediv').html($(responseXml).find('messagetext').html());
+    $('#commentsfield').empty();
+    $('#coveragediv').html($(responseXml).find('coveragetable').html());
+    $('#coveragenumber').text($(responseXml).find('coveragetext').html());
+    $('#standarddiv').append($(responseXml).find('coverageicons').html());
+  }
+
+  
 
   /* Highlight the diagrams' elements/concepts and make then selectable. */
   $(function() {
@@ -79,15 +118,24 @@
 
     // Fills the Element field from the map click
     $('#StandardMap').click(function(e) {
-      var name = json.elements[e.target.id].name;
+      var name = stdJson[e.target.id].name;
+      var btype = stdJson[e.target.id].basetype;
+      var def = stdJson[e.target.id].definition;
       $('#elementidfield').val(e.target.id);
-      $('#elementfield').val(name);
+	  $('#elementfield').text(name);
+      $('#ebasetypefield').text("(" + btype + ")");
+      $('#edefinitionfield').text(def);
     });
+    
     // Fill the Concept field from the map click
     $('#OntologyMap').click(function(e) {
-      var name = json.concepts[e.target.id].name;
+      var name = ontoJson[e.target.id].name;
+      var btype = ontoJson[e.target.id].basetype;
+      var def = ontoJson[e.target.id].definition;
       $('#conceptidfield').val(e.target.id);
-      $('#conceptfield').val(name);
+      $('#conceptfield').text(name);
+      $('#cbasetypefield').text(btype);
+      $('#cdefinitionfield').text(def);
     });
   });
 
@@ -108,7 +156,7 @@
     var comm = $('#commentsfield').val();
 
     // verifying
-    if (elem == '' || conc == '') {
+    if (elem == '' || (conc == '' && relc != 'NOCOVERAGE')) {
       showMessage("Select an element from each diagram.");
       return false;
     }
@@ -117,6 +165,12 @@
       return false;
     }
     return true;
+  }
+
+  function showCoverageInfo() {
+    $("#information").dialog({
+      width : 960
+    });
   }
 
   /* Shows a message dialog. */
@@ -206,19 +260,19 @@
   </div>
 
   <div style="width: 100%; height: 100%">
-    <div style="width: 49%; height: 600px; overflow: auto; display: inline-block; border: 3px solid blue">
-      <IMG src="images/${standard.diagram.name}.png" width="${standard.diagram.astahDiagram.boundRect.width}"
-        class="map" usemap="#Standard">
+    <div id="standarddiv" style="width: 49%; height: 600px; overflow: auto; display: inline-block; border: 3px solid blue; position:relative">
+      <IMG src="${standard.diagram.path}" width="${standard.diagram.width}" class="map" usemap="#Standard">
       <MAP id="StandardMap" name="Standard">
         <c:forEach var="entry" items="${stdCoords}">
           <area shape="rect" coords="${entry.value}" id="${entry.key.id}">
         </c:forEach>
       </MAP>
+<!--       <img src='images/favicon-full.ico' style='top:344px; left:50px; position:absolute'></img> -->
+<!--       <img src='images/favicon-part.ico' style='top:394px; left:50px; position:absolute'></img> -->
     </div>
 
     <div style="width: 49%; height: 600px; overflow: auto; display: inline-block; border: 3px solid red">
-      <IMG src="images/${ontology.diagram.name}.png" width="${ontology.diagram.astahDiagram.boundRect.width}"
-        class="map" usemap="#Ontology">
+      <IMG src="${ontology.diagram.path}" width="${ontology.diagram.width}" class="map" usemap="#Ontology">
       <MAP id="OntologyMap" name="Ontology">
         <c:forEach var="entry" items="${ontoCoords}">
           <area shape="rect" coords="${entry.value}" id="${entry.key.id}">
@@ -231,55 +285,150 @@
   <!-- ##### Match Blocks ##### -->
   <h3>How do the Standard's Elements cover the Ontology's Concepts?</h3>
   <div style="display: inline-block; width: 100%">
-    <div style="width: 320px; display: inline-block">
-      <b>Standard Element</b> <br /> <input id="elementidfield" type="hidden"> <input id="elementfield"
-        type="text" value="(select an element)" title="Select an Element from the Standard model" size="40"
-        readonly="readonly" />
+    <div style="width: 410px; display: inline-block; float:left">
+      <label><b>Standard Element</b></label> <br />
+      <div class="elembox" title="Select an Element from the Standard model">
+        <input id="elementidfield" type="hidden"/>
+        <span id="elementfield" style="font-weight: bold">(select an element)</span><br/>
+        <span id="ebasetypefield"></span><br/>
+        <span id="edefinitionfield" style="font-size: 90%"></span>
+      </div>
     </div>
 
-    <div style="width: 140px; display: inline-block">
-      <b>Coverage</b> <br /> <select id="coveringfield" title="Which is the coverage of the Element on the Concept?"
-        onchange="cleanOC(this)">
-        <option value="EQUIVALENT">[E] EQUIVALENT</option>
-        <option value="PARTIAL">[P] PART OF</option>
-        <option value="WIDER">[W] WIDER</option>
-        <option value="INTERSECTION">[I] INTERSECTION</option>
-        <option value="NOCOVERAGE">[-] NO COVERAGE</option>
-      </select>
+    <div style="width: 140px; display: inline-block; float:left; margin:0 20px 0 20px">
+      <div style="display: inline-block">
+        <b>Coverage (<a href=#nothing onclick="showCoverageInfo()">?</a>)</b> <br />
+        <select id="coveringfield" title="Which is the coverage of the Element on the Concept?"
+          onchange="cleanOC(this)">
+          <option value="EQUIVALENT">[E] EQUIVALENT</option>
+          <option value="PARTIAL">[P] PART OF</option>
+          <option value="WIDER">[W] WIDER</option>
+          <option value="INTERSECTION">[I] INTERSECTION</option>
+          <!--         <option value="NOCOVERAGE">[-] NO COVERAGE</option> -->
+        </select>
+      </div>
+      <div style="display: inline-block; width: 140px; height: 148px; position: relative">
+        <button id="matchbutton" style="width: 80px; height: 30px; font-weight: bold; position: absolute; bottom: 0; right:30px;">MATCH!</button>
+      </div>
+    </div>
+    
+
+    <div style="width: 410px; display: inline-block; float:left">
+      <label><b>Ontology Concept</b></label> <br />
+      <div class="concbox" title="Select a Concept from the Ontology model.">
+        <input id="conceptidfield" type="hidden"/>
+        <span id="conceptfield" style="font-weight: bold">(select concept)</span><br/>
+        <span id="cbasetypefield"></span><br/>
+        <span id="cdefinitionfield" style="font-size: 90%"></span>
+      </div>
+    </div>
+  
+  </div>
+
+  <div style="width: 600px; margin: 15px 0 0 0">
+    <b>Covering Comments</b> <br />
+    <textarea id="commentsfield" title="Describe the non-covered portions of the Element." rows="4" cols="139"></textarea>
+  </div>
+
+  <div style="display: inline-block; overflow: auto; width: 998px; margin: 15px 0 0 0">
+    <strong>Message</strong>
+    <div id="messagediv" style="font-size: 90%; border: 1px solid gray; height: 70px; border-radius: 10px; padding: 8px;;"></div>
+  </div>
+
+  <div>
+    <div style="display: inline-block; overflow: auto; width: 998px; margin: 15px 0 0 0">
+      <strong>Matches Established</strong>
+      <div id="matchingsdiv" style="font-size: 95%; border: 1px solid gray; height: 400px"></div>
     </div>
 
-    <div style="width: 320px; display: inline-block">
-      <b>Ontology Concept</b> <br /> <input id="conceptidfield" type="hidden"> <input id="conceptfield"
-        type="text" value="(select a concept)" title="Select a Concept from the Ontology model." size="40"
-        readonly="readonly" />
-    </div>
-
-    <div style="display: inline-block">
-      <button id="matchbutton">Match</button>
-    </div>
-
-    <br /> <br />
-    <div style="width: 600px">
-      <b>Covering Comments</b> <br />
-      <textarea id="commentsfield" title="Describe the non-covered portions of the Element." rows="4" cols="108"></textarea>
+    <div style="display: inline-block; width: 400px; margin: 15px 0 0 0">
+      <strong>Coverage: <span id="coveragenumber">0%</span></strong>
+      <div id="coveragediv" style="font-size: 95%; overflow: auto; border: 1px solid gray; height: 400px"></div>
     </div>
   </div>
 
-  <br />
-  <div style="display: inline-block; overflow: auto; width: 100%; height: 100px">
-    <strong>Message</strong>:
-    <div id="messagediv" style="font-size: 90%"></div>
+  <div style="text-align: center; width: 998px; margin: 10px 0 0 0">
+    <form action="PhaseSelectServlet" method="POST">
+      <input type="hidden" name="action" value="openPage">
+      <button id="finishbutton">Finish this Mapping</button>
+    </form>
   </div>
 
-  <br />
-  <div style="display: inline-block; overflow: auto; border: 1px solid blue; width: 100%; height: 400px">
-    <strong>Matches Established</strong>:
-    <div id="matchingsdiv" style="font-size: 95%"></div>
-  </div>
   <!-- ***** Match Blocks ***** -->
 
 
+
+  <!-- Information Dialog -->
+  <div id="information" title="Coverage Relations" hidden>
+    <p>Some symbols are used to establish a relation between a <b>Standard&rsquo;s Element</b> and an <b>Ontology&rsquo;s
+        Concept</b> (or between two Elements from different Standards). It is always a binary relation comparing the <b>notions&rsquo;
+        coverage</b> on the domain, i.e. <em>how the domain portion covered by an Element is related to the domain
+        portion covered by a Concept (or by another Element</em>).<br /> For example, <b>A [P] O</b> (A is part of O), means
+      that &ldquo;<em>Element A covers a portion of the domain that <b>is part of</b> the portion covered by
+        Concept O
+    </em>&rdquo;.
+    </p>
+    <p>For the cases where an Element remains with non-covered portions (WIDER or INTERSECTION relations), a comment
+      is required for explaining such portions.</p>
+    <table border=1 cellpadding=6 style="width: 100%">
+      <tbody style="border: 1px solid gray">
+        <tr style="background-color:#F0F0F0">
+          <th width="140"><b>Coverage</b></th>
+          <th width="60"><b>Symbol</b></th>
+          <th width="300"><b>Meaning</b></th>
+          <th width="150"><b>View</b></th>
+          <th width="250"><b>Example</b></th>
+        </tr>
+        <tr>
+          <td><b>[E] EQUIVALENT</b></td>
+          <td><b>A [E] O</b></td>
+          <td>A is Equivalent to O.<br /> Element A covers a portion of the domain that <b>is equivalent to</b>
+            the portion covered by Concept O.
+          </td>
+          <td style="text-align:center"><IMG src="images/Equivalent.png"></td>
+          <td>(Element) Risk Plan<br /> <b>[E]</b><br /> (Concept) Plan of Risks
+          </td>
+        </tr>
+        <tr>
+          <td><b>[P] PART OF</b></td>
+          <td><b>A [P] O</b></td>
+          <td>A is Part of O<br /> Element A covers a portion of the domain that <b>is part of</b> the portion
+            covered by Concept O (O includes A).
+          </td>
+          <td style="text-align:center"><IMG src="images/Partof.png"></td>
+          <td>(Element) Risk Plan<br /> <b>[P]</b><br /> (Concept) Project Plan
+          </td>
+        </tr>
+        <tr>
+          <td><b>[W] WIDER</b></td>
+          <td><b>A [W] O</b></td>
+          <td>A is Wider than O.<br /> Element A covers a portion of the domain that <b>is wider than</b> the
+            portion covered by Concept O (A includes O).
+          </td>
+          <td style="text-align:center"><IMG src="images/Wider.png"></td>
+          <td>(Element) Risk Plan<br /> <b>[W]</b><br /> (Concept) Mitigation Plan<br /> <br /> <b>{contingency
+              actions not covered}</b>
+          </td>
+        </tr>
+        <tr>
+          <td><b>[I] INTERSECTION</b></td>
+          <td><b>A [I] O</b></td>
+          <td>A has Intersection with O.<br /> Element A covers a portion of the domain that <b>has
+              intersection with</b> the portion covered by Concept O.
+          </td>
+          <td style="text-align:center"><IMG src="images/Intersection.png"></td>
+          <td>(Element) Risk Plan<br /> <b>[I]</b> <br /> (Concept) Internal Project Plan<br /> <br /> <b>{external
+              risks not covered}</b>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+
   <!-- ##### Dialog Boxes ##### -->
+
+
   <!-- Simple Message -->
   <div id="dialog-message" title="Message" hidden>
     <p><span class="ui-icon ui-icon-circle-check" style="float: left; margin: 0 7px 50px 0;"></span>

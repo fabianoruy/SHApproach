@@ -8,7 +8,8 @@ Regardless of other packages, this tool will read the packages named "Initiative
 Allways try to avoid not used classes and relations.  
 
 Phases:
-1) Initiative Information				Get main information; Show phases (menu)
+1) Initiative Information				Present approach and get main information;
+*) Stage Selector						A menu to chose next phase				
 2) Model Reading						Parse Astah
 3) Structural Mappings and ISM (done)	Just show
 4) Vertical Mappings (Std*1)			Create the matches (vertical)
@@ -54,8 +55,22 @@ Nov.11
 
 Nov.12
 + Composite match
+
+Nov.13
+/ Stages page (mapping selector)
 - Match validation (T2)
 - Match exclusion
 - Coverage presentation
-- Initital / menu page (mapping selector)
+- Initital (approach and basic data)
 
+
+
+* Ver como salvar e recuperar tudo.
+  - atenção para as classes que usam o astah (evitar)
+  - quando recuperar, o que deve ser montado?
+
+* Após o Parsing, há 3 fases:
+  - Vertical: aqui é livre, o que o usuário fez fica guardado, e é recuperado. Se tentar excluir um simple match, avisar que o composite vai junto.
+  - Diagonal: sempre que voltar aqui, recalcular os nonconvered, e verificar se os matches continuam válidos. Mostrar e excluir os não válidos.
+  - Horizontal: sempre que voltar aqui, recalcular as deduções, e verificar se os matches continuam válidos. Mostrar e excluir os não válidos.
+Acredito que possa deixar todas abertas. Apenas alertar que o ideal é finalizar as anteriores antes de seguir para um próxima (ou seja, só há o botão open).

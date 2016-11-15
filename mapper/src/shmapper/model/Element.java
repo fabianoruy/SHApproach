@@ -4,14 +4,14 @@ import com.change_vision.jude.api.inf.model.IClass;
 
 /* Represents an Element from a Standard Model. */
 public class Element extends Notion {
-	private StandardModel standard;
+	private Model standard;
 
-	public Element(StandardModel standard, IClass astahClass) {
+	public Element(Model standard, IClass astahClass) {
 		super(astahClass);
 		this.standard = standard;
 	}
 
-	public StandardModel getStandardModel() {
+	public Model getModel() {
 		return standard;
 	}
 

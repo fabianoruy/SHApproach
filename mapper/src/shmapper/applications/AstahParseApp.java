@@ -1,5 +1,6 @@
 package shmapper.applications;
 
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.taglibs.standard.lang.jstl.parser.ParseException;
 
 import com.change_vision.jude.api.inf.AstahAPI;
+import com.change_vision.jude.api.inf.exception.InvalidUsingException;
 import com.change_vision.jude.api.inf.exception.LicenseNotFoundException;
 import com.change_vision.jude.api.inf.exception.NonCompatibleException;
 import com.change_vision.jude.api.inf.exception.ProjectLockedException;
@@ -22,6 +24,8 @@ import com.change_vision.jude.api.inf.model.IModel;
 import com.change_vision.jude.api.inf.model.IMultiplicityRange;
 import com.change_vision.jude.api.inf.model.INamedElement;
 import com.change_vision.jude.api.inf.model.IPackage;
+import com.change_vision.jude.api.inf.presentation.INodePresentation;
+import com.change_vision.jude.api.inf.presentation.IPresentation;
 import com.change_vision.jude.api.inf.project.ProjectAccessor;
 
 import shmapper.model.Concept;
@@ -31,6 +35,7 @@ import shmapper.model.Diagram.DiagramType;
 import shmapper.model.Element;
 import shmapper.model.IntegratedModel;
 import shmapper.model.Notion;
+import shmapper.model.NotionPosition;
 import shmapper.model.Ontology;
 import shmapper.model.Ontology.Level;
 import shmapper.model.Relation;
@@ -39,8 +44,9 @@ import shmapper.model.SeonView;
 import shmapper.model.StandardModel;
 
 /** Responsible for parsing the provided Astah file, creating the objects' model. */
-public class AstahParserApp {
+public class AstahParseApp {
 	private SHInitiative	initiative;
+	private String			astahPath;
 	private StringBuffer	parsingResults	= new StringBuffer();
 	private static String	winPath			= '"' + "C:/Program Files/astah-professional/astah-commandw.exe" + '"';
 	private static String	linuxPath		= "/var/lib/tomcat7/astah/astah_professional/astah-command.sh";
@@ -59,7 +65,8 @@ public class AstahParserApp {
 
 	/* Reads an Astah file for parsing the models (1). */
 	public void parseAstah(String filename) throws ParserException {
-		System.out.println("Astah: "+ filename);
+		System.out.println("Astah: " + filename);
+		this.astahPath = filename;
 		ProjectAccessor accessor = null;
 		try {
 			// Accessing the astah model
@@ -97,7 +104,7 @@ public class AstahParserApp {
 		IPackage contentpack = getPackage(domainpack, "3.Content");
 
 		// Creating the SH Initiative
-		initiative = new SHInitiative(domainpack.getName(), null, null);
+		initiative = new SHInitiative(domainpack.getName(), null, null, null, astahPath);
 
 		// Parsing the ontologies (SEON View)
 		parseOntologies(seonpack);
@@ -135,9 +142,6 @@ public class AstahParserApp {
 		initiative.addPackage(seonview);
 		addResult("SEON View created. ");
 
-		// Parse the SEON View Diagram
-		parseDiagram(seonview, DiagramType.SEONVIEW);
-
 		// Get the Ontologies' packages and creates the Ontologies.
 		addResult("Ontologies:\n");
 		for (INamedElement node : seonpack.getOwnedElements()) {
@@ -160,6 +164,10 @@ public class AstahParserApp {
 			}
 		}
 		addResult("\n");
+
+		// Parse the SEON View Diagram
+		Diagram diagram = parseDiagram(seonpack, DiagramType.SEONVIEW);
+		seonview.setDiagram(diagram);
 	}
 
 	/* Reads the structural models packages and creates the SSMs. */
@@ -170,7 +178,8 @@ public class AstahParserApp {
 			if (node instanceof IPackage) {
 				IPackage stdpack = (IPackage) node;
 				StandardModel stdmodel = new StandardModel(true, stdpack);
-				stdmodel.setName(stdmodel.getName() + " SM");
+				// stdmodel.setName(stdmodel.getName() + " SM");
+				stdmodel.setName(stdmodel.getName());
 				initiative.addPackage(stdmodel);
 				addResult(" - " + stdmodel + "\n");
 				parseElements(stdmodel, stdpack);
@@ -194,14 +203,16 @@ public class AstahParserApp {
 			if (node instanceof IPackage) {
 				IPackage stdpack = (IPackage) node;
 				StandardModel stdmodel = new StandardModel(false, stdpack);
-				stdmodel.setName(stdmodel.getName() + " CM");
+				// stdmodel.setName(stdmodel.getName() + " CM");
+				stdmodel.setName(stdmodel.getName());
 				initiative.addPackage(stdmodel);
 				// System.out.print(stdmodel.getId());
 				addResult(" - " + stdmodel + "\n");
 
 				// Parse the SCM Diagrams and elements.
-				parseDiagram(stdmodel, DiagramType.SCM);
 				parseElements(stdmodel, stdpack);
+				Diagram diagram = parseDiagram(stdpack, DiagramType.SCM);
+				stdmodel.setDiagram(diagram);
 			}
 		}
 
@@ -212,8 +223,9 @@ public class AstahParserApp {
 		addResult(" * Integrated CM created.\n\n");
 
 		// Parse the ICM Diagram and elements
-		parseDiagram(icm, DiagramType.ICM);
 		parseIMElements(icm, contentpack);
+		Diagram diagram = parseDiagram(contentpack, DiagramType.ICM);
+		icm.setDiagram(diagram);
 
 	}
 
@@ -242,7 +254,6 @@ public class AstahParserApp {
 				Element element = new Element(model, (IClass) node);
 				model.addElement(element);
 				initiative.addNotion(element);
-				// addResult(" . " + element + "\n");
 			}
 			// Recursivelly parsing packages
 			else if (node instanceof IPackage) {
@@ -259,7 +270,6 @@ public class AstahParserApp {
 				Element element = new Element(null, (IClass) node);
 				im.addElement(element);
 				initiative.addNotion(element);
-				// addResult(" . " + element + "\n");
 			}
 		}
 	}
@@ -334,18 +344,33 @@ public class AstahParserApp {
 	}
 
 	/* Reads and creates an astah Diagrams from a package. */
-	private void parseDiagram(Package pack, DiagramType type) throws ParserException {
-		IDiagram[] diagrams = pack.getAstahPack().getDiagrams();
+	private Diagram parseDiagram(IPackage pack, DiagramType type) throws ParserException {
+		IDiagram[] diagrams = pack.getDiagrams();
 		if (diagrams.length != 1) {
-			throw new ParserException("A single diagram is expected in Package " + pack.getAstahPack().getName() + ". It has " + diagrams.length + ".\n");
+			throw new ParserException("A single diagram is expected in Package " + pack.getName() + ". It has " + diagrams.length + ".\n");
 		}
-		for (IDiagram node : pack.getAstahPack().getDiagrams()) {
-			String name = node.getName();
-			String desc = node.getDefinition();
-			Diagram diagram = new Diagram(name, desc, type, node);
-			pack.setDiagram(diagram);
-			// System.out.println("Diagram: " + diagram);
-			return; // only one diagram for each package, in this case.
+		for (IDiagram diag : pack.getDiagrams()) {
+			// Creating the diagram and getting its path
+			Diagram diagram = new Diagram(type, diag);
+			String filename = (String) astahPath.subSequence(astahPath.indexOf("Uploaded_"), astahPath.indexOf(".asta"));
+			String path = "images/tmp/" + filename + File.separator + diag.getFullName(File.separator) + ".png";
+			diagram.setPath(path);
+
+			try {
+				// Collecting the notions positions.
+				for (IPresentation present : diag.getPresentations()) {
+					if (present instanceof INodePresentation && present.getType().equals("Class")) {
+						INodePresentation pnode = (INodePresentation) present;
+						Notion notion = initiative.getNotionById(pnode.getModel().getId());
+						NotionPosition position = new NotionPosition(notion, pnode, diag.getBoundRect());
+						diagram.addPosition(position);
+					}
+				}
+			} catch (InvalidUsingException e) {
+				e.printStackTrace();
+			}
+			System.out.println("Diagram: " + diagram + "(" + path + ")");
+			return diagram; // only one diagram per package, in this case.
 		}
 		throw new ParserException("Diagram not found in package " + pack.getName() + ".\n");
 	}
@@ -354,6 +379,7 @@ public class AstahParserApp {
 
 	/* Imports the astah PNG images (from astah file) to the images directory. */
 	public void importImages(String astahFile, String workingDir) throws ParseException {
+		// TODO: don't need to copy the selected diagrams. Only set the paths on the Diagram object.
 		String targetPath = workingDir + "images/tmp/";
 		File dir = new File(targetPath);
 		if (!dir.exists()) dir.mkdirs();
@@ -367,19 +393,9 @@ public class AstahParserApp {
 			System.out.println("$ " + command);
 
 			long start = System.currentTimeMillis();
-			Process process = Runtime.getRuntime().exec(command);
+			Process process = Runtime.getRuntime().exec(command); // Executing command
 			process.waitFor();
 			System.out.print("[ -] Time: " + (System.currentTimeMillis() - start) + " - ");
-
-			// Getting the identified diagrams' paths
-			List<String> identDiagrams = new ArrayList<String>();
-			for (Package pack : initiative.getAllPackages()) {
-				Diagram diagram = pack.getDiagram();
-				if (diagram != null) {
-					String relativePath = File.separator + diagram.getAstahDiagram().getFullName(File.separator) + ".png";
-					identDiagrams.add(relativePath);
-				}
-			}
 
 			// TODO: test images exportation in other machines/conditions.
 			// Waiting for all files being copied.
@@ -387,37 +403,23 @@ public class AstahParserApp {
 			int before = 0;
 			int diff = 0;
 			while (files == 0 || diff > 0) {
-				waitFor(5, 1000);
+				waitFor(3, 1000);
 				files = FileUtils.listFiles(dir, new String[] { "png" }, true).size();
 				diff = files - before;
 				before = files;
 				System.out.print("[" + files + "] Time: " + (System.currentTimeMillis() - start) + " - ");
 			}
 
-			// Copying the .PNG files (of the identified diagrams) from the tmp directory to the images directory
-			String target = workingDir + "images/";
-			int count = 0;
-			System.out.println("\nCopying the .PNG files from " + dir.getPath() + " and subdirectories to " + target);
-			List<File> allFiles = (List<File>) FileUtils.listFiles(dir, new String[] { "png" }, true);
-			// System.out.println("IDENT: " + identDiagrams);
-			for (File file : allFiles) {
-				String path = file.getPath();
-				String relativePath = path.substring(path.indexOf(File.separator, path.indexOf("Uploaded_")));
-				if (identDiagrams.contains(relativePath)) {
-					File dest = new File(target + file.getName());
-					// TODO: check if the file is being overwrite (IMPORTANT!)
-					FileUtils.copyFile(file, dest); // copies each PNG file
-					System.out.print(++count + " ");
-					System.out.println(dest);
+			// Counting the identified diagrams' paths
+			int dcount = 0;
+			for (Package pack : initiative.getAllPackages()) {
+				if (pack.getDiagram() != null) {
+					dcount++;
 				}
 			}
-			addResult(count + " diagrams imported.\n");
-
-			// Scheduling the Deletion of temporary astahdoc images directory
-			System.out.println("Deleting " + dir.getName());
-			FileUtils.forceDeleteOnExit(dir);
-			// throw new Exception("It is an Exception! :-/");
+			addResult(dcount + " diagrams imported.\n");
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new ParseException("Failed during astah images importing/copying.");
 		}
 	}

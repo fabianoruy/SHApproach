@@ -31,6 +31,7 @@ public class CompositeMatch extends Match {
 
 	@Override
 	public boolean equals(Object other) {
+		// Equal if they have same source in the same Mapping.
 		CompositeMatch omatch;
 		if (other instanceof CompositeMatch) {
 			omatch = (CompositeMatch) other;

@@ -19,13 +19,14 @@ import shmapper.model.Element;
 import shmapper.model.Mapping;
 import shmapper.model.Match;
 import shmapper.model.Notion;
+import shmapper.model.NotionPosition;
 import shmapper.model.SHInitiative;
 import shmapper.model.SimpleMatch;
 
 /** Responsible for providing the services for the mapping tasks. */
 public class MappingApp {
 	private SHInitiative		initiative;
-	private Mapping				mapping;
+	private Mapping				mapping;															// current mapping
 	private String				message;
 	private String				question;
 	public static final String	CHECKED		= "<span style='color:green'><b>(\u2713)</b></span> ";
@@ -34,11 +35,12 @@ public class MappingApp {
 
 	public MappingApp(SHInitiative initiative) {
 		this.initiative = initiative;
-		this.initiative.createMappings();
+		// this.initiative.createMappings();
 	}
 
 	public void setCurrentMapping(Mapping mapping) {
 		this.mapping = mapping;
+		System.out.println("#Current Mapping: " + this.mapping + " (" + this.mapping.getId() + ")");
 	}
 
 	public Mapping getCurrentMapping() {
@@ -77,14 +79,15 @@ public class MappingApp {
 
 		CompositeMatch compMatch = new CompositeMatch(source, cover, null, smatches);
 		mapping.addMatch(compMatch);
+		System.out.println("(" + mapping.getMatches().size() + ") " + compMatch);
 		message = CHECKED + "Composite Match <b>" + compMatch + "</b> created!";
 		return compMatch;
 	}
 
 	/* Validates the Ontology Disjointness (T1). */
 	private boolean validateOntologyDisjointness(SimpleMatch match) {
-		// Checks if the element is already matched with the same concept.
-		// Checks if the element is already fully covered ([E] or [P]) by other matches.
+		// Checks if the element is already matched with the same concept (T0).
+		// Checks if the element is already fully covered ([E] or [P]) by other matches (ontology disjointness (T1)).
 		Element source = match.getSource();
 		List<SimpleMatch> repeatedMatches = new ArrayList<SimpleMatch>();
 		boolean allowed = true;
@@ -128,31 +131,15 @@ public class MappingApp {
 	/* Creates a hash containg all the diagram notions (as keys) and their respective coords in the diagram. */
 	public Map<Notion, String> createNotionsCoordsHash(Diagram diagram) {
 		Map<Notion, String> coordsHash = new HashMap<Notion, String>();
-		// Getting each Notion (Class) in the diagram and its position.
-		try {
-			for (IPresentation present : diagram.getAstahDiagram().getPresentations()) {
-				if (present instanceof INodePresentation && present.getType().equals("Class")) {
-					INodePresentation node = (INodePresentation) present;
-					Notion notion = initiative.getNotionById(((IClass) node.getModel()).getId());
-					// it is not a Structural Element
-					if (notion instanceof Concept || (notion instanceof Element && !((Element) notion).getStandardModel().isStructural())) {
-						coordsHash.put(notion, getMapCoords(node, diagram.getAstahDiagram().getBoundRect()));
-					}
-				}
+		// Getting each Notion (Class) in the Diagram and its position.
+		for (NotionPosition position : diagram.getPositions()) {
+			Notion notion = position.getNotion();
+			// it is not a Structural Element
+			if (notion instanceof Concept || (notion instanceof Element && !((Element) notion).getModel().isStructural())) {
+				coordsHash.put(notion, position.getCoords());
 			}
-		} catch (InvalidUsingException e) {
-			e.printStackTrace();
 		}
 		return coordsHash;
-	}
-
-	/* Returns the String Coords of a html image MAP diagram. */
-	private String getMapCoords(INodePresentation node, Rectangle2D adjust) {
-		int x = (int) Math.round(node.getLocation().getX() - adjust.getX());
-		int y = (int) Math.round(node.getLocation().getY() - adjust.getY());
-		int w = (int) Math.round(node.getWidth());
-		int h = (int) Math.round(node.getHeight());
-		return "" + x + "," + y + "," + (x + w) + "," + (y + h);
 	}
 
 }

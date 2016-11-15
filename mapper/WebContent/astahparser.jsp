@@ -20,7 +20,7 @@
             function() {
               $.ajax({
                 type : 'POST',
-                url : 'AstahUploadServlet',
+                url : 'AstahParseServlet',
                 data : new FormData($('#upform')[0]),
                 xhr : function() { // Custom XMLHttpRequest
                   return $.ajaxSettings.xhr();
@@ -37,8 +37,7 @@
                 },
                 success : function(servletResponse) {
                   $('#astahparsingdiv').append(servletResponse);
-                  //importImages();
-                  $('#mappingbutton').prop('disabled', false);
+                  importImages();
                 },
                 error : {},
                 //telling jQuery not to process data or worry about content-type.
@@ -53,7 +52,7 @@
   function importImages() {
     $.ajax({
       type : 'POST',
-      url : 'AstahUploadServlet',
+      url : 'AstahParseServlet',
       data : {
         action : 'images',
       },
@@ -62,6 +61,7 @@
       },
       success : function(servletResponse) {
         $('#astahparsingdiv').append(servletResponse);
+        $('#mappingbutton').prop('disabled', false);
       }
     });
   }
@@ -114,7 +114,7 @@
   
   <br />
   <div style="text-align: center">
-    <form action="VerticalMapServlet" method="POST">
+    <form action="PhaseSelectServlet" method="POST">
       <input type="hidden" name="action" value="openPage">
       <button id="mappingbutton" disabled>Start Mapping</button>
     </form>

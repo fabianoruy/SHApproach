@@ -31,6 +31,7 @@ public class SimpleMatch extends Match {
 
 	@Override
 	public boolean equals(Object other) {
+		// Equal if they have same source and target.
 		SimpleMatch omatch;
 		if (other instanceof SimpleMatch) {
 			omatch = (SimpleMatch) other;

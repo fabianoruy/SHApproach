@@ -5,7 +5,7 @@
 <data>
   <matchestable>
     <table>
-      <c:forEach items="${matches}" var="match">
+      <c:forEach items="${mapping.matches}" var="match">
         <tr>
           <td><b>${match.source}</b></td>
           <td>${match.coverage.text}</td>
@@ -29,7 +29,44 @@
     </table>
   </matchestable>
   
-  <messagetext><p>${message}</p></messagetext>
+  <coveragetable>
+    <table>
+      <c:forEach items="${mapping.nonCoveredElements}" var="elem">
+        <tr>
+          <td>${elem}</td>
+          <td>${"0"}</td>
+        </tr>
+      </c:forEach>
+      <c:forEach items="${mapping.partiallyCoveredElements}" var="elem">
+        <tr>
+          <td>${elem}</td>
+          <td>${"1/2"}</td>
+        </tr>
+      </c:forEach>
+    </table>
+  </coveragetable>
+  
+  <coverageicons>
+    <c:forEach items="${mapping.base.diagram.positions}" var="npos">
+      <c:forEach items="${mapping.fullyCoveredElements}" var="elem">
+        <c:if test="${npos.notion eq elem}">
+          <c:set var="xpos" value="${npos.xpos + npos.width - 24 + 12}"/>
+          <img src="images/favicon-full.ico" style="top:${npos.ypos - 12}px; left:${xpos}px; position:absolute"></img>
+        </c:if>
+      </c:forEach>
+      <c:forEach items="${mapping.partiallyCoveredElements}" var="elem">
+        <c:if test="${npos.notion eq elem}">
+          <c:set var="xpos" value="${npos.xpos + npos.width - 24 + 12}"/>
+          <img src="images/favicon-part.ico" style="top:${npos.ypos - 12}px; left:${xpos}px; position:absolute"></img>
+        </c:if>
+      </c:forEach>
+    </c:forEach>
+  </coverageicons>
+  
+  
+  <coveragetext>${mapping.coverage}%</coveragetext>
+  
+  <messagetext>${message}</messagetext>
   
   <questiontext>${question}</questiontext>
   

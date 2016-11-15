@@ -1,22 +1,30 @@
 package shmapper.model;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 /* Represents an abstract Mapping between a Model and an Ontology (vertical) or another Model (horizontal). */
 public abstract class Mapping {
+	private String			id;
 	private StandardModel	base;
 	private List<Match>		matches;
 	private MappingStatus	status;
 
 	public static enum MappingStatus {
-		PLANNED, STARTED, FINISHED
+		PLANNED, AUTHORIZED, STARTED, FINISHED
 	}
 
 	public Mapping(StandardModel base) {
+		this.id = UUID.randomUUID().toString();
 		this.base = base;
 		this.status = MappingStatus.PLANNED;
 		this.matches = new ArrayList<Match>();
+	}
+
+	public String getId() {
+		return this.id;
 	}
 
 	public StandardModel getBase() {
@@ -25,12 +33,25 @@ public abstract class Mapping {
 
 	public abstract Package getTarget();
 
+	public abstract int getCoverage();
+
 	public MappingStatus getStatus() {
 		return status;
 	}
 
 	public List<Match> getMatches() {
 		return this.matches;
+	}
+
+	/* Returns all the simple matches of the mapping. */
+	public List<SimpleMatch> getSimpleMatches() {
+		List<SimpleMatch> smatches = new ArrayList<SimpleMatch>();
+		for (Match match : matches) {
+			if (match instanceof SimpleMatch) {
+				smatches.add((SimpleMatch) match);
+			}
+		}
+		return smatches;
 	}
 
 	/* Returns the simple matches which elem is the source. */
@@ -68,14 +89,41 @@ public abstract class Mapping {
 		match.setMapping(this);
 	}
 
-	public List<SimpleMatch> getSimpleMatches() {
-		List<SimpleMatch> smatches = new ArrayList<SimpleMatch>();
+	/* Returns the current non covered elements of the mapping. */
+	public List<Element> getNonCoveredElements() {
+		List<Element> elems = new LinkedList<Element>(base.getElements());
 		for (Match match : matches) {
-			if (match instanceof SimpleMatch) {
-				smatches.add((SimpleMatch) match);
+			elems.remove(match.getSource());
+		}
+		return elems;
+	}
+
+	/* Returns the current partially covered elements of the mapping. */
+	public List<Element> getPartiallyCoveredElements() {
+		List<Element> elems = new LinkedList<Element>(base.getElements());
+		// removing non covered elements
+		elems.removeAll(getNonCoveredElements());
+		for (Match match : matches) {
+			Coverage cover = match.getCoverage();
+			// removing elements with Equivalent or Partial, remmaining the ones with ONLY Wider/Intersection coverage.
+			if (cover == Coverage.EQUIVALENT || cover == Coverage.PARTIAL) {
+				elems.remove(match.getSource());
 			}
 		}
-		return smatches;
+		return elems;
+	}
+
+	/* Returns the current fully covered elements of the mapping. */
+	public List<Element> getFullyCoveredElements() {
+		List<Element> elems = new ArrayList<Element>();
+		for (Match match : matches) {
+			Coverage cover = match.getCoverage();
+			// adding all elements with Equivalent or Partial matches
+			if (cover == Coverage.EQUIVALENT || cover == Coverage.PARTIAL) {
+				elems.add(match.getSource());
+			}
+		}
+		return elems;
 	}
 
 	@Override
@@ -86,6 +134,11 @@ public abstract class Mapping {
 			return (this.getBase().equals(omap.getBase()) && this.getTarget().equals(omap.getTarget()));
 		}
 		return false;
+	}
+
+	@Override
+	public String toString() {
+		return getBase() + " <--> " + getTarget();
 	}
 
 }

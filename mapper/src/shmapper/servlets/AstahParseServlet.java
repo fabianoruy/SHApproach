@@ -21,27 +21,28 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.taglibs.standard.lang.jstl.parser.ParseException;
 
-import shmapper.applications.AstahParserApp;
+import shmapper.applications.AstahParseApp;
 import shmapper.applications.ParserException;
 
-/** Servlet implementation class AstahUploadServlet */
-@WebServlet("/AstahUploadServlet")
-public class AstahUploadServlet extends HttpServlet {
+/** Servlet implementation class AstahParseServlet */
+@WebServlet("/AstahParseServlet")
+public class AstahParseServlet extends HttpServlet {
 	private static final long	serialVersionUID	= 1L;
-	private AstahParserApp		parser;
+	private AstahParseApp		parser;
 	private String				workingDir			= "";
 	private Path				path				= null;
 	private boolean				success				= true;
+	private boolean				importable			= false;
 
 	/* doPost method, for processing the upload and calling the parsers. */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// Redirects to the action
 		if (request.getParameter("action") == null) { // No action defined: file upload
 			System.out.println("\n\n@@@ STARTING APPLICATION @@@ - " + new Date());
-			System.out.println(">AstahUploadServlet: Upload Astah");
+			System.out.println(">AstahParseServlet: Upload Astah");
 			uploadAstah(request, response);
 		} else if (request.getParameter("action").equals("images") && success) {
-			System.out.println(">AstahUploadServlet: Import Images");
+			System.out.println(">AstahParseServlet: Import Images");
 			importImages(request, response);
 		} else {
 			System.out.println("No action identified");
@@ -70,7 +71,7 @@ public class AstahUploadServlet extends HttpServlet {
 			results = "File <i>" + filename + "</i> uploaded for the initiative.<br/>";
 
 			// Initializing the Application and Parsing the Models
-			parser = new AstahParserApp();
+			parser = new AstahParseApp();
 			parser.parseAstah(path.toString());
 			results += parser.getResults();
 
@@ -94,7 +95,9 @@ public class AstahUploadServlet extends HttpServlet {
 	private void importImages(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		String results = "";
 		try {
-			parser.importImages(path.toString(), workingDir);
+			if (importable) {
+				parser.importImages(path.toString(), workingDir);
+			}
 			results += parser.getResults();
 			results += "<br/><span style='color:blue'><b>Astah File successfully read and parsed!</span></b><br/>Proceed to the Mapping.";
 		} catch (ParseException e) {
