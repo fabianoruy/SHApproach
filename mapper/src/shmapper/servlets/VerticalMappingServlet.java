@@ -34,14 +34,13 @@ public class VerticalMappingServlet extends HttpServlet {
 
 	/* HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response). */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// System.out.println(">VerticalMappingServlet");
+		System.out.println(">VerticalMappingServlet: " + request.getParameter("action"));
 
-		// For starting the mapping.
 		if (request.getParameter("action").equals("startMapping")) {
-			// Accessing the initiative from the Session
+			// Starting the mapping.
+			// Accessing the initiative and application from the Session
 			initiative = (SHInitiative) request.getSession().getAttribute("initiative");
-			// Initializing the application
-			mapp = new MappingApp(initiative);
+			mapp = (MappingApp) request.getSession().getAttribute("mappingapp");
 
 			// Getting the Mapping.
 			String mapId = request.getParameter("mapId");
@@ -51,7 +50,6 @@ public class VerticalMappingServlet extends HttpServlet {
 			SeonView seon = mapping.getTarget();
 
 			// Creating the JSON
-			// JsonElement json = createNotionsJSON(std, seon);
 			JsonElement stdJson = createJSON(std.getDiagram());
 			JsonElement ontoJson = createJSON(seon.getDiagram());
 
@@ -64,74 +62,63 @@ public class VerticalMappingServlet extends HttpServlet {
 			request.setAttribute("ontoCoords", mapp.createNotionsCoordsHash(seon.getDiagram()));
 			request.getRequestDispatcher("verticalmapper.jsp").forward(request, response);
 
-			// If the Match button is pressed.
+		} else if (request.getParameter("action").equals("update")) {
+			// Updating the page with the current mapping
+			updatePage(request, response);
+
 		} else if (request.getParameter("action").equals("match")) {
+			// Creating a new Simple Match
 			String elemId = request.getParameter("elem");
 			String concId = request.getParameter("conc");
 			String cover = request.getParameter("cover");
 			String comm = request.getParameter("comm");
 			SimpleMatch match = mapp.createSimpleMatch(elemId, concId, cover, comm);
 
-			// Setting attributes and calling the page
-			request.setAttribute("message", mapp.getMessage());
-			request.setAttribute("question", mapp.getQuestion());
-			request.setAttribute("mapping", mapp.getCurrentMapping());
-			request.getRequestDispatcher("matches.jsp").forward(request, response);
+			updatePage(request, response);
 
-			// If it is a Composite Match.
 		} else if (request.getParameter("action").equals("compositeMatch")) {
+			// Creating a new Composite Match.
 			String elemId = request.getParameter("elem");
 			String cover = request.getParameter("cover");
 			CompositeMatch match = mapp.createCompositeMatch(elemId, cover);
 
-			// Setting attributes and calling the page
-			request.setAttribute("message", mapp.getMessage());
-			request.setAttribute("mapping", mapp.getCurrentMapping());
-			request.getRequestDispatcher("matches.jsp").forward(request, response);
+			updatePage(request, response);
+
+		} else if (request.getParameter("action").equals("removeMatch")) {
+			// Removing a Match
+			String matchId = request.getParameter("matchId");
+			mapp.removeMatch(matchId);
+
+			updatePage(request, response);
 		}
 	}
 
-	/* Creates the JSON for a Diagram, including its Notions and Positions. */
+	/* Updates the verticalmapper page via ajax. */
+	private void updatePage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// Setting attributes and calling the page
+		request.setAttribute("message", mapp.getMessage());
+		request.setAttribute("question", mapp.getQuestion());
+		request.setAttribute("mapping", mapp.getCurrentMapping());
+		request.getRequestDispatcher("matches.jsp").forward(request, response);
+	}
+
+	/* Creates the JSON for the notions of a Diagram. */
 	private JsonElement createJSON(Diagram diagram) {
 		JsonObject jobj = new JsonObject();
 		for (NotionPosition npos : diagram.getPositions()) {
-			jobj.add(npos.getNotion().getId(), createJSON(npos));
+			jobj.add(npos.getNotion().getId(), createJSON(npos.getNotion()));
 		}
 		return jobj;
 	}
 
-	/* Creates the JSON of a Notion, including the position. */
-	private JsonObject createJSON(NotionPosition npos) {
+	/* Creates the JSON of a Notion. */
+	private JsonObject createJSON(Notion notion) {
 		JsonObject jobj = new JsonObject();
-		Notion notion = npos.getNotion();
 		jobj.addProperty("name", notion.getName().replace("'", ""));
 		String definition = notion.getDefinition().replaceAll("@Ex.", "Ex.").replaceAll("(\\r\\n|\\n\\r|\\r|\\n)", " ").replace("'", "");
 		jobj.addProperty("definition", definition);
-		jobj.addProperty("basetype", "basetype");
-		//TODO: is it needed?
-//		jobj.addProperty("x", npos.getXpos());
-//		jobj.addProperty("y", npos.getYpos());
-//		jobj.addProperty("h", npos.getHeight());
-//		jobj.addProperty("w", npos.getWidth());
+		jobj.addProperty("basetype", notion.getBaseType().getName());
 		return jobj;
 	}
-
-	// /* Creates the JSON for the Standard Elements and SeonView Concepts. */
-	// private JsonElement createNotionsJSON(StandardModel std, SeonView seon) {
-	// JsonObject jroot = new JsonObject();
-	// JsonObject jelements = new JsonObject();
-	// JsonObject jconcepts = new JsonObject();
-	// for (Element elem : std.getElements()) {
-	// jelements.add(elem.getId(), createNotionJSON(elem));
-	// }
-	// for (Ontology onto : seon.getOntologies()) {
-	// for (Concept conc : onto.getConcepts()) {
-	// jconcepts.add(conc.getId(), createNotionJSON(conc));
-	// }
-	// }
-	// jroot.add("elements", jelements);
-	// jroot.add("concepts", jconcepts);
-	// return jroot;
-	// }
 
 }

@@ -13,17 +13,18 @@ public abstract class Notion {
 	private String			stereotype;
 	private List<Notion>	generalizations;
 	private List<Relation>	relations;
-	private IClass			astahClass;
+	// private IClass astahClass;
 
 	public Notion(IClass astahClass) {
 		this.id = astahClass.getId();
 		this.name = astahClass.getName();
 		this.definition = astahClass.getDefinition();
-		if (astahClass.getStereotypes().length > 0) stereotype = astahClass.getStereotypes()[0]; // only the first for while
-		else this.stereotype = "";
+		if (astahClass.getStereotypes().length > 0) {
+			stereotype = astahClass.getStereotypes()[0]; // only the first for while
+		} else this.stereotype = "";
 		this.generalizations = new ArrayList<Notion>();
 		this.relations = new ArrayList<Relation>();
-		this.astahClass = astahClass;
+		// this.astahClass = astahClass;
 	}
 
 	public String getId() {
@@ -50,6 +51,16 @@ public abstract class Notion {
 		this.generalizations.add(notion);
 	}
 
+	/* Returns the highest level type of this notion. */
+	public Notion getBaseType() {
+		// TODO: improve to scape UFO
+		Notion basetype = this;
+		while (basetype.getGeneralizations().size() > 0) {
+			basetype = basetype.getGeneralizations().get(0);
+		}
+		return basetype;
+	}
+
 	public List<Relation> getRelations() {
 		return relations;
 	}
@@ -60,9 +71,9 @@ public abstract class Notion {
 		}
 	}
 
-	public IClass getAstahClass() {
-		return astahClass;
-	}
+	// public IClass getAstahClass() {
+	// return astahClass;
+	// }
 
 	@Override
 	public String toString() {

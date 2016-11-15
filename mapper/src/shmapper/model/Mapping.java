@@ -5,6 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
+import shmapper.model.Mapping.MappingStatus;
+
 /* Represents an abstract Mapping between a Model and an Ontology (vertical) or another Model (horizontal). */
 public abstract class Mapping {
 	private String			id;
@@ -13,7 +15,7 @@ public abstract class Mapping {
 	private MappingStatus	status;
 
 	public static enum MappingStatus {
-		PLANNED, AUTHORIZED, STARTED, FINISHED
+		PLANNED, STARTED, FINISHED
 	}
 
 	public Mapping(StandardModel base) {
@@ -33,7 +35,16 @@ public abstract class Mapping {
 
 	public abstract Package getTarget();
 
-	public abstract int getCoverage();
+	public int getCoverage() {
+		// coverage (%): baseModel.elements.([E] + [P] + [W]/2 + [I]/2) / baseModel.elements;
+		int all = getBase().getElements().size();
+		int partially = getPartiallyCoveredElements().size();
+		int noncovered = getNonCoveredElements().size();
+		int fully = all - partially - noncovered;
+		double coverage = ((partially / 2.0 + fully) / all) * 100;
+		//System.out.println(this + ": All(" + all + "), Full(" + fully + "), Part(" + partially + "), Non(" + noncovered + "): Cover(" + coverage + "%)");
+		return (int) Math.round(coverage);
+	}
 
 	public MappingStatus getStatus() {
 		return status;
@@ -41,6 +52,16 @@ public abstract class Mapping {
 
 	public List<Match> getMatches() {
 		return this.matches;
+	}
+
+	/* Returns the Match with the id parameter. */
+	public Match getMatchById(String matchId) {
+		for (Match match : matches) {
+			if (match.getId().equals(matchId)) {
+				return match;
+			}
+		}
+		return null;
 	}
 
 	/* Returns all the simple matches of the mapping. */
@@ -52,6 +73,17 @@ public abstract class Mapping {
 			}
 		}
 		return smatches;
+	}
+
+	/* Returns all the composite matches of the mapping. */
+	public List<CompositeMatch> getCompositeMatches() {
+		List<CompositeMatch> cmatches = new ArrayList<CompositeMatch>();
+		for (Match match : matches) {
+			if (match instanceof CompositeMatch) {
+				cmatches.add((CompositeMatch) match);
+			}
+		}
+		return cmatches;
 	}
 
 	/* Returns the simple matches which elem is the source. */
@@ -75,18 +107,17 @@ public abstract class Mapping {
 		return null;
 	}
 
-	/* Adds a match to the mapping. */
-	public void addMatch(Match match) {
-		// Adds a simple match to the mapping.
-		if (match instanceof SimpleMatch) {
-			this.matches.add(match);
-		} else {
-			// Adds a composite match to the mapping, replacing the previous with the same source.
-			Match previous = getCompositeMatch(match.getSource());
-			matches.remove(previous);
-			matches.add(match);
+	/* Returns the single composite match, in this mapping, for the simple match. */
+	public CompositeMatch getCompositeMatch(SimpleMatch match) {
+		for (CompositeMatch cmatch : getCompositeMatches()) {
+			for (SimpleMatch smatch : cmatch.getMatches()) {
+				// is the simple match part of a composite match?
+				if (match.equals(smatch)) {
+					return cmatch;
+				}
+			}
 		}
-		match.setMapping(this);
+		return null;
 	}
 
 	/* Returns the current non covered elements of the mapping. */
@@ -124,6 +155,30 @@ public abstract class Mapping {
 			}
 		}
 		return elems;
+	}
+
+	/* Adds a match to the mapping. */
+	public void addMatch(Match match) {
+		// Adds a simple match to the mapping.
+		if (match instanceof SimpleMatch) {
+			this.matches.add(match);
+		} else {
+			// Adds a composite match to the mapping, replacing the previous with the same source.
+			Match previous = getCompositeMatch(match.getSource());
+			matches.remove(previous);
+			matches.add(match);
+		}
+		match.setMapping(this);
+		
+		// Starting the mapping, if first Match
+		if(status == MappingStatus.PLANNED) {
+			status = MappingStatus.STARTED;
+		}
+	}
+
+	/* Removes a Match to the Mapping. */
+	public void removeMatch(Match rmatch) {
+		matches.remove(rmatch);
 	}
 
 	@Override

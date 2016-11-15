@@ -42,8 +42,7 @@ public class SHInitiative {
 		}
 		// A single DM (1)
 		mappings.add(new DiagonalMapping(standards, integrated));
-		System.out.println("Mappings Created: ");
-		System.out.println(mappings);
+		System.out.println("Mappings Created: " + mappings);
 	}
 
 	public String getDomain() {
@@ -69,7 +68,7 @@ public class SHInitiative {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	
+
 	public String getAstahPath() {
 		return astahPath;
 	}
@@ -77,7 +76,6 @@ public class SHInitiative {
 	public void setAstahPath(String path) {
 		this.astahPath = path;
 	}
-
 
 	public List<Package> getAllPackages() {
 		return this.packages;
@@ -107,7 +105,7 @@ public class SHInitiative {
 				vmaps.add((VerticalMapping) map);
 			}
 		}
-		System.out.println("Returning " + vmaps.size() + " VMs: " + vmaps);
+		//System.out.println("Returning " + vmaps.size() + " VMs: " + vmaps);
 		return vmaps;
 	}
 

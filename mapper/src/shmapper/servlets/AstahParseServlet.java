@@ -36,13 +36,12 @@ public class AstahParseServlet extends HttpServlet {
 
 	/* doPost method, for processing the upload and calling the parsers. */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		System.out.println(">AstahParseServlet: " + request.getParameter("action"));
 		// Redirects to the action
 		if (request.getParameter("action") == null) { // No action defined: file upload
 			System.out.println("\n\n@@@ STARTING APPLICATION @@@ - " + new Date());
-			System.out.println(">AstahParseServlet: Upload Astah");
 			uploadAstah(request, response);
 		} else if (request.getParameter("action").equals("images") && success) {
-			System.out.println(">AstahParseServlet: Import Images");
 			importImages(request, response);
 		} else {
 			System.out.println("No action identified");

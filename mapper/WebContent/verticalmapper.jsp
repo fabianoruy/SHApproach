@@ -16,23 +16,15 @@
   border-radius: 8px;
   border: 2px solid blue;
   padding: 8px;
-  min-height: 150px;
+  min-height: 140px;
 }
 
 .concbox {
   border-radius: 8px;
   border: 2px solid red;
   padding: 8px;
-  min-height: 150px;
+  min-height: 140px;
 }
-
-/* .fully { */
-/*     position: absolute; */
-/*     width: 30px; */
-/*     height: 30px; */
-/*     border: 1px solid blue; */
-/*     background: rgba(0, 102, 255, 0.3); */
-/* } */
 
 </style>
 <script src="js/jquery.min.js"></script>
@@ -45,12 +37,28 @@
   //console.log(json);
 
   $(document).ready(function() {
+    // Match button
     $('#matchbutton').click(function() {
       if (checkFields()) {
         doMatch();
       }
     });
   });
+  
+  
+  /* Calls (the servlet via ajax) for updating the page with the current Mapping. */
+  function doUpdate() {
+    $.ajax({
+      type : 'POST',
+      url : 'VerticalMappingServlet',
+      data : {
+        action : 'update',
+      },
+      success : function(responseXml) {
+        updateMapping(responseXml);
+      }
+    });
+  }
 
   /* Calls (the servlet via ajax) for creating a Match. */
   function doMatch() {
@@ -62,15 +70,14 @@
         elem : $('#elementidfield').val(),
         conc : $('#conceptidfield').val(),
         cover : $('#coveringfield').val(),
-        comm : $('#commentsfield').val(),
+        comm : $('#commentsfield').val()
       },
       success : function(responseXml) {
         updateMapping(responseXml);
-        
       }
     });
   }
-  
+
   /* Calls (the servlet via ajax) for creating a Composite Match. */
   function doCompositeMatch(cover) {
     $.ajax({
@@ -79,19 +86,32 @@
       data : {
         action : 'compositeMatch',
         elem : $('#elementidfield').val(),
-        cover : cover,
+        cover : cover
       },
       success : function(responseXml) {
         updateMapping(responseXml);
-//         console.log(responseXml);
-//         $('#matchingsdiv').html($(responseXml).find('matchestable').html());
-//         $('#messagediv').html($(responseXml).find('messagetext').html());
       }
     });
   }
-  
+
+  /* Calls (the servlet via ajax) for removing a Match. */
+  function removeMatch(matchId) {
+    $.ajax({
+      type : 'POST',
+      url : 'VerticalMappingServlet',
+      data : {
+        action : 'removeMatch',
+        matchId : matchId
+      },
+      success : function(responseXml) {
+        updateMapping(responseXml);
+      }
+    });
+  }
+
   /* Updates the page with the current information. */
   function updateMapping(responseXml) {
+    console.log("updateMapping");
     console.log(responseXml);
     var question = $(responseXml).find('questiontext').html();
     if (question != "") {
@@ -101,11 +121,10 @@
     $('#messagediv').html($(responseXml).find('messagetext').html());
     $('#commentsfield').empty();
     $('#coveragediv').html($(responseXml).find('coveragetable').html());
-    $('#coveragenumber').text($(responseXml).find('coveragetext').html());
+    $('#covernumber').text($(responseXml).find('coveragetext').html());
+    $('.icon').remove();
     $('#standarddiv').append($(responseXml).find('coverageicons').html());
   }
-
-  
 
   /* Highlight the diagrams' elements/concepts and make then selectable. */
   $(function() {
@@ -122,11 +141,11 @@
       var btype = stdJson[e.target.id].basetype;
       var def = stdJson[e.target.id].definition;
       $('#elementidfield').val(e.target.id);
-	  $('#elementfield').text(name);
+      $('#elementfield').text(name);
       $('#ebasetypefield').text("(" + btype + ")");
       $('#edefinitionfield').text(def);
     });
-    
+
     // Fill the Concept field from the map click
     $('#OntologyMap').click(function(e) {
       var name = ontoJson[e.target.id].name;
@@ -134,7 +153,7 @@
       var def = ontoJson[e.target.id].definition;
       $('#conceptidfield').val(e.target.id);
       $('#conceptfield').text(name);
-      $('#cbasetypefield').text(btype);
+      $('#cbasetypefield').text("(" + btype + ")");
       $('#cdefinitionfield').text(def);
     });
   });
@@ -168,8 +187,14 @@
   }
 
   function showCoverageInfo() {
-    $("#information").dialog({
-      width : 960
+    $("#coverinfo").dialog({
+      width : 1000
+    });
+  }
+
+  function showCoverageStatus() {
+    $("#coveragediv").dialog({
+      width : 530
     });
   }
 
@@ -234,28 +259,27 @@
 </script>
 </HEAD>
 
-<BODY>
+<BODY onload="doUpdate()">
   <h3 align="center">Approach for Harmonizing SE Standards</h3>
   <h1 align="center">(4) Vertical Mappings</h1>
 
   <h2><b>Content Vertical Mapping</b></h2>
 
   <h2>Map the Standards' Models to the Domain Ontologies</h2>
-  <p align="justify"><b>The standards' elements shall be mapped to the domain ontologies' concepts (vertical
-      mapping).</b> <br /> This tool supports the mapping by providing features for selecting the desired elements and
-    concepts and establishing the allowed types of matches between then. Select a element from the left-hand side model
-    (the Standard Model) and select a concept from the right-hand side model (the SEON View). Then, choose the suitable
-    match type and add comments for the match (required for PARTIAL and INTERSECTION). When the matches are finished,
-    list the not covered elements, which will be used in the next activity.</p>
-
+  <p align="justify" style="width: 98%"><b>The standards' elements shall be mapped to the domain ontologies'
+      concepts (vertical mapping).</b> <br /> This tool supports the mapping by providing features for selecting the
+    desired elements and concepts and establishing different types of matches between then. Select an element from the
+    left-hand side model (the Standard Model) and select a concept from the right-hand side model (the SEON View). Then,
+    choose the suitable <a href=#nothing onclick="showCoverageInfo()">coverage relation</a> and add comments for the match. Try
+    to achieve a larger standard coverage by making as many suitable matches as possible.</p>
 
   <!-- ##### Diagrams Blocks ##### -->
   <div>
-    <div style="width: 50%; display: inline-block">
-      <b>Standard</b>
+    <div style="width: 49.5%; display: inline-block">
+      <b>Standard: ${standard.name}</b>
     </div>
     <div style="width: 49%; display: inline-block">
-      <b>Ontology</b>
+      <b>Ontology: ${ontology.name}</b>
     </div>
   </div>
 
@@ -267,8 +291,6 @@
           <area shape="rect" coords="${entry.value}" id="${entry.key.id}">
         </c:forEach>
       </MAP>
-<!--       <img src='images/favicon-full.ico' style='top:344px; left:50px; position:absolute'></img> -->
-<!--       <img src='images/favicon-part.ico' style='top:394px; left:50px; position:absolute'></img> -->
     </div>
 
     <div style="width: 49%; height: 600px; overflow: auto; display: inline-block; border: 3px solid red">
@@ -307,7 +329,7 @@
           <!--         <option value="NOCOVERAGE">[-] NO COVERAGE</option> -->
         </select>
       </div>
-      <div style="display: inline-block; width: 140px; height: 148px; position: relative">
+      <div style="display: inline-block; width: 140px; height: 138px; position: relative">
         <button id="matchbutton" style="width: 80px; height: 30px; font-weight: bold; position: absolute; bottom: 0; right:30px;">MATCH!</button>
       </div>
     </div>
@@ -335,17 +357,12 @@
     <div id="messagediv" style="font-size: 90%; border: 1px solid gray; height: 70px; border-radius: 10px; padding: 8px;;"></div>
   </div>
 
-  <div>
-    <div style="display: inline-block; overflow: auto; width: 998px; margin: 15px 0 0 0">
-      <strong>Matches Established</strong>
-      <div id="matchingsdiv" style="font-size: 95%; border: 1px solid gray; height: 400px"></div>
+<!--   <div> -->
+    <div style="display: inline-block; width: 998px; margin: 15px 0 0 0">
+      <strong>Matches Established. (<a href=#nothing onclick="showCoverageStatus()">Coverage: <span id="covernumber">0%</span></a>)</strong>
+      <div id="matchingsdiv" style="font-size: 95%; overflow: auto; border: 1px solid gray; height: 400px"></div>
     </div>
-
-    <div style="display: inline-block; width: 400px; margin: 15px 0 0 0">
-      <strong>Coverage: <span id="coveragenumber">0%</span></strong>
-      <div id="coveragediv" style="font-size: 95%; overflow: auto; border: 1px solid gray; height: 400px"></div>
-    </div>
-  </div>
+<!--   </div> -->
 
   <div style="text-align: center; width: 998px; margin: 10px 0 0 0">
     <form action="PhaseSelectServlet" method="POST">
@@ -356,21 +373,21 @@
 
   <!-- ***** Match Blocks ***** -->
 
-
+  <!-- Information Dialog -->
+  <div id="coveragediv" title="Coverage Status" style="font-size: 95%; overflow: auto; border: 1px solid gray; width: 500px; height: 500px" hidden></div>
 
   <!-- Information Dialog -->
-  <div id="information" title="Coverage Relations" hidden>
+  <div id="coverinfo" title="Coverage Relations" hidden>
     <p>Some symbols are used to establish a relation between a <b>Standard&rsquo;s Element</b> and an <b>Ontology&rsquo;s
         Concept</b> (or between two Elements from different Standards). It is always a binary relation comparing the <b>notions&rsquo;
         coverage</b> on the domain, i.e. <em>how the domain portion covered by an Element is related to the domain
-        portion covered by a Concept (or by another Element</em>).<br /> For example, <b>A [P] O</b> (A is part of O), means
+        portion covered by a Concept (or by another Element</em>).<br /> For example, <b>A [P] O</b> (A is PART OF O), means
       that &ldquo;<em>Element A covers a portion of the domain that <b>is part of</b> the portion covered by
-        Concept O
-    </em>&rdquo;.
+        Concept O</em>&rdquo;.
     </p>
-    <p>For the cases where an Element remains with non-covered portions (WIDER or INTERSECTION relations), a comment
+    <p>For the matches where an Element remains with non-covered portions (WIDER or INTERSECTION relations), a comment
       is required for explaining such portions.</p>
-    <table border=1 cellpadding=6 style="width: 100%">
+    <table border=1 cellpadding=6 style="width: 100%; font-size:95%">
       <tbody style="border: 1px solid gray">
         <tr style="background-color:#F0F0F0">
           <th width="140"><b>Coverage</b></th>
@@ -423,6 +440,9 @@
         </tr>
       </tbody>
     </table>
+    <p>An Element that is EQUIVALENT or PART OF any Concept is considered <b>fully covered</b> <img
+      src="images/favicon-full.ico">.<br /> An Element that is WIDER than or have INTERSECTION with any Concept
+      is considered <b>partially covered</b> <img src="images/favicon-part.ico">.</p>
   </div>
 
 

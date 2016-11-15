@@ -112,11 +112,10 @@
     <div id="astahparsingdiv" style="font-size: 90%"></div>
   </div>
   
-  <br />
-  <div style="text-align: center">
+  <div style="text-align: center; margin: 10px 0 0 0">
     <form action="PhaseSelectServlet" method="POST">
-      <input type="hidden" name="action" value="openPage">
-      <button id="mappingbutton" disabled>Start Mapping</button>
+      <input type="hidden" name="action" value="startSelection">
+      <button id="mappingbutton" disabled>Access Menu</button>
     </form>
   </div>
   <!-- ***** Reading Blocks ***** -->

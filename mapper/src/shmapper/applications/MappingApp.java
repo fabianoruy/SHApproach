@@ -1,15 +1,9 @@
 package shmapper.applications;
 
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.change_vision.jude.api.inf.exception.InvalidUsingException;
-import com.change_vision.jude.api.inf.model.IClass;
-import com.change_vision.jude.api.inf.presentation.INodePresentation;
-import com.change_vision.jude.api.inf.presentation.IPresentation;
 
 import shmapper.model.CompositeMatch;
 import shmapper.model.Concept;
@@ -17,6 +11,7 @@ import shmapper.model.Coverage;
 import shmapper.model.Diagram;
 import shmapper.model.Element;
 import shmapper.model.Mapping;
+import shmapper.model.Mapping.MappingStatus;
 import shmapper.model.Match;
 import shmapper.model.Notion;
 import shmapper.model.NotionPosition;
@@ -35,7 +30,7 @@ public class MappingApp {
 
 	public MappingApp(SHInitiative initiative) {
 		this.initiative = initiative;
-		// this.initiative.createMappings();
+		this.initiative.createMappings();
 	}
 
 	public void setCurrentMapping(Mapping mapping) {
@@ -48,11 +43,15 @@ public class MappingApp {
 	}
 
 	public String getMessage() {
-		return message;
+		String msg = message;
+		message = "";
+		return msg;
 	}
 
 	public String getQuestion() {
-		return question;
+		String quest = question;
+		question = "";
+		return quest;
 	}
 
 	/* Creates a new (simple) Match. */
@@ -63,7 +62,7 @@ public class MappingApp {
 
 		SimpleMatch match = new SimpleMatch(source, target, cover, comm);
 		if (validateOntologyDisjointness(match)) {
-			mapping.addMatch(match);
+			mapping.addMatch(match); // At this moment the match is registered
 			System.out.println("(" + mapping.getMatches().size() + ") " + match);
 			message = CHECKED + "Match <b>" + match + "</b> created!";
 			return match;
@@ -78,10 +77,25 @@ public class MappingApp {
 		List<SimpleMatch> smatches = mapping.getSimpleMatches(source);
 
 		CompositeMatch compMatch = new CompositeMatch(source, cover, null, smatches);
-		mapping.addMatch(compMatch);
+		mapping.addMatch(compMatch); // At this moment the match is registered
 		System.out.println("(" + mapping.getMatches().size() + ") " + compMatch);
 		message = CHECKED + "Composite Match <b>" + compMatch + "</b> created!";
 		return compMatch;
+	}
+
+	/* Removes a match from the mapping. */
+	public void removeMatch(String matchId) {
+		Match match = mapping.getMatchById(matchId);
+		if (match instanceof SimpleMatch) {
+			// If there is a Composite Match related
+			CompositeMatch cmatch = mapping.getCompositeMatch((SimpleMatch) match);
+			if (cmatch != null) {
+				message = PROBLEM + "This match has an associated Composite Match (" + cmatch + ")! Remove it before.";
+				return;
+			}
+		}
+		mapping.removeMatch(match); // At this moment the match is excluded
+		message = CHECKED + "Match <b>" + match + "</b> has been removed from the mapping.";
 	}
 
 	/* Validates the Ontology Disjointness (T1). */

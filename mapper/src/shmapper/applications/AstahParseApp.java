@@ -1,10 +1,10 @@
 package shmapper.applications;
 
-import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.taglibs.standard.lang.jstl.parser.ParseException;
@@ -30,7 +30,6 @@ import com.change_vision.jude.api.inf.project.ProjectAccessor;
 
 import shmapper.model.Concept;
 import shmapper.model.Diagram;
-import shmapper.model.Package;
 import shmapper.model.Diagram.DiagramType;
 import shmapper.model.Element;
 import shmapper.model.IntegratedModel;
@@ -38,6 +37,7 @@ import shmapper.model.Notion;
 import shmapper.model.NotionPosition;
 import shmapper.model.Ontology;
 import shmapper.model.Ontology.Level;
+import shmapper.model.Package;
 import shmapper.model.Relation;
 import shmapper.model.SHInitiative;
 import shmapper.model.SeonView;
@@ -45,12 +45,13 @@ import shmapper.model.StandardModel;
 
 /** Responsible for parsing the provided Astah file, creating the objects' model. */
 public class AstahParseApp {
-	private SHInitiative	initiative;
-	private String			astahPath;
-	private StringBuffer	parsingResults	= new StringBuffer();
-	private static String	winPath			= '"' + "C:/Program Files/astah-professional/astah-commandw.exe" + '"';
-	private static String	linuxPath		= "/var/lib/tomcat7/astah/astah_professional/astah-command.sh";
-	private static String	astahCommandPath;
+	private SHInitiative		initiative;
+	private String				astahPath;
+	private StringBuffer		parsingResults	= new StringBuffer();
+	private Map<String, IClass>	astahClassMap	= new HashMap<String, IClass>();
+	private static String		winPath			= '"' + "C:/Program Files/astah-professional/astah-commandw.exe" + '"';
+	private static String		linuxPath		= "/var/lib/tomcat7/astah/astah_professional/astah-command.sh";
+	private static String		astahCommandPath;
 
 	static {
 		String os = System.getProperty("os.name");
@@ -115,7 +116,7 @@ public class AstahParseApp {
 		// Parsing the standards content models (SCMs and ICM)
 		parseContentModels(contentpack);
 
-		addResult(initiative.getAllNotions().size() + " concepts and elements parsed.\n");
+		addResult("\n" + initiative.getAllNotions().size() + " concepts and elements parsed.\n");
 
 		// Reading the model Relations and Generalizations
 		parseRelations(initiative.getAllNotions());
@@ -220,7 +221,7 @@ public class AstahParseApp {
 		IntegratedModel icm = new IntegratedModel(false, contentpack);
 		icm.setName("Integrated Content Model");
 		initiative.addPackage(icm);
-		addResult(" * Integrated CM created.\n\n");
+		addResult(" * Integrated CM created.\n");
 
 		// Parse the ICM Diagram and elements
 		parseIMElements(icm, contentpack);
@@ -237,6 +238,7 @@ public class AstahParseApp {
 				Concept concept = new Concept(onto, (IClass) node);
 				onto.addConcept(concept);
 				initiative.addNotion(concept);
+				astahClassMap.put(node.getId(), (IClass) node);
 				// addResult(" . " + concept + "\n");
 			}
 			// Recursivelly parsing packages
@@ -254,6 +256,7 @@ public class AstahParseApp {
 				Element element = new Element(model, (IClass) node);
 				model.addElement(element);
 				initiative.addNotion(element);
+				astahClassMap.put(node.getId(), (IClass) node);
 			}
 			// Recursivelly parsing packages
 			else if (node instanceof IPackage) {
@@ -267,9 +270,10 @@ public class AstahParseApp {
 		for (INamedElement node : pack.getOwnedElements()) {
 			// Parsing classes and creating Elements
 			if (node instanceof IClass) {
-				Element element = new Element(null, (IClass) node);
+				Element element = new Element(im, (IClass) node);
 				im.addElement(element);
 				initiative.addNotion(element);
+				astahClassMap.put(node.getId(), (IClass) node);
 			}
 		}
 	}
@@ -279,9 +283,10 @@ public class AstahParseApp {
 		int gcount = 0;
 		for (Notion child : notions) {
 			// Reading and setting generalizations
-			for (IGeneralization node : child.getAstahClass().getGeneralizations()) {
+			for (IGeneralization node : astahClassMap.get(child.getId()).getGeneralizations()) {
 				Notion parent = initiative.getNotionById(node.getSuperType().getId());
 				child.addGeneralization(parent);
+				// System.out.println(child + " --> " + parent);
 				gcount++;
 			}
 		}
@@ -293,13 +298,13 @@ public class AstahParseApp {
 		int rcount = 0;
 		for (Notion source : notions) {
 			// Reading and creating relations
-			for (IAttribute attrib : source.getAstahClass().getAttributes()) {
+			for (IAttribute attrib : astahClassMap.get(source.getId()).getAttributes()) {
 				IAssociation assoc = attrib.getAssociation();
 				if (assoc != null) { // it is an Association, not an Attribute
 					IAttribute firstEnd = assoc.getMemberEnds()[0];
 					IAttribute secondEnd = assoc.getMemberEnds()[1];
 					// Selecting only the relations where this concept is source (not target).
-					if (firstEnd.getType().equals(source.getAstahClass())) {
+					if (firstEnd.getType().equals(astahClassMap.get(source.getId()))) {
 						String name = assoc.getName();
 						String def = assoc.getDefinition();
 						String ster = null;
@@ -369,7 +374,7 @@ public class AstahParseApp {
 			} catch (InvalidUsingException e) {
 				e.printStackTrace();
 			}
-			System.out.println("Diagram: " + diagram + "(" + path + ")");
+			System.out.println("   . Diagram: " + diagram);
 			return diagram; // only one diagram per package, in this case.
 		}
 		throw new ParserException("Diagram not found in package " + pack.getName() + ".\n");

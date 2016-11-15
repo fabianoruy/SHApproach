@@ -14,16 +14,4 @@ public class VerticalMapping extends Mapping {
 		return target;
 	}
 
-	@Override
-	public int getCoverage() {
-		// coverage (%): baseModel.elements.([E] + [P] + [W]/2 + [I]/2) / baseModel.elements;
-		int all = getBase().getElements().size();
-		int partially = getPartiallyCoveredElements().size();
-		int noncovered = getNonCoveredElements().size();
-		int fully = all - partially - noncovered;
-		double coverage = ((partially / 2.0 + fully) / all) * 100;
-		System.out.println("All(" + all + "), Full(" + fully + "), Part(" + partially + "), Non(" + noncovered + "): Cover(" + coverage + "%)");
-		return (int) Math.round(coverage);
-	}
-
 }

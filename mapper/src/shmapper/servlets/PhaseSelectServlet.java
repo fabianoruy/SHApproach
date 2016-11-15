@@ -31,21 +31,22 @@ public class PhaseSelectServlet extends HttpServlet {
 
 	/* HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response). */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		System.out.println(">PhaseSelectServlet");
+		System.out.println(">AstahParseServlet: " + request.getParameter("action"));
 		// Accessing the initiative from the Session
 		initiative = (SHInitiative) request.getSession().getAttribute("initiative");
-		
-		//TODO: put it in a better location (app)
-		initiative.createMappings();
 
-		// For opening the Page.
-		if (request.getParameter("action").equals("openPage")) {
+		if (request.getParameter("action").equals("startSelection")) {
+			// Starting the selection page.
+			// Initializing the application, that creates the mappings
+			MappingApp mapp = new MappingApp(initiative);
+			request.getSession().setAttribute("mappingapp", mapp);
 			request.setAttribute("initiative", initiative);
 			request.getRequestDispatcher("phaseselector.jsp").forward(request, response);
 
-			// If the openphase button is pressed.
-		} else if (request.getParameter("action").equals("openPhase")) {
-			// TODO: code here
+			// For opening the Page.
+		} else if (request.getParameter("action").equals("openPage")) {
+			request.setAttribute("initiative", initiative);
+			request.getRequestDispatcher("phaseselector.jsp").forward(request, response);
 		}
 	}
 }
