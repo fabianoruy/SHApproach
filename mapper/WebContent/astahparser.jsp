@@ -62,6 +62,7 @@
       success : function(servletResponse) {
         $('#astahparsingdiv').append(servletResponse);
         $('#mappingbutton').prop('disabled', false);
+        $('#logfile').prop('hidden', false);
       }
     });
   }
@@ -81,14 +82,14 @@
       tool will read the packages named <i>Initiative</i> and <i>Standards Structural Models</i>.
       <ul>
         <li><i>Initiative</i> package: must have a single subpackage for your initiative (e.g. Quality Assurance)
-          and 3 subpackages:
+          with 3 subpackages:
           <ul>
             <li><i>1.SEON View</i>: with a single diagram representing this view, and the selected portion of SEON
               (in subpackages).</li>
             <li><i>2.Structure</i>: with a diagram for each Standard and one for the Integrated Structural Model
               (ISM). The ISM aditional elements stay here.</li>
             <li><i>3.Content</i>: with a package for each selected Standard (each containing the Standard elements
-              and a single diagram); and, optionally, the resulting diagram Integrated Content Model (ICM) with the
+              and a single diagram); and the resulting diagram Integrated Content Model (ICM) with the
               added new elements.</li>
           </ul></li>
         <li><i>Standards Structural Models</i> package: must have a subpackage for each Standard, each one
@@ -108,10 +109,12 @@
       type="file" name="file" accept=".asta" /> <br /> <input id="uploadbutton" type="button" value="Start Parsing" />
   </form>
 
-  <div style="display: inline-block; overflow: auto; border: 1px solid blue; width: 100%; height: 550px">
+  <div style="display: inline-block; overflow: auto; border: 1px solid blue; width: 100%; height: 560px">
     <div id="astahparsingdiv" style="font-size: 90%"></div>
   </div>
-  
+
+  <a id="logfile" href="SHlogfile.txt" target="_blank" hidden><code>log file</code></a>
+
   <div style="text-align: center; margin: 10px 0 0 0">
     <form action="PhaseSelectServlet" method="POST">
       <input type="hidden" name="action" value="startSelection">

@@ -34,7 +34,7 @@ public class VerticalMappingServlet extends HttpServlet {
 
 	/* HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response). */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		System.out.println(">VerticalMappingServlet: " + request.getParameter("action"));
+		//System.out.println(">VerticalMappingServlet: " + request.getParameter("action"));
 
 		if (request.getParameter("action").equals("startMapping")) {
 			// Starting the mapping.

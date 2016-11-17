@@ -25,7 +25,6 @@
   padding: 8px;
   min-height: 140px;
 }
-
 </style>
 <script src="js/jquery.min.js"></script>
 <script src="js/jquery-ui.js"></script>
@@ -44,8 +43,7 @@
       }
     });
   });
-  
-  
+
   /* Calls (the servlet via ajax) for updating the page with the current Mapping. */
   function doUpdate() {
     $.ajax({
@@ -111,7 +109,6 @@
 
   /* Updates the page with the current information. */
   function updateMapping(responseXml) {
-    console.log("updateMapping");
     console.log(responseXml);
     var question = $(responseXml).find('questiontext').html();
     if (question != "") {
@@ -122,8 +119,8 @@
     $('#commentsfield').empty();
     $('#coveragediv').html($(responseXml).find('coveragetable').html());
     $('#covernumber').text($(responseXml).find('coveragetext').html());
-    $('.icon').remove();
-    $('#standarddiv').append($(responseXml).find('coverageicons').html());
+    //     $('.icon').remove();
+    //     $('#standarddiv').append($(responseXml).find('coverageicons').html());
   }
 
   /* Highlight the diagrams' elements/concepts and make then selectable. */
@@ -268,10 +265,10 @@
   <h2>Map the Standards' Models to the Domain Ontologies</h2>
   <p align="justify" style="width: 98%"><b>The standards' elements shall be mapped to the domain ontologies'
       concepts (vertical mapping).</b> <br /> This tool supports the mapping by providing features for selecting the
-    desired elements and concepts and establishing different types of matches between then. Select an element from the
+    desired elements and concepts and establishing different types of matches between them. Select an element from the
     left-hand side model (the Standard Model) and select a concept from the right-hand side model (the SEON View). Then,
-    choose the suitable <a href=#nothing onclick="showCoverageInfo()">coverage relation</a> and add comments for the match. Try
-    to achieve a larger standard coverage by making as many suitable matches as possible.</p>
+    choose the suitable <a href=#nothing onclick="showCoverageInfo()">coverage relation</a> and add comments for the
+    match. Try to achieve a larger standard coverage by making as many suitable matches as possible.</p>
 
   <!-- ##### Diagrams Blocks ##### -->
   <div>
@@ -284,7 +281,8 @@
   </div>
 
   <div style="width: 100%; height: 100%">
-    <div id="standarddiv" style="width: 49%; height: 600px; overflow: auto; display: inline-block; border: 3px solid blue; position:relative">
+    <div id="standarddiv"
+      style="width: 49%; height: 600px; overflow: auto; display: inline-block; border: 3px solid blue; position: relative">
       <IMG src="${standard.diagram.path}" width="${standard.diagram.width}" class="map" usemap="#Standard">
       <MAP id="StandardMap" name="Standard">
         <c:forEach var="entry" items="${stdCoords}">
@@ -307,20 +305,18 @@
   <!-- ##### Match Blocks ##### -->
   <h3>How do the Standard's Elements cover the Ontology's Concepts?</h3>
   <div style="display: inline-block; width: 100%">
-    <div style="width: 410px; display: inline-block; float:left">
+    <div style="width: 410px; display: inline-block; float: left">
       <label><b>Standard Element</b></label> <br />
       <div class="elembox" title="Select an Element from the Standard model">
-        <input id="elementidfield" type="hidden"/>
-        <span id="elementfield" style="font-weight: bold">(select an element)</span><br/>
-        <span id="ebasetypefield"></span><br/>
-        <span id="edefinitionfield" style="font-size: 90%"></span>
+        <input id="elementidfield" type="hidden" /> <span id="elementfield" style="font-weight: bold">(select an
+          element)</span><br /> <span id="ebasetypefield"></span><br /> <span id="edefinitionfield" style="font-size: 90%"></span>
       </div>
     </div>
 
-    <div style="width: 140px; display: inline-block; float:left; margin:0 20px 0 20px">
+    <div style="width: 140px; display: inline-block; float: left; margin: 0 20px 0 20px">
       <div style="display: inline-block">
-        <b>Coverage (<a href=#nothing onclick="showCoverageInfo()">?</a>)</b> <br />
-        <select id="coveringfield" title="Which is the coverage of the Element on the Concept?"
+        <b>Coverage (<a href=#nothing onclick="showCoverageInfo()">?</a>)
+        </b> <br /> <select id="coveringfield" title="Which is the coverage of the Element on the Concept?"
           onchange="cleanOC(this)">
           <option value="EQUIVALENT">[E] EQUIVALENT</option>
           <option value="PARTIAL">[P] PART OF</option>
@@ -330,21 +326,20 @@
         </select>
       </div>
       <div style="display: inline-block; width: 140px; height: 138px; position: relative">
-        <button id="matchbutton" style="width: 80px; height: 30px; font-weight: bold; position: absolute; bottom: 0; right:30px;">MATCH!</button>
+        <button id="matchbutton"
+          style="width: 80px; height: 30px; font-weight: bold; position: absolute; bottom: 0; right: 30px;">MATCH!</button>
       </div>
     </div>
-    
 
-    <div style="width: 410px; display: inline-block; float:left">
+
+    <div style="width: 410px; display: inline-block; float: left">
       <label><b>Ontology Concept</b></label> <br />
       <div class="concbox" title="Select a Concept from the Ontology model.">
-        <input id="conceptidfield" type="hidden"/>
-        <span id="conceptfield" style="font-weight: bold">(select concept)</span><br/>
-        <span id="cbasetypefield"></span><br/>
-        <span id="cdefinitionfield" style="font-size: 90%"></span>
+        <input id="conceptidfield" type="hidden" /> <span id="conceptfield" style="font-weight: bold">(select
+          concept)</span><br /> <span id="cbasetypefield"></span><br /> <span id="cdefinitionfield" style="font-size: 90%"></span>
       </div>
     </div>
-  
+
   </div>
 
   <div style="width: 600px; margin: 15px 0 0 0">
@@ -354,27 +349,31 @@
 
   <div style="display: inline-block; overflow: auto; width: 998px; margin: 15px 0 0 0">
     <strong>Message</strong>
-    <div id="messagediv" style="font-size: 90%; border: 1px solid gray; height: 70px; border-radius: 10px; padding: 8px;;"></div>
+    <div id="messagediv"
+      style="font-size: 90%; border: 1px solid gray; height: 70px; border-radius: 10px; padding: 8px;"></div>
   </div>
 
-<!--   <div> -->
-    <div style="display: inline-block; width: 998px; margin: 15px 0 0 0">
-      <strong>Matches Established. (<a href=#nothing onclick="showCoverageStatus()">Coverage: <span id="covernumber">0%</span></a>)</strong>
-      <div id="matchingsdiv" style="font-size: 95%; overflow: auto; border: 1px solid gray; height: 400px"></div>
-    </div>
-<!--   </div> -->
+  <!--   <div> -->
+  <div style="display: inline-block; width: 998px; margin: 15px 0 0 0">
+    <strong>Matches Established. (<a href=#nothing onclick="showCoverageStatus()">Coverage: <span
+        id="covernumber">0%</span></a>)
+    </strong>
+    <div id="matchingsdiv" style="font-size: 95%; overflow: auto; border: 1px solid gray; height: 400px"></div>
+  </div>
+  <!--   </div> -->
 
   <div style="text-align: center; width: 998px; margin: 10px 0 0 0">
     <form action="PhaseSelectServlet" method="POST">
-      <input type="hidden" name="action" value="openPage">
-      <button id="finishbutton">Finish this Mapping</button>
+      <input type="hidden" name="action" value="openSelection">
+      <button id="finishbutton">Finish Mapping</button>
     </form>
   </div>
 
   <!-- ***** Match Blocks ***** -->
 
   <!-- Information Dialog -->
-  <div id="coveragediv" title="Coverage Status" style="font-size: 95%; overflow: auto; border: 1px solid gray; width: 500px; height: 500px" hidden></div>
+  <div id="coveragediv" title="Coverage Status"
+    style="font-size: 95%; overflow: auto; border: 1px solid gray; width: 500px; height: 500px" hidden></div>
 
   <!-- Information Dialog -->
   <div id="coverinfo" title="Coverage Relations" hidden>
@@ -383,13 +382,14 @@
         coverage</b> on the domain, i.e. <em>how the domain portion covered by an Element is related to the domain
         portion covered by a Concept (or by another Element</em>).<br /> For example, <b>A [P] O</b> (A is PART OF O), means
       that &ldquo;<em>Element A covers a portion of the domain that <b>is part of</b> the portion covered by
-        Concept O</em>&rdquo;.
+        Concept O
+    </em>&rdquo;.
     </p>
-    <p>For the matches where an Element remains with non-covered portions (WIDER or INTERSECTION relations), a comment
-      is required for explaining such portions.</p>
-    <table border=1 cellpadding=6 style="width: 100%; font-size:95%">
+    <p>For the matches where an Element remains with non-covered portions (WIDER or INTERSECTION relations), a
+      comment is required for explaining such portions.</p>
+    <table border=1 cellpadding=6 style="width: 100%; font-size: 95%">
       <tbody style="border: 1px solid gray">
-        <tr style="background-color:#F0F0F0">
+        <tr style="background-color: #F0F0F0">
           <th width="140"><b>Coverage</b></th>
           <th width="60"><b>Symbol</b></th>
           <th width="300"><b>Meaning</b></th>
@@ -402,7 +402,7 @@
           <td>A is Equivalent to O.<br /> Element A covers a portion of the domain that <b>is equivalent to</b>
             the portion covered by Concept O.
           </td>
-          <td style="text-align:center"><IMG src="images/Equivalent.png"></td>
+          <td style="text-align: center"><IMG src="images/Equivalent.png"></td>
           <td>(Element) Risk Plan<br /> <b>[E]</b><br /> (Concept) Plan of Risks
           </td>
         </tr>
@@ -412,7 +412,7 @@
           <td>A is Part of O<br /> Element A covers a portion of the domain that <b>is part of</b> the portion
             covered by Concept O (O includes A).
           </td>
-          <td style="text-align:center"><IMG src="images/Partof.png"></td>
+          <td style="text-align: center"><IMG src="images/Partof.png"></td>
           <td>(Element) Risk Plan<br /> <b>[P]</b><br /> (Concept) Project Plan
           </td>
         </tr>
@@ -422,7 +422,7 @@
           <td>A is Wider than O.<br /> Element A covers a portion of the domain that <b>is wider than</b> the
             portion covered by Concept O (A includes O).
           </td>
-          <td style="text-align:center"><IMG src="images/Wider.png"></td>
+          <td style="text-align: center"><IMG src="images/Wider.png"></td>
           <td>(Element) Risk Plan<br /> <b>[W]</b><br /> (Concept) Mitigation Plan<br /> <br /> <b>{contingency
               actions not covered}</b>
           </td>
@@ -433,7 +433,7 @@
           <td>A has Intersection with O.<br /> Element A covers a portion of the domain that <b>has
               intersection with</b> the portion covered by Concept O.
           </td>
-          <td style="text-align:center"><IMG src="images/Intersection.png"></td>
+          <td style="text-align: center"><IMG src="images/Intersection.png"></td>
           <td>(Element) Risk Plan<br /> <b>[I]</b> <br /> (Concept) Internal Project Plan<br /> <br /> <b>{external
               risks not covered}</b>
           </td>
@@ -442,7 +442,8 @@
     </table>
     <p>An Element that is EQUIVALENT or PART OF any Concept is considered <b>fully covered</b> <img
       src="images/favicon-full.ico">.<br /> An Element that is WIDER than or have INTERSECTION with any Concept
-      is considered <b>partially covered</b> <img src="images/favicon-part.ico">.</p>
+      is considered <b>partially covered</b> <img src="images/favicon-part.ico">.
+    </p>
   </div>
 
 

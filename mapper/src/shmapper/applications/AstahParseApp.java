@@ -1,7 +1,9 @@
 package shmapper.applications;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -141,7 +143,7 @@ public class AstahParseApp {
 		// Creates the SEON View
 		SeonView seonview = new SeonView(seonpack);
 		initiative.addPackage(seonview);
-		addResult("SEON View created. ");
+		addResult("\nSEON View created. ");
 
 		// Get the Ontologies' packages and creates the Ontologies.
 		addResult("Ontologies:\n");
@@ -164,8 +166,6 @@ public class AstahParseApp {
 				}
 			}
 		}
-		addResult("\n");
-
 		// Parse the SEON View Diagram
 		Diagram diagram = parseDiagram(seonpack, DiagramType.SEONVIEW);
 		seonview.setDiagram(diagram);
@@ -174,7 +174,7 @@ public class AstahParseApp {
 	/* Reads the structural models packages and creates the SSMs. */
 	private void parseStructuralModels(IPackage ssmpack, IPackage ismpack) {
 		// Creates the Standards Structure Models (SSMs) and their elements.
-		addResult("Standards' Structural Models created: \n");
+		addResult("\nStandards' Structural Models created: \n");
 		for (INamedElement node : ssmpack.getOwnedElements()) {
 			if (node instanceof IPackage) {
 				IPackage stdpack = (IPackage) node;
@@ -374,7 +374,7 @@ public class AstahParseApp {
 			} catch (InvalidUsingException e) {
 				e.printStackTrace();
 			}
-			System.out.println("   . Diagram: " + diagram);
+			System.out.println("   . " + diagram + " (diagram)");
 			return diagram; // only one diagram per package, in this case.
 		}
 		throw new ParserException("Diagram not found in package " + pack.getName() + ".\n");
@@ -390,7 +390,7 @@ public class AstahParseApp {
 		if (!dir.exists()) dir.mkdirs();
 		try {
 			// Exporting images from the Astah file (using command line).
-			System.out.println("\n# Exporting images from Astah to " + targetPath);
+			System.out.println("\n# Exporting images from Astah");
 			String command = astahCommandPath; // command for exporting
 			command += " -image cl"; // selecting only Class diagrams
 			command += " -f " + astahFile; // defining input astah file
@@ -457,4 +457,5 @@ public class AstahParseApp {
 		parsingResults = new StringBuffer();
 		return results;
 	}
+	
 }

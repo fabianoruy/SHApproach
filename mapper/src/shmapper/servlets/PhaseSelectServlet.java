@@ -31,7 +31,7 @@ public class PhaseSelectServlet extends HttpServlet {
 
 	/* HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response). */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		System.out.println(">AstahParseServlet: " + request.getParameter("action"));
+		// System.out.println(">PhaseSelectServlet: " + request.getParameter("action"));
 		// Accessing the initiative from the Session
 		initiative = (SHInitiative) request.getSession().getAttribute("initiative");
 
@@ -43,10 +43,19 @@ public class PhaseSelectServlet extends HttpServlet {
 			request.setAttribute("initiative", initiative);
 			request.getRequestDispatcher("phaseselector.jsp").forward(request, response);
 
-			// For opening the Page.
-		} else if (request.getParameter("action").equals("openPage")) {
+		} else if (request.getParameter("action").equals("openSelection")) {
+			// Opening the Page.
 			request.setAttribute("initiative", initiative);
 			request.getRequestDispatcher("phaseselector.jsp").forward(request, response);
+
+		} else if (request.getParameter("action").equals("endSession")) {
+			// Finishing the session.
+			response.getWriter().println("Application Finished!\n");
+			response.getWriter().println(initiative.getMappings().size() +" Mappings were created:");
+			for (Mapping map : initiative.getMappings()) {
+				response.getWriter().println(map + ": " + map.getStatus() + " (" + map.getCoverage() + "%)");
+			}
+			request.getSession().invalidate();
 		}
 	}
 }

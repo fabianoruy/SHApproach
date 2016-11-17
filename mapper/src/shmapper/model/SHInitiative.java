@@ -27,20 +27,26 @@ public class SHInitiative {
 		this.notionMap = new HashMap<String, Notion>();
 	}
 
+	/* Creating the Mappings for this Initiative. */
 	public void createMappings() {
-		// Creating the Mappings for this Initiative
+		// Getting the models
 		SeonView seon = getSeonView();
 		IntegratedModel integrated = getIntegratedCM();
 		List<StandardModel> standards = getStandardCMs();
+		
+		// One VM for Standard (Std * 1)
 		for (int i = 0; i < standards.size(); i++) {
-			// One VM for Standard (Std * 1)
 			mappings.add(new VerticalMapping(standards.get(i), seon));
+		}
+		
+		// One HM for each pair of Standards (Std * (Std-1))
+		for (int i = 0; i < standards.size(); i++) {
 			for (int j = i + 1; j < standards.size(); j++) {
-				// One HM for each pair of Standards (Std * (Std-1))
 				mappings.add(new HorizontalMapping(standards.get(i), standards.get(j)));
 			}
 		}
-		// A single DM (1)
+
+		// A single DM (1) with all standards as base
 		mappings.add(new DiagonalMapping(standards, integrated));
 		System.out.println("Mappings Created: " + mappings);
 	}

@@ -1,7 +1,9 @@
 package shmapper.servlets;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -32,17 +34,23 @@ public class AstahParseServlet extends HttpServlet {
 	private String				workingDir			= "";
 	private Path				path				= null;
 	private boolean				success				= true;
-	private boolean				importable			= false;
+	private boolean				importable			= true;
 
 	/* doPost method, for processing the upload and calling the parsers. */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		System.out.println(">AstahParseServlet: " + request.getParameter("action"));
-		// Redirects to the action
+		// System.out.println(">AstahParseServlet: " + request.getParameter("action"));
+
 		if (request.getParameter("action") == null) { // No action defined: file upload
-			System.out.println("\n\n@@@ STARTING APPLICATION @@@ - " + new Date());
+			//setLogOutput(request.getSession().getServletContext().getRealPath("/") + "/SHlogfile.txt");
+
+			// Uploading File
+			System.out.println("\n### STARTING APPLICATION ### - " + new Date());
 			uploadAstah(request, response);
-		} else if (request.getParameter("action").equals("images") && success) {
-			importImages(request, response);
+		} else if (request.getParameter("action").equals("images")) {
+			// Importing Images
+			if (success) {
+				importImages(request, response);
+			}
 		} else {
 			System.out.println("No action identified");
 		}
@@ -84,6 +92,7 @@ public class AstahParseServlet extends HttpServlet {
 			results += "<br/><b>Please, fix your astah file and try again.</b>";
 			success = false;
 			System.out.println("-> Parse Exception: " + e.getMessage());
+			e.printStackTrace();
 		} finally {
 			// Sending answer for the page
 			response.getWriter().print(results);
@@ -93,18 +102,33 @@ public class AstahParseServlet extends HttpServlet {
 	/* Imports the images from the uploaded astha file. */
 	private void importImages(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		String results = "";
-		try {
-			if (importable) {
+		if (importable) {
+			try {
 				parser.importImages(path.toString(), workingDir);
+				results += parser.getResults();
+				results += "<br/><span style='color:blue'><b>Astah File successfully read and parsed!</span></b><br/>Proceed to the Mapping.";
+			} catch (ParseException e) {
+				results += "<span style='color:red'>" + e.getMessage().replaceAll("\n", "<br/>") + "</span>";
+				results += "<br/><b>Please, fix your astah file and try again.</b>";
+				System.out.println("-> Parse Exception: " + e.getMessage());
+				e.printStackTrace();
+			} finally {
+				response.getWriter().print(results);
 			}
-			results += parser.getResults();
-			results += "<br/><span style='color:blue'><b>Astah File successfully read and parsed!</span></b><br/>Proceed to the Mapping.";
-		} catch (ParseException e) {
-			results += "<span style='color:red'>" + e.getMessage().replaceAll("\n", "<br/>") + "</span>";
-			results += "<br/><b>Please, fix your astah file and try again.</b>";
-			System.out.println("-> Parse Exception: " + e.getMessage());
-		} finally {
-			response.getWriter().print(results);
+		}
+	}
+
+	/* Defines the output log file. */
+	private void setLogOutput(String logfile) {
+		PrintStream ps;
+		try {
+			ps = new PrintStream(logfile);
+			System.setOut(ps);
+			System.setErr(ps);
+			System.out.println("SH Approach log file - " + new java.util.Date());
+			System.out.println("---------------------------------------------------\n");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
 		}
 	}
 

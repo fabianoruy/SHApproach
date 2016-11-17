@@ -13,11 +13,5 @@ public class HorizontalMapping extends Mapping {
 	public StandardModel getTarget() {
 		return target;
 	}
-	
-	@Override
-	public int getCoverage() {
-		//TODO: coverage (%): baseModel.elements / baseModel.elements.([E] + [P] + [W]/2 + [I]/2);
-		return 80;
-	}
 
 }

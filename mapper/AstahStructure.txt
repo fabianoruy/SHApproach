@@ -57,11 +57,21 @@ Nov.12
 + Composite match
 
 Nov.13
-/ Stages page (mapping selector)
++ Stages page (mapping selector)
+
+Nov.14/15
++ Match exclusion
++ Coverage presentation
+ 
+Nov.16
+- Publishing
+- Saving and Recovering
+= Initital (approach and basic data)
+= ICM Elements
+= Horizontal Mapping
+= Results
 - Match validation (T2)
-- Match exclusion
-- Coverage presentation
-- Initital (approach and basic data)
+
 
 
 

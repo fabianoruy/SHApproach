@@ -22,11 +22,12 @@ public class DiagonalMapping extends Mapping {
 		return target;
 	}
 	
+	/* Returns the coverage of the matchs over the base Elements. */
 	@Override
 	public int getCoverage() {
-		//TODO: coverage (%): baseModel.elements / baseModel.elements.([E] + [P] + [W]/2 + [I]/2);
-		return 80;
+		return 0;
 	}
+
 
 	@Override
 	public String toString() {
