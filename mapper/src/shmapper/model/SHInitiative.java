@@ -17,14 +17,19 @@ public class SHInitiative {
 	private List<Mapping>		mappings;
 	private Map<String, Notion>	notionMap;
 
-	public SHInitiative(String domain, String purpose, String scope, String people, String path) {
+	public SHInitiative(String domain) {
 		this.domain = domain;
-		this.purpose = purpose;
-		this.scope = scope;
-		this.astahPath = path;
 		this.packages = new ArrayList<Package>();
 		this.mappings = new ArrayList<Mapping>();
 		this.notionMap = new HashMap<String, Notion>();
+	}
+
+	public SHInitiative(String domain, String purpose, String scope, String people, String path) {
+		this(domain);
+		this.purpose = purpose;
+		this.scope = scope;
+		this.people = people;
+		this.astahPath = path;
 	}
 
 	/* Creating the Mappings for this Initiative. */
@@ -59,12 +64,24 @@ public class SHInitiative {
 		return purpose;
 	}
 
+	public void setPurpose(String purpose) {
+		this.purpose = purpose;
+	}
+	
 	public String getScope() {
 		return scope;
 	}
 
+	public void setScope(String scope) {
+		this.scope = scope;
+	}
+	
 	public String getPeople() {
 		return people;
+	}
+	
+	public void setPeople(String people) {
+		this.people = people;
 	}
 
 	public String getDescription() {

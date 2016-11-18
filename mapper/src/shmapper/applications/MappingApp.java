@@ -20,13 +20,13 @@ import shmapper.model.SimpleMatch;
 
 /** Responsible for providing the services for the mapping tasks. */
 public class MappingApp {
-	private SHInitiative		initiative;
-	private Mapping				mapping;															// current mapping
-	private String				message;
-	private String				question;
-	public static final String	CHECKED		= "<span style='color:green'><b>(\u2713)</b></span> ";
-	public static final String	PROBLEM		= "<span style='color:red'><b>(!)</b></span> ";
-	public static final String	QUESTION	= "<span style='color:blue'><b>(?)</b></span> ";
+	private SHInitiative initiative;
+	private Mapping mapping; // current mapping
+	private String message;
+	private String question;
+	public static final String CHECKED = "<span style='color:green'><b>(\u2713)</b></span> ";
+	public static final String PROBLEM = "<span style='color:red'><b>(!)</b></span> ";
+	public static final String QUESTION = "<span style='color:blue'><b>(?)</b></span> ";
 
 	public MappingApp(SHInitiative initiative) {
 		this.initiative = initiative;
@@ -35,7 +35,7 @@ public class MappingApp {
 
 	public void setCurrentMapping(Mapping mapping) {
 		this.mapping = mapping;
-		System.out.println("#Current Mapping: " + this.mapping + " (" + this.mapping.getId() + ")");
+		System.out.println("\n#Current Mapping: " + this.mapping + " (" + this.mapping.getId() + ")");
 	}
 
 	public Mapping getCurrentMapping() {
@@ -63,8 +63,8 @@ public class MappingApp {
 		SimpleMatch match = new SimpleMatch(source, target, cover, comm);
 		if (validateOntologyDisjointness(match)) {
 			mapping.addMatch(match); // At this moment the match is registered
-			System.out.println("(" + mapping.getMatches().size() + ") " + match);
 			message = CHECKED + "Match <b>" + match + "</b> created!";
+			System.out.println("(" + mapping.getMatches().size() + ") " + match);
 			return match;
 		}
 		return null;
@@ -78,8 +78,8 @@ public class MappingApp {
 
 		CompositeMatch compMatch = new CompositeMatch(source, cover, null, smatches);
 		mapping.addMatch(compMatch); // At this moment the match is registered
-		System.out.println("(" + mapping.getMatches().size() + ") " + compMatch);
 		message = CHECKED + "Composite Match <b>" + compMatch + "</b> created!";
+		System.out.println("(" + mapping.getMatches().size() + ") " + compMatch);
 		return compMatch;
 	}
 
@@ -96,6 +96,7 @@ public class MappingApp {
 		}
 		mapping.removeMatch(match); // At this moment the match is excluded
 		message = CHECKED + "Match <b>" + match + "</b> has been removed from the mapping.";
+		System.out.println("Excluded: " + match);
 	}
 
 	/* Validates the Ontology Disjointness (T1). */
@@ -113,31 +114,37 @@ public class MappingApp {
 			if (source.equals(osource)) {
 				// repeated source and target
 				if (match.getTarget().equals(omatch.getTarget())) {
-					message += PROBLEM + "The element <b>" + source + "</b> is already matched with the same concept (" + omatch + ")";
+					message += PROBLEM + "The element <b>" + source + "</b> is already matched with the same concept ("
+							+ omatch + ")";
 					return false;
 				}
-				message += "The element <b>" + source + "</b> is already matched with other concept (" + omatch + ").<br/>";
+				message += "The element <b>" + source + "</b> is already matched with other concept (" + omatch
+						+ ").<br/>";
 				repeatedMatches.add(omatch);
 				Coverage cover = match.getCoverage();
 				Coverage ocover = omatch.getCoverage();
 				// both coverages must be [W] or [I]
-				if (!((cover == Coverage.WIDER || cover == Coverage.INTERSECTION) && (ocover == Coverage.WIDER || ocover == Coverage.INTERSECTION))) {
+				if (!((cover == Coverage.WIDER || cover == Coverage.INTERSECTION)
+						&& (ocover == Coverage.WIDER || ocover == Coverage.INTERSECTION))) {
 					allowed = false;
 				}
 			}
 		}
 		if (!allowed) {
-			message += PROBLEM + "Multiple matches for the same element are allowed only for WIDER and INTERSECTION coverages.";
+			message += PROBLEM
+					+ "Multiple matches for the same element are allowed only for WIDER and INTERSECTION coverages.";
 			return false;
 		} else if (repeatedMatches.size() > 0) {
 			repeatedMatches.add(match);
-			question += "The element <b>" + source + "</b> has now " + repeatedMatches.size() + " matches with different concepts.<br/>";
+			question += "The element <b>" + source + "</b> has now " + repeatedMatches.size()
+					+ " matches with different concepts.<br/>";
 			question += "<code>";
 			for (SimpleMatch matchfor : repeatedMatches) {
 				question += "* <b>" + matchfor + "</b><br/>";
 			}
 			question += "</code><br/>";
-			question += QUESTION + "Do these " + repeatedMatches.size() + " concepts together <b>fully cover</b> the element <b>" + source + "</b>?";
+			question += QUESTION + "Do these " + repeatedMatches.size()
+					+ " concepts together <b>fully cover</b> the element <b>" + source + "</b>?";
 		}
 		return true;
 	}
@@ -149,7 +156,8 @@ public class MappingApp {
 		for (NotionPosition position : diagram.getPositions()) {
 			Notion notion = position.getNotion();
 			// it is not a Structural Element
-			if (notion instanceof Concept || (notion instanceof Element && !((Element) notion).getModel().isStructural())) {
+			if (notion instanceof Concept
+					|| (notion instanceof Element && !((Element) notion).getModel().isStructural())) {
 				coordsHash.put(notion, position.getCoords());
 			}
 		}

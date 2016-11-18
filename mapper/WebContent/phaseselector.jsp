@@ -74,13 +74,24 @@
 
       <p />
       <div class="done">
-        <b>2) Astah Parsing</b><br /> Astah succesfully parsed.<br />
-        <ul>
-          <li>SEON View: ${initiative.domain}</li>
-          <li>Integrated Model: ${initiative.integratedCM}</li>
-          <li>Standard Models: ${initiative.standardCMs}</li>
-          <li>Elements and Concepts: ${initiative.allNotions.size()}</li>
-        </ul>
+        <div style="display: inline-block">
+          <b>2) Astah Parsing</b>
+          <c:if test="${not empty initiative.allPackages}">
+            <br />Astah succesfully parsed.<br />
+            <ul>
+              <li>SEON View: ${initiative.domain}</li>
+              <li>Integrated Model: ${initiative.integratedCM}</li>
+              <li>Standard Models: ${initiative.standardCMs}</li>
+              <li>Elements and Concepts: ${initiative.allNotions.size()}</li>
+            </ul>
+          </c:if>
+        </div>
+        <div style="display: inline-block; float: right">
+          <form action="AstahParseServlet" method="POST">
+            <input type="hidden" name="action" value="openPage">
+            <button id="parsingbutton">Parse Astah</button>
+          </form>
+        </div>
       </div>
 
       <p />
@@ -117,7 +128,6 @@
         <div style="display: inline-block; float: right">
           <button disabled>Do Mapping</button>
         </div>
-
       </div>
 
       <p />

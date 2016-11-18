@@ -1,5 +1,6 @@
 package shmapper.servlets;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -29,23 +31,32 @@ import shmapper.applications.ParserException;
 /** Servlet implementation class AstahParseServlet */
 @WebServlet("/AstahParseServlet")
 public class AstahParseServlet extends HttpServlet {
-	private static final long	serialVersionUID	= 1L;
-	private AstahParseApp		parser;
-	private String				workingDir			= "";
-	private Path				path				= null;
-	private boolean				success				= true;
-	private boolean				importable			= true;
+	private static final long serialVersionUID = 1L;
+	private AstahParseApp parser;
+	private String workingDir = "";
+	private Path path = null;
+	private String logfile = null;
+	private boolean success = true;
+	private boolean importable = true;
 
 	/* doPost method, for processing the upload and calling the parsers. */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// System.out.println(">AstahParseServlet: " + request.getParameter("action"));
-
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		//System.out.println(">AstahParseServlet: " + request.getParameter("action"));
+		
 		if (request.getParameter("action") == null) { // No action defined: file upload
 			//setLogOutput(request.getSession().getServletContext().getRealPath("/") + "/SHlogfile.txt");
+			logfile = "log/SHLog." + new SimpleDateFormat("yyyy-MM-dd.hh-mm-ss").format(new Date()) + ".txt";
+			setLogOutput(request.getSession().getServletContext().getRealPath("/") + File.separator + logfile);
+			//request.getSession().setAttribute("logfile", logfile);
 
 			// Uploading File
 			System.out.println("\n### STARTING APPLICATION ### - " + new Date());
 			uploadAstah(request, response);
+
+		} else if (request.getParameter("action").equals("openPage")) {
+			request.getRequestDispatcher("astahparser.jsp").forward(request, response);
+
 		} else if (request.getParameter("action").equals("images")) {
 			// Importing Images
 			if (success) {
@@ -57,7 +68,8 @@ public class AstahParseServlet extends HttpServlet {
 	}
 
 	/* Gets the uploaded file, saves it, and starts the parsing. */
-	private void uploadAstah(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void uploadAstah(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 		// Accessing, saving and processing the uploaded astah file.
 		String results = null;
 		try {
@@ -72,7 +84,7 @@ public class AstahParseServlet extends HttpServlet {
 
 				// Saving file on disk
 				workingDir = request.getSession().getServletContext().getRealPath("/");
-				path = Paths.get(workingDir + "/Uploaded_" + filename);
+				path = Paths.get(workingDir + "/Uploaded_" + filename.replaceAll("[^a-zA-Z0-9.-]", "_")); // eliminating special chars
 				Files.copy(content, path, StandardCopyOption.REPLACE_EXISTING);
 			}
 			results = "File <i>" + filename + "</i> uploaded for the initiative.<br/>";
@@ -83,13 +95,14 @@ public class AstahParseServlet extends HttpServlet {
 			results += parser.getResults();
 
 			// Setting the initiative to the session.
-			request.getSession().setAttribute("initiative", parser.getInitiative());
+			//request.getSession().setAttribute("initiative", parser.getInitiative());
 
 		} catch (FileUploadException e) {
 			throw new ServletException("Parsing file upload failed.", e);
 		} catch (ParserException e) {
 			results += "<span style='color:red'>" + e.getMessage().replaceAll("\n", "<br/>") + "</span>";
 			results += "<br/><b>Please, fix your astah file and try again.</b>";
+			results += "<br/><a id='logfile' href='" + logfile + "' target='_blank' hidden><code>log file</code></a>";
 			success = false;
 			System.out.println("-> Parse Exception: " + e.getMessage());
 			e.printStackTrace();
@@ -113,6 +126,8 @@ public class AstahParseServlet extends HttpServlet {
 				System.out.println("-> Parse Exception: " + e.getMessage());
 				e.printStackTrace();
 			} finally {
+				results += "<br/><a id='logfile' href='" + logfile
+						+ "' target='_blank' hidden><code>log file</code></a>";
 				response.getWriter().print(results);
 			}
 		}
@@ -126,7 +141,7 @@ public class AstahParseServlet extends HttpServlet {
 			System.setOut(ps);
 			System.setErr(ps);
 			System.out.println("SH Approach log file - " + new java.util.Date());
-			System.out.println("---------------------------------------------------\n");
+			System.out.println("---------------------------------------------------");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
