@@ -132,7 +132,7 @@ public class MappingApp {
 		}
 		if (!allowed) {
 			message += PROBLEM
-					+ "Multiple matches for the same element are allowed only for WIDER and INTERSECTION coverages.";
+					+ "Multiple matches for the same element are allowed only for combinations of WIDER and INTERSECTION coverages.";
 			return false;
 		} else if (repeatedMatches.size() > 0) {
 			repeatedMatches.add(match);
@@ -142,9 +142,10 @@ public class MappingApp {
 			for (SimpleMatch matchfor : repeatedMatches) {
 				question += "* <b>" + matchfor + "</b><br/>";
 			}
+			//TODO: if all matches are [W], only the EQUIVALENT, and NO options are available.
 			question += "</code><br/>";
-			question += QUESTION + "Do these " + repeatedMatches.size()
-					+ " concepts together <b>fully cover</b> the element <b>" + source + "</b>?";
+			question += QUESTION + "Is the element <b>" + source + "</b> <b>fully covered</b> by these " + repeatedMatches.size()	+ " concepts together?";
+			//question += QUESTION + "Do these " + repeatedMatches.size()	+ " concepts together <b>fully cover</b> the element <b>" + source + "</b>?";
 		}
 		return true;
 	}

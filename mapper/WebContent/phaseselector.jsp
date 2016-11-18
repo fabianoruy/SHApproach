@@ -11,7 +11,9 @@
 <title>SH Approach</title>
 
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/jquery-ui.css">
 <script src="js/jquery.min.js"></script>
+<script src="js/jquery-ui.js"></script>
 
 <style>
 .done {
@@ -35,37 +37,54 @@
   padding: 10px;
   width: 97%;
 }
+
+.phasebutton {
+  width: 100px;
+  height: 25px;
+}
 </style>
 
 <script>
-  $('#parsingbutton').click(
-      function() {
-        var maps = ${initiative.startedMappingsNumber}; 
-        if (maps > 0) {
-          showQuestion("You have " + maps
-              + " mappings started! Parsing astah again will exclude all the mappigs. Are you sure?", alert);
-        }
-      });
+var reset = false;
 
-  /* Shows a question message dialog. */
-  function showQuestion(text, yesFunction) {
-    $('#questionText').empty().append(text);
-    $('#dialog-question').dialog({
-      resizable : false,
-      height : "auto",
-      width : 600,
-      modal : true,
-      buttons : {
-        Yes : function() {
-          $(this).dialog('close');
-          yesFunction();
-        },
-        No : function() {
-          $(this).dialog('close');
-        }
-      }
-    });
-  }
+$(document).ready(function() {
+	// Parse button
+	$('#parsebutton').click(function(e) {
+		console.log(reset);
+		if (reset == false) {
+			var maps = ${initiative.startedMappingsNumber};
+			if (maps > 0) {
+				e.preventDefault();
+				showQuestion("You have " + maps
+					+ " mappings started! Parsing astah again will reset all the mappigs. Are you sure?");
+			}
+		}
+	});
+});
+
+	/* Shows a question message dialog. */
+function showQuestion(text) {
+	$('#questionText').empty().append(text);
+	$('#dialog-question').dialog({
+		resizable : false,
+		height : "auto",
+		width : 600,
+		modal : true,
+		buttons : {
+			Yes : function() {
+				$(this).dialog('close');
+				reset = true;
+				$("#parsebutton").click();
+				reset = false;
+				return true;
+			},
+			No : function() {
+				$(this).dialog('close');
+				return false;
+			}
+		}
+	});
+}
 </script>
 </HEAD>
 
@@ -89,7 +108,7 @@
 
   <p />
   <div>
-    <div style="width: 60%; margin: auto">
+    <div style="width: 60%; margin: auto"> <!-- Main DIV -->
 
       <div class="done">
         <div style="display: inline-block">
@@ -104,7 +123,7 @@
         <div style="display: inline-block; float: right">
           <form action="InitiativeStartServlet" method="POST">
             <input type="hidden" name="action" value="editInfo">
-            <button id="infobutton">Edit Info</button>
+            <button class="phasebutton" id="infobutton">Edit Info</button>
           </form>
         </div>
       </div>
@@ -112,7 +131,7 @@
       <p />
       <div class="done">
         <div style="display: inline-block">
-          <b>2) Astah Parsing</b>
+          <b>2) Astah Parsing</b><br/>
           <c:if test="${not empty initiative.allPackages}">
             <br />Astah succesfully parsed.<br />
             <ul>
@@ -126,7 +145,7 @@
         <div style="display: inline-block; float: right">
           <form action="AstahParseServlet" method="POST">
             <input type="hidden" name="action" value="openPage">
-            <button id="parsingbutton">Parse Astah</button>
+            <button class="phasebutton" id="parsebutton">Parse Astah</button>
           </form>
         </div>
       </div>
@@ -149,7 +168,7 @@
               <form action="VerticalMappingServlet" method="POST">
                 <input type="hidden" name="action" value="startMapping"> <input type="hidden" name="mapId"
                   value="${map.id}">
-                <button id="mappingbutton">Do Mapping</button>
+                <button class="phasebutton" id="mappingbutton">Do Mapping</button>
               </form>
             </div>
           </div>
@@ -163,7 +182,7 @@
           <b>5) ICM Mapping: ${map}</b> <br /> Status: ${map.status}<br /> Coverage: ${map.coverage}%
         </div>
         <div style="display: inline-block; float: right">
-          <button disabled>Do Mapping</button>
+          <button class="phasebutton" disabled>Do Mapping</button>
         </div>
       </div>
 
@@ -177,7 +196,7 @@
               <b>6.${loop.index+1}) ${map}</b><br /> Status: ${map.status}<br /> Coverage: ${map.coverage}%
             </div>
             <div style="display: inline-block; float: right">
-              <button disabled>Do Mapping</button>
+              <button class="phasebutton" disabled>Do Mapping</button>
             </div>
           </div>
           <p />
@@ -190,19 +209,40 @@
           <b>7) Harmonization Initiative Results</b><br /> To see the initiative results.
         </div>
         <div style="display: inline-block; float: right">
-          <button disabled>See Results</button>
+          <button class="phasebutton" disabled>See Results</button>
         </div>
       </div>
+
 
       <div style="text-align: center; margin: 10px 0 0 0">
         <form action="PhaseSelectServlet" method="POST">
           <input type="hidden" name="action" value="endSession">
-          <button id="sessionbutton">Exit Application</button>
+          <button style="width: 120px; height: 25px;" id="sessionbutton">Exit Application</button>
         </form>
       </div>
 
+      <a id="logfile" href="${logfile}" target="_blank"><code>log file</code></a>
+
     </div>
   </div>
+  
+  <!-- ##### Dialog Boxes ##### -->
+  <!-- Simple Message -->
+  <div id="dialog-message" title="Message" hidden>
+    <p><span class="ui-icon ui-icon-circle-check" style="float: left; margin: 0 7px 50px 0;"></span>
+    <div id="messageText"></div>
+    </p>
+  </div>
+
+  <!-- Question Message -->
+  <div id="dialog-question" title="Question" hidden>
+    <p><span class="ui-icon ui-icon-help" style="float: left; margin: 12px 12px 20px 0;"></span>
+    <p>
+    <div id="questionText"></div>
+    </p>
+  </div>
+    <!-- ***** Dialog Boxes ***** -->
+  
 </BODY>
 </HTML>
 

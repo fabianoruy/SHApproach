@@ -26,20 +26,20 @@
       <div style="width: 60%; margin: auto; border: 1px solid gray; padding: 10px">
         <table>
           <tr>
-            <td><b>Domain:</b></td>
-            <td><input type="text" name="domain" size="79" value="${initiative.domain}" disabled></td>
+            <td width="75px"><b>Domain</b></td>
+            <td><input type="text" name="domain" size="79px" value="${initiative.domain}" disabled></td>
           </tr>
           <tr>
-            <td><b>Purpose:</b></td>
+            <td><b>Purpose</b></td>
             <td><textarea name="purpose" rows="4" cols="80" placeholder="Initiative Purpose">${initiative.purpose}</textarea></td>
           </tr>
           <tr>
-            <td><b>Scope:</b></td>
+            <td><b>Scope</b></td>
             <td><textarea name="scope" rows="4" cols="80" placeholder="Initiative Harmonization Scope">${initiative.scope}</textarea></td>
           </tr>
           <tr>
-            <td><b>People:</b></td>
-            <td><input type="text" name="people" size="79" value="${initiative.people}" placeholder="People involved"></td>
+            <td><b>People</b></td>
+            <td><textarea name="people" rows="3" cols="80" placeholder="People involved">${initiative.people}</textarea></td>
           </tr>
           <tr>
             <td colspan="2" style="text-align:center"><button type="submit">Access Menu</button></td>

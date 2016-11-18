@@ -47,19 +47,21 @@ import shmapper.model.StandardModel;
 
 /** Responsible for parsing the provided Astah file, creating the objects' model. */
 public class AstahParseApp {
-	private SHInitiative		initiative;
-	private String				astahPath;
-	private StringBuffer		parsingResults	= new StringBuffer();
-	private Map<String, IClass>	astahClassMap	= new HashMap<String, IClass>();
-	private static String		winPath			= '"' + "C:/Program Files/astah-professional/astah-commandw.exe" + '"';
-	private static String		linuxPath		= "/var/lib/tomcat7/astah/astah_professional/astah-command.sh";
-	private static String		astahCommandPath;
+	private SHInitiative initiative;
+	private String astahPath;
+	private StringBuffer parsingResults = new StringBuffer();
+	private Map<String, IClass> astahClassMap = new HashMap<String, IClass>();
+	private static String winPath = '"' + "C:/Program Files/astah-professional/astah-commandw.exe" + '"';
+	private static String linuxPath = "/var/lib/tomcat7/astah/astah_professional/astah-command.sh";
+	private static String astahCommandPath;
 
 	static {
 		String os = System.getProperty("os.name");
 		System.out.println("*SO: " + os);
-		if (os.contains("Linux")) astahCommandPath = linuxPath;
-		else if (os.contains("Windows")) astahCommandPath = winPath;
+		if (os.contains("Linux"))
+			astahCommandPath = linuxPath;
+		else if (os.contains("Windows"))
+			astahCommandPath = winPath;
 	}
 
 	public AstahParseApp(SHInitiative initiative) {
@@ -87,7 +89,8 @@ public class AstahParseApp {
 			// Reading the model Packages (Ontologies and Models) and Notions (Concepts and Elements)
 			parseAstahModel(model);
 
-		} catch (IOException | ClassNotFoundException | LicenseNotFoundException | ProjectNotFoundException | NonCompatibleException | ProjectLockedException e) {
+		} catch (IOException | ClassNotFoundException | LicenseNotFoundException | ProjectNotFoundException
+				| NonCompatibleException | ProjectLockedException e) {
 			e.printStackTrace();
 		} finally {
 			accessor.close();
@@ -155,9 +158,12 @@ public class AstahParseApp {
 			if (node instanceof IPackage) {
 				IPackage levelpack = (IPackage) node;
 				Level level = null;
-				if (levelpack.getName().contains("Domain Level")) level = Level.DOMAIN;
-				else if (levelpack.getName().contains("Core Level")) level = Level.CORE;
-				else if (levelpack.getName().contains("Foundational Level")) level = Level.FOUNDATIONAL;
+				if (levelpack.getName().contains("Domain Level"))
+					level = Level.DOMAIN;
+				else if (levelpack.getName().contains("Core Level"))
+					level = Level.CORE;
+				else if (levelpack.getName().contains("Foundational Level"))
+					level = Level.FOUNDATIONAL;
 				for (INamedElement pack : levelpack.getOwnedElements()) {
 					if (pack instanceof IPackage) {
 						IPackage ontopack = (IPackage) pack;
@@ -345,10 +351,14 @@ public class AstahParseApp {
 	private String multiplicityToString(IMultiplicityRange imult) {
 		int lower = imult.getLower();
 		int upper = imult.getUpper();
-		if (lower == IMultiplicityRange.UNDEFINED) return "";
-		if (lower == IMultiplicityRange.UNLIMITED) return "*";
-		if (upper == IMultiplicityRange.UNDEFINED) return lower + "";
-		if (upper == IMultiplicityRange.UNLIMITED) return lower + "..*";
+		if (lower == IMultiplicityRange.UNDEFINED)
+			return "";
+		if (lower == IMultiplicityRange.UNLIMITED)
+			return "*";
+		if (upper == IMultiplicityRange.UNDEFINED)
+			return lower + "";
+		if (upper == IMultiplicityRange.UNLIMITED)
+			return lower + "..*";
 		return lower + ".." + upper;
 	}
 
@@ -356,13 +366,15 @@ public class AstahParseApp {
 	private Diagram parseDiagram(IPackage pack, DiagramType type) throws ParserException {
 		IDiagram[] diagrams = pack.getDiagrams();
 		if (diagrams.length != 1) {
-			throw new ParserException("A single diagram is expected in Package " + pack.getName() + ". It has " + diagrams.length + ".\n");
+			throw new ParserException("A single diagram is expected in Package " + pack.getName() + ". It has "
+					+ diagrams.length + ".\n");
 		}
 		for (IDiagram diag : pack.getDiagrams()) {
 			// Creating the diagram and getting its path
 			Diagram diagram = new Diagram(type, diag);
-			String filename = (String) astahPath.subSequence(astahPath.indexOf("Uploaded_"), astahPath.indexOf(".asta"));
-			String path = "images/tmp/" + filename + File.separator + diag.getFullName(File.separator) + ".png";
+			String filename = (String) astahPath.subSequence(astahPath.indexOf("Uploaded_"),
+					astahPath.indexOf(".asta"));
+			String path = "images/" + filename + File.separator + diag.getFullName(File.separator) + ".png";
 			diagram.setPath(path);
 
 			try {
@@ -388,13 +400,13 @@ public class AstahParseApp {
 
 	/* Imports the astah PNG images (from astah file) to the images directory. */
 	public void importImages(String astahFile, String workingDir) throws ParserException {
-		// TODO: don't need to copy the selected diagrams. Only set the paths on the Diagram object.
-		String targetPath = workingDir + "images/tmp/";
-		File dir = new File(targetPath);
-		if (!dir.exists()) dir.mkdirs();
+		String targetPath = workingDir + "images";
 		try {
+			File dir = new File(targetPath);
+			//if (!dir.exists()) dir.mkdirs();
 			// TODO: remove
 			System.out.print("\nWho am I? ");
+			System.out.flush();
 			Process process = Runtime.getRuntime().exec("whoami");
 			BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
 			String s = null;
@@ -410,6 +422,7 @@ public class AstahParseApp {
 			command += " -f " + astahFile; // defining input astah file
 			command += " -o " + targetPath; // defining output directory
 			System.out.println("$ " + command);
+			System.out.flush();
 
 			long start = System.currentTimeMillis();
 			process = Runtime.getRuntime().exec(command); // Executing command
@@ -461,7 +474,8 @@ public class AstahParseApp {
 		// TODO: don't need to copy the selected diagrams. Only set the paths on the Diagram object.
 		String targetPath = workingDir + "images/";
 		File dir = new File(targetPath);
-		if (!dir.exists()) dir.mkdirs();
+		if (!dir.exists())
+			dir.mkdirs();
 		try {
 			// TODO: remove
 			System.out.println("Who am I?");

@@ -111,7 +111,7 @@
       type="file" name="file" accept=".asta" /> <br /> <input id="uploadbutton" type="button" value="Start Parsing" />
   </form>
 
-  <div style="display: inline-block; overflow: auto; border: 1px solid blue; width: 100%; height: 560px">
+  <div style="display: inline-block; overflow: auto; border: 1px solid blue; width: 100%; height: 580px">
     <div id="astahparsingdiv" style="font-size: 90%"></div>
   </div>
 

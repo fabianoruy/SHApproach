@@ -25,17 +25,35 @@
       <input type="hidden" name="action" value="login">
       <div style="width: 60%; margin: auto; border: 1px solid gray; padding: 10px">
         <b>Select an Initiative:</b><br/>
-        <select name="user" size="5">
+        <select name="user" size="5" style="width:250px" required>
             <option value="Quality Assurance">Quality Assurance</option>
             <option value="Configuration Management">Configuration Management</option>
-            <option value="Design">Design</option>
+            <option value="Software Design">Software Design</option>
             <option value="Requirements Development">Requirements Development</option>
         </select><br/>
 <!--         <label><b>Password:</b></label><br/> -->
-<!--         <input type="password" placeholder="Enter Password" name="pword" required><br/> -->
+<!--         <input type="password" placeholder="Enter Password" name="pword" required style="width:250px"><br/> -->
         <button type="submit">Open</button>
       </div>
     </form>
+  </div>
+
+  <div>
+    <code>
+      <p>
+        In this version, you can:<br />
+        - Parse your astah file<br />
+        - Do vertical mappings (simple and composite matches)<br/>
+        - Monitor mapping's coverage
+      </p>
+      <p>
+        In this version, you can't:<br />
+        - Do ICM mappings<br />
+        - Do horizontal mappings<br />
+        - See initiative results<br />
+        - Save your progress
+      </p>
+    </code>
   </div>
 </BODY>
 </HTML>

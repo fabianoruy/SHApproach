@@ -31,15 +31,15 @@ public class InitiativeStartServlet extends HttpServlet {
 				String pword = (String) request.getParameter("pword");
 				System.out.println("Login: " + title + ", " + pword);
 
-				// Recovering and SETTING the initiative to the SESSION. //
-				// -------------------------------------------------------//
-				this.initiative = recoverInitiative(title, pword);
-				request.getSession().setAttribute("initiative", initiative);
-				// -------------------------------------------------------//
+				// Recovering and SETTING the initiative to the SESSION.     //
+				// ----------------------------------------------------------//
+				this.initiative = recoverInitiative(title, pword);           //
+				request.getSession().setAttribute("initiative", initiative); //
+				// ----------------------------------------------------------//
 
 				if (logfile == null) {
 					// setLogOutput(request.getSession().getServletContext().getRealPath("/") + "/SHlogfile.txt");
-					//setLogOutput(request.getSession().getServletContext().getRealPath("/"));
+					setLogOutput(request.getSession().getServletContext().getRealPath("/"));
 					request.getSession().setAttribute("logfile", logfile);
 					System.out.println("\n### STARTING APPLICATION ###");
 					System.out.println("\n# Initiative Identification: "+ initiative);
@@ -71,7 +71,6 @@ public class InitiativeStartServlet extends HttpServlet {
 	private SHInitiative recoverInitiative(String title, String pword) {
 		// TODO: test pword and recover initiative
 		// TODO: move to application
-		//return new SHInitiative(title, "Purpose of the Initiative", "Scope of the Initiative", "People involved in the Initiative", null);
 		return new SHInitiative(title, "", "", "", null);
 	}
 
