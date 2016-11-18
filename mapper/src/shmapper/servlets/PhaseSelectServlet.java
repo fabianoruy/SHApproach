@@ -16,39 +16,44 @@ import shmapper.model.SHInitiative;
 /* Servlet implementation class PhaseSelectServlet */
 @WebServlet("/PhaseSelectServlet")
 public class PhaseSelectServlet extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-	private SHInitiative initiative;
+	private static final long	serialVersionUID	= 1L;
+	private SHInitiative		initiative;
 
 	/* HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response). */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
 		// System.out.println(">PhaseSelectServlet: " + request.getParameter("action"));
 		// Accessing the initiative from the Session
 		initiative = (SHInitiative) request.getSession().getAttribute("initiative");
 
-		if (request.getParameter("action").equals("startSelection")) {
-			// Starting the selection page.
-			// Initializing the application, that creates the mappings
-			MappingApp mapp = new MappingApp(initiative);
-			request.getSession().setAttribute("mappingapp", mapp);
-			request.setAttribute("initiative", initiative);
-			request.getRequestDispatcher("phaseselector.jsp").forward(request, response);
+		try {
+			if (request.getParameter("action").equals("openSelection")) {
+				System.out.println("\n# Phase Selection");
+				System.out.printf("Packs %d, Maps %d, Started %d\n", initiative.getAllPackages().size(), initiative.getMappings().size(), initiative.getStartedMappingsNumber());
+				// Starting the selection page.
+				if (!initiative.getAllPackages().isEmpty() && initiative.getMappings().isEmpty()) {
+					System.out.println("* Initiative: " + initiative);
+					// Initializing the application, that creates the mappings
+					MappingApp mapp = new MappingApp(initiative);
+					request.getSession().setAttribute("mappingapp", mapp);
+				}
+				request.getRequestDispatcher("phaseselector.jsp").forward(request, response);
 
-		} else if (request.getParameter("action").equals("openSelection")) {
-			// Opening the Page.
-			request.setAttribute("initiative", initiative);
-			request.getRequestDispatcher("phaseselector.jsp").forward(request, response);
-
-		} else if (request.getParameter("action").equals("endSession")) {
-			// Finishing the session.
-			System.out.println("\n### APPLICATION FINISHED ### - " + new Date());
-			response.getWriter().println("Application Finished!\n");
-			response.getWriter().println(initiative.getMappings().size() + " Mappings were created:");
-			for (Mapping map : initiative.getMappings()) {
-				response.getWriter().println(map + ": " + map.getStatus() + " (" + map.getCoverage() + "%)");
+			} else if (request.getParameter("action").equals("endSession")) {
+				// Finishing the session.
+				System.out.println("\n### APPLICATION FINISHED ### - " + new Date());
+				response.getWriter().println("Application Finished!\n");
+				response.getWriter().println(initiative.getMappings().size() + " Mappings were created:");
+				for (Mapping map : initiative.getMappings()) {
+					response.getWriter().println(map + ": " + map.getStatus() + " (" + map.getCoverage() + "%)");
+				}
+				// TODO: put the logfile here. Needs to be HTML.
+				request.getSession().invalidate();
 			}
-			//TODO: put the logfile here. Needs to be HTML. 
-			request.getSession().invalidate();
+			else {
+				System.out.println(">PhaseSelectServlet, invalid action: " + request.getParameter("action"));
+			}
+		} catch (ServletException | IOException e) {
+			e.printStackTrace();
 		}
 	}
 }

@@ -31,8 +31,8 @@
             <option value="Design">Design</option>
             <option value="Requirements Development">Requirements Development</option>
         </select><br/>
-        <label><b>Password:</b></label><br/>
-        <input type="password" placeholder="Enter Password" name="pword" required><br/>
+<!--         <label><b>Password:</b></label><br/> -->
+<!--         <input type="password" placeholder="Enter Password" name="pword" required><br/> -->
         <button type="submit">Open</button>
       </div>
     </form>

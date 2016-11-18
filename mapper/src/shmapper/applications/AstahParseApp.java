@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.taglibs.standard.lang.jstl.parser.ParseException;
 
 import com.change_vision.jude.api.inf.AstahAPI;
 import com.change_vision.jude.api.inf.exception.InvalidUsingException;
@@ -48,26 +47,28 @@ import shmapper.model.StandardModel;
 
 /** Responsible for parsing the provided Astah file, creating the objects' model. */
 public class AstahParseApp {
-	private SHInitiative initiative;
-	private String astahPath;
-	private StringBuffer parsingResults = new StringBuffer();
-	private Map<String, IClass> astahClassMap = new HashMap<String, IClass>();
-	private static String winPath = '"' + "C:/Program Files/astah-professional/astah-commandw.exe" + '"';
-	private static String linuxPath = "/var/lib/tomcat7/astah/astah_professional/astah-command.sh";
-	private static String astahCommandPath;
+	private SHInitiative		initiative;
+	private String				astahPath;
+	private StringBuffer		parsingResults	= new StringBuffer();
+	private Map<String, IClass>	astahClassMap	= new HashMap<String, IClass>();
+	private static String		winPath			= '"' + "C:/Program Files/astah-professional/astah-commandw.exe" + '"';
+	private static String		linuxPath		= "/var/lib/tomcat7/astah/astah_professional/astah-command.sh";
+	private static String		astahCommandPath;
 
 	static {
 		String os = System.getProperty("os.name");
-		System.out.println("##SO: " + os);
-		if (os.contains("Linux"))
-			astahCommandPath = linuxPath;
-		else if (os.contains("Windows"))
-			astahCommandPath = winPath;
+		System.out.println("*SO: " + os);
+		if (os.contains("Linux")) astahCommandPath = linuxPath;
+		else if (os.contains("Windows")) astahCommandPath = winPath;
 	}
 
-	public SHInitiative getInitiative() {
-		return this.initiative;
+	public AstahParseApp(SHInitiative initiative) {
+		this.initiative = initiative;
 	}
+
+	// public SHInitiative getInitiative() {
+	// return this.initiative;
+	// }
 
 	/* Reads an Astah file for parsing the models (1). */
 	public void parseAstah(String filename) throws ParserException {
@@ -86,8 +87,7 @@ public class AstahParseApp {
 			// Reading the model Packages (Ontologies and Models) and Notions (Concepts and Elements)
 			parseAstahModel(model);
 
-		} catch (IOException | ClassNotFoundException | LicenseNotFoundException | ProjectNotFoundException
-				| NonCompatibleException | ProjectLockedException e) {
+		} catch (IOException | ClassNotFoundException | LicenseNotFoundException | ProjectNotFoundException | NonCompatibleException | ProjectLockedException e) {
 			e.printStackTrace();
 		} finally {
 			accessor.close();
@@ -110,8 +110,8 @@ public class AstahParseApp {
 		// Get the Standards Content Models (SCMs) package (3)
 		IPackage contentpack = getPackage(domainpack, "3.Content");
 
-		// Creating the SH Initiative
-		initiative = new SHInitiative(domainpack.getName(), null, null, null, astahPath);
+		// Creating the Packages for the Initiative
+		initiative.setAstahPath(astahPath);
 
 		// Parsing the ontologies (SEON View)
 		parseOntologies(seonpack);
@@ -135,7 +135,7 @@ public class AstahParseApp {
 		for (INamedElement node : superpack.getOwnedElements()) {
 			if (node instanceof IPackage && node.getName().equals(packname)) {
 				pack = (IPackage) node;
-				addResult("Package found: " + packname + ".\n");
+				addResult("Package found: " + packname + "\n");
 				return pack;
 			}
 		}
@@ -155,12 +155,9 @@ public class AstahParseApp {
 			if (node instanceof IPackage) {
 				IPackage levelpack = (IPackage) node;
 				Level level = null;
-				if (levelpack.getName().contains("Domain Level"))
-					level = Level.DOMAIN;
-				else if (levelpack.getName().contains("Core Level"))
-					level = Level.CORE;
-				else if (levelpack.getName().contains("Foundational Level"))
-					level = Level.FOUNDATIONAL;
+				if (levelpack.getName().contains("Domain Level")) level = Level.DOMAIN;
+				else if (levelpack.getName().contains("Core Level")) level = Level.CORE;
+				else if (levelpack.getName().contains("Foundational Level")) level = Level.FOUNDATIONAL;
 				for (INamedElement pack : levelpack.getOwnedElements()) {
 					if (pack instanceof IPackage) {
 						IPackage ontopack = (IPackage) pack;
@@ -348,14 +345,10 @@ public class AstahParseApp {
 	private String multiplicityToString(IMultiplicityRange imult) {
 		int lower = imult.getLower();
 		int upper = imult.getUpper();
-		if (lower == IMultiplicityRange.UNDEFINED)
-			return "";
-		if (lower == IMultiplicityRange.UNLIMITED)
-			return "*";
-		if (upper == IMultiplicityRange.UNDEFINED)
-			return lower + "";
-		if (upper == IMultiplicityRange.UNLIMITED)
-			return lower + "..*";
+		if (lower == IMultiplicityRange.UNDEFINED) return "";
+		if (lower == IMultiplicityRange.UNLIMITED) return "*";
+		if (upper == IMultiplicityRange.UNDEFINED) return lower + "";
+		if (upper == IMultiplicityRange.UNLIMITED) return lower + "..*";
 		return lower + ".." + upper;
 	}
 
@@ -363,14 +356,12 @@ public class AstahParseApp {
 	private Diagram parseDiagram(IPackage pack, DiagramType type) throws ParserException {
 		IDiagram[] diagrams = pack.getDiagrams();
 		if (diagrams.length != 1) {
-			throw new ParserException("A single diagram is expected in Package " + pack.getName() + ". It has "
-					+ diagrams.length + ".\n");
+			throw new ParserException("A single diagram is expected in Package " + pack.getName() + ". It has " + diagrams.length + ".\n");
 		}
 		for (IDiagram diag : pack.getDiagrams()) {
 			// Creating the diagram and getting its path
 			Diagram diagram = new Diagram(type, diag);
-			String filename = (String) astahPath.subSequence(astahPath.indexOf("Uploaded_"),
-					astahPath.indexOf(".asta"));
+			String filename = (String) astahPath.subSequence(astahPath.indexOf("Uploaded_"), astahPath.indexOf(".asta"));
 			String path = "images/tmp/" + filename + File.separator + diag.getFullName(File.separator) + ".png";
 			diagram.setPath(path);
 
@@ -396,15 +387,14 @@ public class AstahParseApp {
 	//////////////////// IMPORTING IMAGES ////////////////////
 
 	/* Imports the astah PNG images (from astah file) to the images directory. */
-	public void importImages(String astahFile, String workingDir) throws ParseException {
+	public void importImages(String astahFile, String workingDir) throws ParserException {
 		// TODO: don't need to copy the selected diagrams. Only set the paths on the Diagram object.
 		String targetPath = workingDir + "images/tmp/";
 		File dir = new File(targetPath);
-		if (!dir.exists())
-			dir.mkdirs();
+		if (!dir.exists()) dir.mkdirs();
 		try {
-			//TODO: remove
-			System.out.print("Who am I? ");
+			// TODO: remove
+			System.out.print("\nWho am I? ");
 			Process process = Runtime.getRuntime().exec("whoami");
 			BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
 			String s = null;
@@ -414,7 +404,7 @@ public class AstahParseApp {
 			input.close();
 
 			// Exporting images from the Astah file (using command line).
-			System.out.println("\n# Exporting images from Astah");
+			System.out.println("\n* Exporting images from Astah");
 			String command = astahCommandPath; // command for exporting
 			command += " -image cl"; // selecting only Class diagrams
 			command += " -f " + astahFile; // defining input astah file
@@ -424,19 +414,18 @@ public class AstahParseApp {
 			long start = System.currentTimeMillis();
 			process = Runtime.getRuntime().exec(command); // Executing command
 
-			//TODO: remove
+			// TODO: remove
 			input = new BufferedReader(new InputStreamReader(process.getInputStream()));
 			while ((s = input.readLine()) != null) {
 				System.out.println(s);
 			}
 			input.close();
 			BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-			while((s = error.readLine()) != null){
-			    System.out.println(s);
+			while ((s = error.readLine()) != null) {
+				System.out.println(s);
 			}
 			error.close();
-			
-			
+
 			process.waitFor();
 			System.out.print("[ -] Time: " + (System.currentTimeMillis() - start) + " - ");
 
@@ -463,19 +452,18 @@ public class AstahParseApp {
 			addResult(dcount + " diagrams imported.\n");
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new ParseException("Failed during astah images importing/copying.");
+			throw new ParserException("Failed during astah images importing/copying.");
 		}
 	}
 
 	/* Imports the astah PNG images (from astah file) to the images directory. */
-	public void importImages2(String astahFile, String workingDir) throws ParseException {
+	public void importImages2(String astahFile, String workingDir) throws ParserException {
 		// TODO: don't need to copy the selected diagrams. Only set the paths on the Diagram object.
 		String targetPath = workingDir + "images/";
 		File dir = new File(targetPath);
-		if (!dir.exists())
-			dir.mkdirs();
+		if (!dir.exists()) dir.mkdirs();
 		try {
-			//TODO: remove
+			// TODO: remove
 			System.out.println("Who am I?");
 			ProcessBuilder pb = new ProcessBuilder("whoami");
 			pb.redirectOutput(Redirect.INHERIT);
@@ -491,14 +479,14 @@ public class AstahParseApp {
 			System.out.println("$ " + command);
 
 			long start = System.currentTimeMillis();
-			//process = Runtime.getRuntime().exec(command); // Executing command
+			// process = Runtime.getRuntime().exec(command); // Executing command
 			pb = new ProcessBuilder(command);
 			pb.redirectOutput(Redirect.INHERIT);
 			pb.redirectError(Redirect.INHERIT);
 			p = pb.start();
 			p.waitFor();
 
-			//process.waitFor();
+			// process.waitFor();
 			System.out.print("[ -] Time: " + (System.currentTimeMillis() - start) + " - ");
 
 			// TODO: test images exporting in other machines/conditions.
@@ -524,7 +512,7 @@ public class AstahParseApp {
 			addResult(dcount + " diagrams imported.\n");
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new ParseException("Failed during astah images importing/copying.");
+			throw new ParserException("Failed during astah images importing/copying.");
 		}
 	}
 

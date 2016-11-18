@@ -24,11 +24,27 @@
     <form action="InitiativeStartServlet" method="POST">
       <input type="hidden" name="action" value="accessMenu">
       <div style="width: 60%; margin: auto; border: 1px solid gray; padding: 10px">
-        <label><b>Domain:</b></label><input type="text" name="domain" value="${initiative.domain}" disabled><br/>
-        <label><b>Purpose:</b></label><textarea name="purpose" rows="4" cols="80">${initiative.purpose}</textarea><br/>
-        <label><b>Scope:</b></label><textarea name="purpose" rows="4" cols="80">${initiative.scope}</textarea><br/>
-        <label><b>People:</b></label><input type="text" name="people" value="${initiative.people}" placeholder="People involved"><br/>
-        <button type="submit">Access Menu</button>
+        <table>
+          <tr>
+            <td><b>Domain:</b></td>
+            <td><input type="text" name="domain" size="79" value="${initiative.domain}" disabled></td>
+          </tr>
+          <tr>
+            <td><b>Purpose:</b></td>
+            <td><textarea name="purpose" rows="4" cols="80" placeholder="Initiative Purpose">${initiative.purpose}</textarea></td>
+          </tr>
+          <tr>
+            <td><b>Scope:</b></td>
+            <td><textarea name="scope" rows="4" cols="80" placeholder="Initiative Harmonization Scope">${initiative.scope}</textarea></td>
+          </tr>
+          <tr>
+            <td><b>People:</b></td>
+            <td><input type="text" name="people" size="79" value="${initiative.people}" placeholder="People involved"></td>
+          </tr>
+          <tr>
+            <td colspan="2" style="text-align:center"><button type="submit">Access Menu</button></td>
+          </tr>
+        </table>
       </div>
     </form>
   </div>

@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import shmapper.model.Mapping.MappingStatus;
+
 /* Represents a Standard Harmonization Initiative. */
 public class SHInitiative {
 	private String				domain;
@@ -38,12 +40,12 @@ public class SHInitiative {
 		SeonView seon = getSeonView();
 		IntegratedModel integrated = getIntegratedCM();
 		List<StandardModel> standards = getStandardCMs();
-		
+
 		// One VM for Standard (Std * 1)
 		for (int i = 0; i < standards.size(); i++) {
 			mappings.add(new VerticalMapping(standards.get(i), seon));
 		}
-		
+
 		// One HM for each pair of Standards (Std * (Std-1))
 		for (int i = 0; i < standards.size(); i++) {
 			for (int j = i + 1; j < standards.size(); j++) {
@@ -53,7 +55,13 @@ public class SHInitiative {
 
 		// A single DM (1) with all standards as base
 		mappings.add(new DiagonalMapping(standards, integrated));
-		System.out.println("Mappings Created: " + mappings);
+	}
+	
+	// Resets all the initiative's packages, mappings and notions.
+	public void resetInitiative() {
+		this.packages = new ArrayList<Package>();
+		this.mappings = new ArrayList<Mapping>();
+		this.notionMap = new HashMap<String, Notion>();
 	}
 
 	public String getDomain() {
@@ -67,7 +75,7 @@ public class SHInitiative {
 	public void setPurpose(String purpose) {
 		this.purpose = purpose;
 	}
-	
+
 	public String getScope() {
 		return scope;
 	}
@@ -75,11 +83,11 @@ public class SHInitiative {
 	public void setScope(String scope) {
 		this.scope = scope;
 	}
-	
+
 	public String getPeople() {
 		return people;
 	}
-	
+
 	public void setPeople(String people) {
 		this.people = people;
 	}
@@ -112,6 +120,14 @@ public class SHInitiative {
 		return mappings;
 	}
 
+	public int getStartedMappingsNumber() {
+		int count = 0;
+		for (Mapping mapping : mappings) {
+			if (mapping.getStatus() == MappingStatus.STARTED) count++;
+		}
+		return count;
+	}
+
 	public Mapping getMappingById(String mapId) {
 		for (Mapping map : mappings) {
 			if (map.getId().equals(mapId)) {
@@ -128,7 +144,7 @@ public class SHInitiative {
 				vmaps.add((VerticalMapping) map);
 			}
 		}
-		//System.out.println("Returning " + vmaps.size() + " VMs: " + vmaps);
+		// System.out.println("Returning " + vmaps.size() + " VMs: " + vmaps);
 		return vmaps;
 	}
 

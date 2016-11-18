@@ -36,8 +36,36 @@
   width: 97%;
 }
 </style>
+
 <script>
-  
+  $('#parsingbutton').click(
+      function() {
+        var maps = ${initiative.startedMappingsNumber}; 
+        if (maps > 0) {
+          showQuestion("You have " + maps
+              + " mappings started! Parsing astah again will exclude all the mappigs. Are you sure?", alert);
+        }
+      });
+
+  /* Shows a question message dialog. */
+  function showQuestion(text, yesFunction) {
+    $('#questionText').empty().append(text);
+    $('#dialog-question').dialog({
+      resizable : false,
+      height : "auto",
+      width : 600,
+      modal : true,
+      buttons : {
+        Yes : function() {
+          $(this).dialog('close');
+          yesFunction();
+        },
+        No : function() {
+          $(this).dialog('close');
+        }
+      }
+    });
+  }
 </script>
 </HEAD>
 
@@ -47,29 +75,38 @@
 
   <h2><b>Initiative: ${initiative.domain}</b></h2>
 
-  <div style="width: 220px; font-size: 80%">
-    <div class="done" style="padding: 7px">
-      <b>Done</b>: Phase Finished
-    </div>
-    <div class="open" style="padding: 7px">
-      <b>Open</b>: Phase Open to be Performed
-    </div>
-    <div class="closed" style="padding: 7px">
-      <b>Closed</b>: Phase not Open Yet
-    </div>
-  </div>
+<!--   <div style="width: 220px; font-size: 80%"> -->
+<!--     <div class="done" style="padding: 7px"> -->
+<!--       <b>Done</b>: Phase Finished -->
+<!--     </div> -->
+<!--     <div class="open" style="padding: 7px"> -->
+<!--       <b>Open</b>: Phase Open to be Performed -->
+<!--     </div> -->
+<!--     <div class="closed" style="padding: 7px"> -->
+<!--       <b>Closed</b>: Phase not Open Yet -->
+<!--     </div> -->
+<!--   </div> -->
 
   <p />
   <div>
     <div style="width: 60%; margin: auto">
+
       <div class="done">
-        <b>1) Initiative Info</b><br />
-        <ul>
-          <li>Domain: ${initiative.domain}</li>
-          <li>Purpose: ${initiative.purpose}</li>
-          <li>Scope: ${initiative.scope}</li>
-          <li>People: ${initiative.people}</li>
-        </ul>
+        <div style="display: inline-block">
+          <b>1) Initiative Info</b><br />
+          <ul>
+            <li>Domain: ${initiative.domain}</li>
+            <li>Purpose: ${initiative.purpose}</li>
+            <li>Scope: ${initiative.scope}</li>
+            <li>People: ${initiative.people}</li>
+          </ul>
+        </div>
+        <div style="display: inline-block; float: right">
+          <form action="InitiativeStartServlet" method="POST">
+            <input type="hidden" name="action" value="editInfo">
+            <button id="infobutton">Edit Info</button>
+          </form>
+        </div>
       </div>
 
       <p />

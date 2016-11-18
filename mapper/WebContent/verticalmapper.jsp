@@ -365,7 +365,7 @@
   <div style="text-align: center; width: 998px; margin: 10px 0 0 0">
     <form action="PhaseSelectServlet" method="POST">
       <input type="hidden" name="action" value="openSelection">
-      <button id="finishbutton">Stop Mapping</button>
+      <button id="finishbutton">Back to Menu</button>
     </form>
   </div>
 

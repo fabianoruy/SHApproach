@@ -34,6 +34,7 @@
                     $('#astahparsingdiv').empty().append(
                         "Please wait. Astah file is being processed. It can take some seconds.<br/>");
                   }
+                  $('#menubutton').prop('disabled', true);
                 },
                 success : function(servletResponse) {
                   $('#astahparsingdiv').append(servletResponse);
@@ -61,9 +62,8 @@
       },
       success : function(servletResponse) {
         $('#astahparsingdiv').append(servletResponse);
-        $('#mappingbutton').prop('disabled', false);
-        $('#logfile').prop('hidden', false);
-        
+        $('#menubutton').prop('disabled', false);
+        //$('#logfile').prop('hidden', false);
       }
     });
   }
@@ -96,7 +96,8 @@
         <li><i>Standards Structural Models</i> package: must have a subpackage for each Standard, each one
           containing a single diagram and the related concepts.</li>
       </ul>
-      Always try to avoid not used classes and relations.
+      Always try to avoid not used classes and relations.<br/>
+      The definitions set for each element/class will be shown during the mappings to support the comparisons.        
     </div>
     <div style="display: inline-block; text-align: right; float: right">
       <IMG src="images/AstahStructure.png" />
@@ -114,12 +115,12 @@
     <div id="astahparsingdiv" style="font-size: 90%"></div>
   </div>
 
-<!--   <a id="logfile" href="SHlogfile.txt" target="_blank" hidden><code>log file</code></a> -->
+  <a id="logfile" href="${logfile}" target="_blank"><code>log file</code></a>
 
   <div style="text-align: center; margin: 10px 0 0 0">
     <form action="PhaseSelectServlet" method="POST">
-      <input type="hidden" name="action" value="startSelection">
-      <button id="mappingbutton" disabled>Access Menu</button>
+      <input type="hidden" name="action" value="openSelection">
+      <button id="menubutton">Back to Menu</button>
     </form>
   </div>
   <!-- ***** Reading Blocks ***** -->

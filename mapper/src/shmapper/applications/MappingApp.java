@@ -11,7 +11,6 @@ import shmapper.model.Coverage;
 import shmapper.model.Diagram;
 import shmapper.model.Element;
 import shmapper.model.Mapping;
-import shmapper.model.Mapping.MappingStatus;
 import shmapper.model.Match;
 import shmapper.model.Notion;
 import shmapper.model.NotionPosition;
@@ -31,11 +30,12 @@ public class MappingApp {
 	public MappingApp(SHInitiative initiative) {
 		this.initiative = initiative;
 		this.initiative.createMappings();
+		System.out.println("Mappings Created: " + initiative.getMappings());
 	}
 
 	public void setCurrentMapping(Mapping mapping) {
 		this.mapping = mapping;
-		System.out.println("\n#Current Mapping: " + this.mapping + " (" + this.mapping.getId() + ")");
+		System.out.println("* Current Mapping: " + this.mapping);
 	}
 
 	public Mapping getCurrentMapping() {
