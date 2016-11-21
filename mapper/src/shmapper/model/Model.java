@@ -7,25 +7,34 @@ import com.change_vision.jude.api.inf.model.IPackage;
 
 /* Represents a Model with Elements. */
 public abstract class Model extends Package {
-    private boolean structural;
-    private List<Element> elements;
+	private boolean			structural;
+	private List<Element>	elements;
 
-    public Model(boolean struct, IPackage astahPack) {
-	super(astahPack);
-	this.structural = struct;
-	this.elements = new ArrayList<Element>();
-    }
+	public Model(boolean struct, IPackage astahPack) {
+		super(astahPack);
+		this.structural = struct;
+		this.elements = new ArrayList<Element>();
+	}
 
-    public boolean isStructural() {
-	return structural;
-    }
+	public boolean isStructural() {
+		return structural;
+	}
 
-    public List<Element> getElements() {
-	return this.elements;
-    }
+	public List<Element> getElements() {
+		return this.elements;
+	}
 
-    public void addElement(Element elem) {
-	this.elements.add(elem);
-    }
+	public void addElement(Element elem) {
+		this.elements.add(elem);
+	}
+	
+	public Element getElementByName(String name) {
+		for (Element element : elements) {
+			if(element.getName().equals(name)) {
+				return element;
+			}
+		}
+		return null;
+	}
 
 }

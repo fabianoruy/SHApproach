@@ -17,6 +17,16 @@ Phases:
 6) Horizontal Mappings (Std*(Std-1))	Create the matches (derived/horizontal)
 7) Harmonization Results				Show results (main table, ICM modifications)
 
+# File Structure
+  * mapper (workingDir)
+    - initiative
+      - index.ser
+      - {domain} (initiativeDir)
+        - log/logs.txt
+        - images/.../astahimages.png
+        - data/[domain].ser
+        - uploaded.asta
+domain: {qualityassurance, requirementsdevelopment, softwaredesig, configurationmanagement}
 
 # Match validation
 * Match
@@ -63,13 +73,26 @@ Nov.14/15
 + Match exclusion
 + Coverage presentation
  
-Nov.16
-- Publishing
+Nov.16/17/18/19
++ Publishing
++ Initital (approach and basic data)
++ File structure
++ Diverse fixes
+
+Nov.20
++ Discard not used elements (some structural)
++ Establish Structural Mapping (correspondences)
++ Deduce Structural Horizontal Mappings
++ Initiative States control
+
+Nov.21
 - Saving and Recovering
-= Initital (approach and basic data)
+- Match basetype validation
+= Results (partial)
+
+Nov.22
 = ICM Elements
 = Horizontal Mapping
-= Results
 - Match validation (T2)
 
 

@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.ProcessBuilder.Redirect;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +22,6 @@ import com.change_vision.jude.api.inf.model.IClass;
 import com.change_vision.jude.api.inf.model.IDiagram;
 import com.change_vision.jude.api.inf.model.IGeneralization;
 import com.change_vision.jude.api.inf.model.IModel;
-import com.change_vision.jude.api.inf.model.IMultiplicityRange;
 import com.change_vision.jude.api.inf.model.INamedElement;
 import com.change_vision.jude.api.inf.model.IPackage;
 import com.change_vision.jude.api.inf.presentation.INodePresentation;
@@ -47,21 +45,19 @@ import shmapper.model.StandardModel;
 
 /** Responsible for parsing the provided Astah file, creating the objects' model. */
 public class AstahParseApp {
-	private SHInitiative initiative;
-	private String astahPath;
-	private StringBuffer parsingResults = new StringBuffer();
-	private Map<String, IClass> astahClassMap = new HashMap<String, IClass>();
-	private static String winPath = '"' + "C:/Program Files/astah-professional/astah-commandw.exe" + '"';
-	private static String linuxPath = "/var/lib/tomcat7/astah/astah_professional/astah-command.sh";
-	private static String astahCommandPath;
+	private SHInitiative		initiative;
+	private String				astahPath;
+	private StringBuffer		parsingResults	= new StringBuffer();
+	private Map<String, IClass>	astahClassMap	= new HashMap<String, IClass>();
+	private static String		winPath			= '"' + "C:/Program Files/astah-professional/astah-commandw.exe" + '"';
+	private static String		linuxPath		= "/var/lib/tomcat7/astah/astah_professional/astah-command.sh";
+	private static String		astahCommandPath;
 
 	static {
 		String os = System.getProperty("os.name");
 		System.out.println("*SO: " + os);
-		if (os.contains("Linux"))
-			astahCommandPath = linuxPath;
-		else if (os.contains("Windows"))
-			astahCommandPath = winPath;
+		if (os.contains("Linux")) astahCommandPath = linuxPath;
+		else if (os.contains("Windows")) astahCommandPath = winPath;
 	}
 
 	public AstahParseApp(SHInitiative initiative) {
@@ -89,8 +85,7 @@ public class AstahParseApp {
 			// Reading the model Packages (Ontologies and Models) and Notions (Concepts and Elements)
 			parseAstahModel(model);
 
-		} catch (IOException | ClassNotFoundException | LicenseNotFoundException | ProjectNotFoundException
-				| NonCompatibleException | ProjectLockedException e) {
+		} catch (IOException | ClassNotFoundException | LicenseNotFoundException | ProjectNotFoundException | NonCompatibleException | ProjectLockedException e) {
 			e.printStackTrace();
 		} finally {
 			accessor.close();
@@ -130,6 +125,10 @@ public class AstahParseApp {
 		// Reading the model Relations and Generalizations
 		parseRelations(initiative.getAllNotions());
 		parseGeneralizations(initiative.getAllNotions());
+		int noBTs = checkBasetypes(initiative.getAllNotions());
+		if (noBTs > 0) {
+			addResult("<b>There are " + noBTs + " classes without a basetype. Fixing some of them allows a better support during the Mappings.<b>\n\n");
+		}
 	}
 
 	/* Reads the packages and creates the Ontologies and Standards Models. */
@@ -158,12 +157,9 @@ public class AstahParseApp {
 			if (node instanceof IPackage) {
 				IPackage levelpack = (IPackage) node;
 				Level level = null;
-				if (levelpack.getName().contains("Domain Level"))
-					level = Level.DOMAIN;
-				else if (levelpack.getName().contains("Core Level"))
-					level = Level.CORE;
-				else if (levelpack.getName().contains("Foundational Level"))
-					level = Level.FOUNDATIONAL;
+				if (levelpack.getName().contains("Domain Level")) level = Level.DOMAIN;
+				else if (levelpack.getName().contains("Core Level")) level = Level.CORE;
+				else if (levelpack.getName().contains("Foundational Level")) level = Level.FOUNDATIONAL;
 				for (INamedElement pack : levelpack.getOwnedElements()) {
 					if (pack instanceof IPackage) {
 						IPackage ontopack = (IPackage) pack;
@@ -182,7 +178,7 @@ public class AstahParseApp {
 	}
 
 	/* Reads the structural models packages and creates the SSMs. */
-	private void parseStructuralModels(IPackage ssmpack, IPackage ismpack) {
+	private void parseStructuralModels(IPackage ssmpack, IPackage ismpack) throws ParserException {
 		// Creates the Standards Structure Models (SSMs) and their elements.
 		addResult("\nStandards' Structural Models created: \n");
 		for (INamedElement node : ssmpack.getOwnedElements()) {
@@ -242,65 +238,79 @@ public class AstahParseApp {
 
 	/* Reads the classes of an Ontology package and creates the Concepts. */
 	private void parseConcepts(Ontology onto, IPackage pack) {
-		for (INamedElement node : pack.getOwnedElements()) {
-			// Parsing classes and creating Concepts
-			if (node instanceof IClass) {
-				Concept concept = new Concept(onto, (IClass) node);
-				onto.addConcept(concept);
-				initiative.addNotion(concept);
-				astahClassMap.put(node.getId(), (IClass) node);
-				// addResult(" . " + concept + "\n");
+		try {
+			for (INamedElement node : pack.getOwnedElements()) {
+				// Parsing classes and creating Concepts
+				if (node instanceof IClass) {
+					if (node.getPresentations().length > 0) { // selects only visible classes (appear in some diagram)
+						Concept concept = new Concept(onto, (IClass) node);
+						onto.addConcept(concept);
+						initiative.addNotion(concept);
+						astahClassMap.put(node.getId(), (IClass) node);
+						// addResult(" . " + concept + "\n");
+					} else {
+						System.out.println("Discarded Concept: " + node.getName());
+					}
+				}
+				// Recursivelly parsing packages
+				else if (node instanceof IPackage) {
+					parseConcepts(onto, (IPackage) node);
+				}
 			}
-			// Recursivelly parsing packages
-			else if (node instanceof IPackage) {
-				parseConcepts(onto, (IPackage) node);
-			}
+		} catch (InvalidUsingException e) {
+			e.printStackTrace();
 		}
 	}
 
 	/* Reads the classes of a Standard Model package and creates the Elements. */
 	private void parseElements(StandardModel model, IPackage pack) {
-		for (INamedElement node : pack.getOwnedElements()) {
-			// Parsing classes and creating Elements
-			if (node instanceof IClass) {
-				Element element = new Element(model, (IClass) node);
-				model.addElement(element);
-				initiative.addNotion(element);
-				astahClassMap.put(node.getId(), (IClass) node);
+		try {
+			for (INamedElement node : pack.getOwnedElements()) {
+				// Parsing classes and creating Elements
+				if (node instanceof IClass) {
+					if (node.getPresentations().length > 0) { // selects only visible classes (appear in some diagram)
+						Element element = new Element(model, (IClass) node);
+						model.addElement(element);
+						initiative.addNotion(element);
+						astahClassMap.put(node.getId(), (IClass) node);
+					} else {
+						System.out.println("Discarded Element: " + node.getName());
+					}
+				}
+				// Recursivelly parsing packages
+				else if (node instanceof IPackage) {
+					parseElements(model, (IPackage) node);
+				}
 			}
-			// Recursivelly parsing packages
-			else if (node instanceof IPackage) {
-				parseElements(model, (IPackage) node);
-			}
+		} catch (InvalidUsingException e) {
+			e.printStackTrace();
 		}
 	}
 
 	/* Reads the classes of a Standard Model package and creates the Elements. */
-	private void parseIMElements(IntegratedModel im, IPackage pack) {
-		for (INamedElement node : pack.getOwnedElements()) {
-			// Parsing classes and creating Elements
-			if (node instanceof IClass) {
-				Element element = new Element(im, (IClass) node);
-				im.addElement(element);
-				initiative.addNotion(element);
-				astahClassMap.put(node.getId(), (IClass) node);
+	private void parseIMElements(IntegratedModel im, IPackage pack) throws ParserException {
+		int ecount = 0;
+		try {
+			for (INamedElement node : pack.getOwnedElements()) {
+				// Parsing classes and creating Elements
+				if (node instanceof IClass) {
+					if (node.getPresentations().length > 0) { // selects only visible classes (appear in some diagram)
+						Element element = new Element(im, (IClass) node);
+						im.addElement(element);
+						initiative.addNotion(element);
+						astahClassMap.put(node.getId(), (IClass) node);
+						ecount++;
+					} else {
+						System.out.println("Discarded Element: " + node.getName());
+					}
+				}
 			}
-		}
-	}
-
-	/* Reads and sets the generalizations of each notion (Concepts and Elements). */
-	private void parseGeneralizations(List<Notion> notions) {
-		int gcount = 0;
-		for (Notion child : notions) {
-			// Reading and setting generalizations
-			for (IGeneralization node : astahClassMap.get(child.getId()).getGeneralizations()) {
-				Notion parent = initiative.getNotionById(node.getSuperType().getId());
-				child.addGeneralization(parent);
-				// System.out.println(child + " --> " + parent);
-				gcount++;
+			if(ecount == 0 && im.isStructural()) {
+				throw new ParserException("No elements were found in the Integrated Structural Model");
 			}
+		} catch (InvalidUsingException e) {
+			e.printStackTrace();
 		}
-		addResult(gcount + " generalizations set.\n");
 	}
 
 	/* Reads and creates the Relations between the Notions. */
@@ -311,32 +321,17 @@ public class AstahParseApp {
 			for (IAttribute attrib : astahClassMap.get(source.getId()).getAttributes()) {
 				IAssociation assoc = attrib.getAssociation();
 				if (assoc != null) { // it is an Association, not an Attribute
-					IAttribute firstEnd = assoc.getMemberEnds()[0];
-					IAttribute secondEnd = assoc.getMemberEnds()[1];
+					IClass asource = assoc.getMemberEnds()[0].getType();
 					// Selecting only the relations where this concept is source (not target).
-					if (firstEnd.getType().equals(astahClassMap.get(source.getId()))) {
-						String name = assoc.getName();
-						String def = assoc.getDefinition();
-						String ster = null;
-						if (assoc.getStereotypes().length > 0) {
-							ster = assoc.getStereotypes()[0]; // only the first for while
-						}
-						boolean composition = (firstEnd.isComposite() || firstEnd.isAggregate());
-						String smult = "";
-						String tmult = "";
-						if (firstEnd.getMultiplicity().length > 0) {
-							smult = multiplicityToString(firstEnd.getMultiplicity()[0]);
-						}
-						if (secondEnd.getMultiplicity().length > 0) {
-							tmult = multiplicityToString(secondEnd.getMultiplicity()[0]);
-						}
-
+					if (asource.equals(astahClassMap.get(source.getId()))) {
 						Notion target = initiative.getNotionById(attrib.getType().getId());
 						// Creating the Relation object
-						Relation relation = new Relation(name, def, ster, composition, source, target, smult, tmult);
-						source.addRelation(relation);
-						target.addRelation(relation);
-						rcount++;
+						if (target != null) {
+							Relation relation = new Relation(source, target, assoc);
+							source.addRelation(relation);
+							target.addRelation(relation);
+							rcount++;
+						}
 					}
 				} else {
 					// It is an attribute
@@ -347,35 +342,73 @@ public class AstahParseApp {
 		addResult(rcount + " relations parsed.\n");
 	}
 
-	/* Returns the multiplicity of an end in text format (n..m). */
-	private String multiplicityToString(IMultiplicityRange imult) {
-		int lower = imult.getLower();
-		int upper = imult.getUpper();
-		if (lower == IMultiplicityRange.UNDEFINED)
-			return "";
-		if (lower == IMultiplicityRange.UNLIMITED)
-			return "*";
-		if (upper == IMultiplicityRange.UNDEFINED)
-			return lower + "";
-		if (upper == IMultiplicityRange.UNLIMITED)
-			return lower + "..*";
-		return lower + ".." + upper;
+	/* Reads and sets the generalizations of each notion (Concepts and Elements). */
+	private void parseGeneralizations(List<Notion> notions) {
+		int gcount = 0;
+		for (Notion child : notions) {
+			// Reading and setting generalizations
+			for (IGeneralization node : astahClassMap.get(child.getId()).getGeneralizations()) {
+				Notion parent = initiative.getNotionById(node.getSuperType().getId());
+				if (parent != null) {
+					child.addGeneralization(parent);
+					// System.out.println(child + " --> " + parent);
+					gcount++;
+				}
+			}
+		}
+		addResult(gcount + " generalizations set.\n");
 	}
+
+	/* Checks if there is any notion without a basetype. */
+	private int checkBasetypes(List<Notion> allNotions) {
+		int count = 0;
+		for (Notion notion : allNotions) {
+			if (!notion.isBasetype()) {
+				List<Notion> basetypes = notion.getBasetypes();
+				if (basetypes.isEmpty()) {
+					if (notion instanceof Concept) {
+						addResult("The concept " + notion + " (package " + notion.getPackage() + ") has no generalization to a Core/Foundational Ontology Concept.\n");
+					} else if (notion instanceof Element) {
+						addResult("The element " + notion + " (package " + notion.getPackage() + ") has no generalization to a Structural Model Element.\n");
+					}
+					count++;
+				}
+			}
+		}
+		return count;
+	}
+
+	// if (!basetype.equals(notion)) {
+	// if (basetype instanceof Element) {
+	// Model model = ((Element) basetype).getModel();
+	// if (!model.isStructural()) {
+	// addResult("The element " + notion + " has no generalization to a Structural Model Element.\n");
+	// System.out.println("BT: "+ basetype);
+	// count++;
+	// }
+	// } else if (basetype instanceof Concept) {
+	// Ontology onto = ((Concept) basetype).getOntology();
+	// if (onto.getLevel() != Level.CORE && onto.getLevel() != Level.FOUNDATIONAL) {
+	// addResult("The concept " + notion + " has no generalization to a Core/Foundational Ontology Concept.\n");
+	// System.out.println("BT: "+ ((Concept)basetype).getOntology().getLevel());
+	// count++;
+	// }
+	// }
 
 	/* Reads and creates an astah Diagrams from a package. */
 	private Diagram parseDiagram(IPackage pack, DiagramType type) throws ParserException {
 		IDiagram[] diagrams = pack.getDiagrams();
 		if (diagrams.length != 1) {
-			throw new ParserException("A single diagram is expected in Package " + pack.getName() + ". It has "
-					+ diagrams.length + ".\n");
+			throw new ParserException("A single diagram is expected in Package " + pack.getName() + ". It has " + diagrams.length + ".\n");
 		}
 		for (IDiagram diag : pack.getDiagrams()) {
 			// Creating the diagram and getting its path
 			Diagram diagram = new Diagram(type, diag);
-			String filename = (String) astahPath.subSequence(astahPath.indexOf("Uploaded_"),
-					astahPath.indexOf(".asta"));
-			String path = "images/" + filename + File.separator + diag.getFullName(File.separator) + ".png";
-			diagram.setPath(path);
+			// System.out.println("AstahPath: "+ astahPath);
+			String filename = (String) astahPath.subSequence(astahPath.indexOf("uploaded_"), astahPath.indexOf(".asta"));
+			String initdir = (String) astahPath.subSequence(astahPath.indexOf("/mapper/"), astahPath.indexOf("uploaded_"));
+			String path = initdir + "images/" + filename + File.separator + diag.getFullName(File.separator) + ".png";
+			diagram.setPath(path.replace("\\", "/"));
 
 			try {
 				// Collecting the notions positions.
@@ -403,7 +436,7 @@ public class AstahParseApp {
 		String targetPath = workingDir + "images";
 		try {
 			File dir = new File(targetPath);
-			//if (!dir.exists()) dir.mkdirs();
+			// if (!dir.exists()) dir.mkdirs();
 			// TODO: remove
 			System.out.print("\nWho am I? ");
 			System.out.flush();
@@ -470,65 +503,63 @@ public class AstahParseApp {
 	}
 
 	/* Imports the astah PNG images (from astah file) to the images directory. */
-	public void importImages2(String astahFile, String workingDir) throws ParserException {
-		// TODO: don't need to copy the selected diagrams. Only set the paths on the Diagram object.
-		String targetPath = workingDir + "images/";
-		File dir = new File(targetPath);
-		if (!dir.exists())
-			dir.mkdirs();
-		try {
-			// TODO: remove
-			System.out.println("Who am I?");
-			ProcessBuilder pb = new ProcessBuilder("whoami");
-			pb.redirectOutput(Redirect.INHERIT);
-			pb.redirectError(Redirect.INHERIT);
-			Process p = pb.start();
-
-			// Exporting images from the Astah file (using command line).
-			System.out.println("\n# Exporting images from Astah");
-			String command = astahCommandPath; // command for exporting
-			command += " -image cl"; // selecting only Class diagrams
-			command += " -f " + astahFile; // defining input astah file
-			command += " -o " + targetPath; // defining output directory
-			System.out.println("$ " + command);
-
-			long start = System.currentTimeMillis();
-			// process = Runtime.getRuntime().exec(command); // Executing command
-			pb = new ProcessBuilder(command);
-			pb.redirectOutput(Redirect.INHERIT);
-			pb.redirectError(Redirect.INHERIT);
-			p = pb.start();
-			p.waitFor();
-
-			// process.waitFor();
-			System.out.print("[ -] Time: " + (System.currentTimeMillis() - start) + " - ");
-
-			// TODO: test images exporting in other machines/conditions.
-			// Waiting for all files being copied.
-			int files = 0;
-			int before = 0;
-			int diff = 0;
-			while (files == 0 || diff > 0) {
-				waitFor(3, 1000);
-				files = FileUtils.listFiles(dir, new String[] { "png" }, true).size();
-				diff = files - before;
-				before = files;
-				System.out.print("[" + files + "] Time: " + (System.currentTimeMillis() - start) + " - ");
-			}
-
-			// Counting the identified diagrams' paths
-			int dcount = 0;
-			for (Package pack : initiative.getAllPackages()) {
-				if (pack.getDiagram() != null) {
-					dcount++;
-				}
-			}
-			addResult(dcount + " diagrams imported.\n");
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new ParserException("Failed during astah images importing/copying.");
-		}
-	}
+//	public void importImages2(String astahFile, String workingDir) throws ParserException {
+//		String targetPath = workingDir + "images/";
+//		File dir = new File(targetPath);
+//		if (!dir.exists()) dir.mkdirs();
+//		try {
+//			// TODO: remove
+//			System.out.println("Who am I?");
+//			ProcessBuilder pb = new ProcessBuilder("whoami");
+//			pb.redirectOutput(Redirect.INHERIT);
+//			pb.redirectError(Redirect.INHERIT);
+//			Process p = pb.start();
+//
+//			// Exporting images from the Astah file (using command line).
+//			System.out.println("\n# Exporting images from Astah");
+//			String command = astahCommandPath; // command for exporting
+//			command += " -image cl"; // selecting only Class diagrams
+//			command += " -f " + astahFile; // defining input astah file
+//			command += " -o " + targetPath; // defining output directory
+//			System.out.println("$ " + command);
+//
+//			long start = System.currentTimeMillis();
+//			// process = Runtime.getRuntime().exec(command); // Executing command
+//			pb = new ProcessBuilder(command);
+//			pb.redirectOutput(Redirect.INHERIT);
+//			pb.redirectError(Redirect.INHERIT);
+//			p = pb.start();
+//			p.waitFor();
+//
+//			// process.waitFor();
+//			System.out.print("[ -] Time: " + (System.currentTimeMillis() - start) + " - ");
+//
+//			// TODO: test images exporting in other machines/conditions.
+//			// Waiting for all files being copied.
+//			int files = 0;
+//			int before = 0;
+//			int diff = 0;
+//			while (files == 0 || diff > 0) {
+//				waitFor(3, 1000);
+//				files = FileUtils.listFiles(dir, new String[] { "png" }, true).size();
+//				diff = files - before;
+//				before = files;
+//				System.out.print("[" + files + "] Time: " + (System.currentTimeMillis() - start) + " - ");
+//			}
+//
+//			// Counting the identified diagrams' paths
+//			int dcount = 0;
+//			for (Package pack : initiative.getAllPackages()) {
+//				if (pack.getDiagram() != null) {
+//					dcount++;
+//				}
+//			}
+//			addResult(dcount + " diagrams imported.\n");
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			throw new ParserException("Failed during astah images importing/copying.");
+//		}
+//	}
 
 	/* Waits for a period (millis) a number of times (times). */
 	private void waitFor(int times, long millis) {

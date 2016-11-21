@@ -15,6 +15,7 @@ import shmapper.model.Match;
 import shmapper.model.Notion;
 import shmapper.model.NotionPosition;
 import shmapper.model.SHInitiative;
+import shmapper.model.SHInitiative.InitiativeStatus;
 import shmapper.model.SimpleMatch;
 
 /** Responsible for providing the services for the mapping tasks. */
@@ -29,8 +30,8 @@ public class MappingApp {
 
 	public MappingApp(SHInitiative initiative) {
 		this.initiative = initiative;
-		this.initiative.createMappings();
-		System.out.println("Mappings Created: " + initiative.getMappings());
+		this.initiative.createContentMappings();
+		System.out.println("Mappings Created: " + initiative.getContentMappings());
 	}
 
 	public void setCurrentMapping(Mapping mapping) {
@@ -65,6 +66,9 @@ public class MappingApp {
 			mapping.addMatch(match); // At this moment the match is registered
 			message = CHECKED + "Match <b>" + match + "</b> created!";
 			System.out.println("(" + mapping.getMatches().size() + ") " + match);
+			if(initiative.getStatus() == InitiativeStatus.STRUCTURED) {
+				initiative.setStatus(InitiativeStatus.CONTENTED);
+			}
 			return match;
 		}
 		return null;
@@ -74,7 +78,7 @@ public class MappingApp {
 	public CompositeMatch createCompositeMatch(String elemId, String coverName) {
 		Element source = (Element) initiative.getNotionById(elemId);
 		Coverage cover = Coverage.valueOf(coverName);
-		List<SimpleMatch> smatches = mapping.getSimpleMatches(source);
+		List<SimpleMatch> smatches = mapping.getSimpleMatchesBySource(source);
 
 		CompositeMatch compMatch = new CompositeMatch(source, cover, null, smatches);
 		mapping.addMatch(compMatch); // At this moment the match is registered

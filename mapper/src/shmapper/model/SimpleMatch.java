@@ -4,14 +4,7 @@ package shmapper.model;
 public class SimpleMatch extends Match {
 	private Notion target;
 
-	/* Constructor for Vertical Mappings. */
-	public SimpleMatch(Element source, Concept target, Coverage cover, String comm) {
-		super(source, cover, comm);
-		this.target = target;
-	}
-
-	/* Constructor for Horizontal Mappings. */
-	public SimpleMatch(Element source, Element target, Coverage cover, String comm) {
+	public SimpleMatch(Element source, Notion target, Coverage cover, String comm) {
 		super(source, cover, comm);
 		this.target = target;
 	}

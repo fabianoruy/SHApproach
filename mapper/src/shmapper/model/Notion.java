@@ -11,9 +11,13 @@ public abstract class Notion {
 	private String			name;
 	private String			definition;
 	private String			stereotype;
+	private UFOType			ufotype;
 	private List<Notion>	generalizations;
 	private List<Relation>	relations;
-	// private IClass astahClass;
+
+	public static enum UFOType {
+		EVENT, OBJECT, AGENT, MOMENT, SITUATION;
+	}
 
 	public Notion(IClass astahClass) {
 		this.id = astahClass.getId();
@@ -24,7 +28,6 @@ public abstract class Notion {
 		} else this.stereotype = "";
 		this.generalizations = new ArrayList<Notion>();
 		this.relations = new ArrayList<Relation>();
-		// this.astahClass = astahClass;
 	}
 
 	public String getId() {
@@ -43,6 +46,14 @@ public abstract class Notion {
 		return stereotype;
 	}
 
+	public UFOType getUfotype() {
+		return ufotype;
+	}
+
+	public void setUfotype(UFOType type) {
+		this.ufotype = type;
+	}
+
 	public List<Notion> getGeneralizations() {
 		return generalizations;
 	}
@@ -51,15 +62,32 @@ public abstract class Notion {
 		this.generalizations.add(notion);
 	}
 
-	/* Returns the highest level type of this notion. */
-	public Notion getBaseType() {
-		// TODO: improve to scape UFO
-		Notion basetype = this;
-		while (basetype.getGeneralizations().size() > 0) {
-			basetype = basetype.getGeneralizations().get(0);
+	// /* Returns the highest level type of this notion. */
+	// public Notion getBasetype() {
+	// // TODO: improve to scape UFO
+	// Notion basetype = this;
+	// while (basetype.getGeneralizations().size() > 0) {
+	// basetype = basetype.getGeneralizations().get(0);
+	// }
+	// return basetype;
+	// }
+
+	/* Returns all basetypes of this element. */
+	public List<Notion> getBasetypes() {
+		ArrayList<Notion> basetypes = new ArrayList<Notion>();
+		for (Notion general : getGeneralizations()) {
+			if (general.isBasetype()) {
+				basetypes.add(general);
+			} else {
+				basetypes.addAll(general.getBasetypes());
+			}
 		}
-		return basetype;
+		return basetypes;
 	}
+
+	public abstract boolean isBasetype();
+
+	public abstract Package getPackage();
 
 	public List<Relation> getRelations() {
 		return relations;
@@ -70,10 +98,6 @@ public abstract class Notion {
 			this.relations.add(relation);
 		}
 	}
-
-	// public IClass getAstahClass() {
-	// return astahClass;
-	// }
 
 	@Override
 	public String toString() {

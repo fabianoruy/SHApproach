@@ -31,13 +31,22 @@ public class SeonView extends Package {
 	public void addOntology(Ontology onto) {
 		this.ontologies.add(onto);
 	}
-	
+
 	public List<Concept> getConcepts() {
 		List<Concept> concepts = new ArrayList<Concept>();
 		for (Ontology onto : ontologies) {
 			concepts.addAll(onto.getConcepts());
 		}
 		return concepts;
+	}
+
+	public Concept getConceptByName(String name) {
+		for (Concept concept : getConcepts()) {
+			if (concept.getName().equals(name)) {
+				return concept;
+			}
+		}
+		return null;
 	}
 
 }

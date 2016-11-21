@@ -30,6 +30,10 @@
             <td><input type="text" name="domain" size="79px" value="${initiative.domain}" disabled></td>
           </tr>
           <tr>
+            <td><b>Status</b></td>
+            <td><input type="text" name="status" size="79px" value="${initiative.status}" disabled></td>
+          </tr>
+          <tr>
             <td><b>Purpose</b></td>
             <td><textarea name="purpose" rows="4" cols="80" placeholder="Initiative Purpose">${initiative.purpose}</textarea></td>
           </tr>

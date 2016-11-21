@@ -5,12 +5,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-import shmapper.model.Mapping.MappingStatus;
-
 /* Represents an abstract Mapping between a Model and an Ontology (vertical) or another Model (horizontal). */
 public abstract class Mapping {
 	private String			id;
 	private StandardModel	base;
+	private boolean			structural;
 	private List<Match>		matches;
 	private MappingStatus	status;
 
@@ -35,6 +34,14 @@ public abstract class Mapping {
 
 	public abstract Package getTarget();
 
+	public boolean isStructural() {
+		return structural;
+	}
+
+	public void setStructural(boolean structural) {
+		this.structural = structural;
+	}
+
 	/* Returns the coverage of the matchs over the Standard's Elements. */
 	public int getCoverage() {
 		// coverage (%): baseModel.elements.([E] + [P] + [W]/2 + [I]/2) / baseModel.elements;
@@ -43,14 +50,15 @@ public abstract class Mapping {
 		int noncovered = getNonCoveredElements().size();
 		int fully = all - partially - noncovered;
 		double coverage = ((partially / 2.0 + fully) / all) * 100;
-		//System.out.println(this + ": All(" + all + "), Full(" + fully + "), Part(" + partially + "), Non(" + noncovered + "): Cover(" + coverage + "%)");
+		// System.out.println(this + ": All(" + all + "), Full(" + fully + "), Part(" + partially + "), Non(" +
+		// noncovered + "): Cover(" + coverage + "%)");
 		return (int) Math.round(coverage);
 	}
 
 	public MappingStatus getStatus() {
 		return status;
 	}
-
+	
 	public List<Match> getMatches() {
 		return this.matches;
 	}
@@ -88,15 +96,27 @@ public abstract class Mapping {
 	}
 
 	/* Returns the simple matches which elem is the source. */
-	public List<SimpleMatch> getSimpleMatches(Element elem) {
-		List<SimpleMatch> elemMatches = new ArrayList<SimpleMatch>();
+	public List<SimpleMatch> getSimpleMatchesBySource(Element source) {
+		List<SimpleMatch> smatches = new ArrayList<SimpleMatch>();
 		for (Match match : matches) {
-			if (match instanceof SimpleMatch && match.getSource().equals(elem)) {
-				elemMatches.add((SimpleMatch) match);
+			if (match instanceof SimpleMatch && match.getSource().equals(source)) {
+				smatches.add((SimpleMatch) match);
 			}
 		}
-		return elemMatches;
+		return smatches;
 	}
+	
+	/* Returns the simple matches which elem is the target. */
+	public List<SimpleMatch> getSimpleMatchesByTarget(Notion target) {
+		List<SimpleMatch> smatches = new ArrayList<SimpleMatch>();
+		for (Match match : matches) {
+			if (match instanceof SimpleMatch && ((SimpleMatch) match).getTarget().equals(target)) {
+				smatches.add((SimpleMatch) match);
+			}
+		}
+		return smatches;
+	}
+
 
 	/* Returns the single composite match, in this mapping, within elem is the source. */
 	public CompositeMatch getCompositeMatch(Element elem) {
@@ -170,16 +190,20 @@ public abstract class Mapping {
 			matches.add(match);
 		}
 		match.setMapping(this);
-		
+
 		// Starting the mapping, if first Match
-		if(status == MappingStatus.PLANNED) {
+		if (status == MappingStatus.PLANNED) {
 			status = MappingStatus.STARTED;
 		}
 	}
-
+	
 	/* Removes a Match to the Mapping. */
 	public void removeMatch(Match rmatch) {
 		matches.remove(rmatch);
+	}
+
+	public void finishMapping() {
+		this.status = MappingStatus.FINISHED;
 	}
 
 	@Override

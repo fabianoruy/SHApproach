@@ -1,10 +1,7 @@
 package shmapper.servlets;
 
-import java.io.FileNotFoundException;
+import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -12,17 +9,19 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import shmapper.applications.InitiativeStartApp;
 import shmapper.model.SHInitiative;
 
 /** Servlet implementation class AstahParseServlet */
 @WebServlet("/InitiativeStartServlet")
 public class InitiativeStartServlet extends HttpServlet {
 	private static final long	serialVersionUID	= 1L;
+	private InitiativeStartApp	startApp			= null;
 	private SHInitiative		initiative			= null;
-	private String				logfile				= null;
+	private String				initdir				= "";
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
-		//System.out.println(">InitiativeStartServlet: " + request.getParameter("action"));
+		// System.out.println(">InitiativeStartServlet: " + request.getParameter("action"));
 
 		try {
 			if (request.getParameter("action").equals("login")) {
@@ -31,27 +30,32 @@ public class InitiativeStartServlet extends HttpServlet {
 				String pword = (String) request.getParameter("pword");
 				System.out.println("Login: " + title + ", " + pword);
 
-				// Recovering and SETTING the initiative to the SESSION.     //
-				// ----------------------------------------------------------//
-				this.initiative = recoverInitiative(title, pword);           //
-				request.getSession().setAttribute("initiative", initiative); //
-				// ----------------------------------------------------------//
+				// Initializing the Application
+				String mapperdir = request.getSession().getServletContext().getRealPath("/");
+				this.startApp = new InitiativeStartApp(mapperdir);
 
-				if (logfile == null) {
-					// setLogOutput(request.getSession().getServletContext().getRealPath("/") + "/SHlogfile.txt");
-					setLogOutput(request.getSession().getServletContext().getRealPath("/"));
+				// RECOVERING THE INITIATIVE
+				this.initiative = startApp.recoverInitiative(title, pword);
+				if (initiative != null) {
+					// SETTING THE INITIATIVE TO THE SESSION.
+					request.getSession().setAttribute("initiative", initiative);
+
+					// Creating and setting the logfile and initiative directory to the session.
+					initdir = "initiative/"+ title.toLowerCase().replaceAll("[^a-zA-Z0-9.-]", "") + File.separator;
+					String logfile = startApp.createLogOutput();
+					request.getSession().setAttribute("initdir", initdir);
 					request.getSession().setAttribute("logfile", logfile);
-					System.out.println("\n### STARTING APPLICATION ###");
-					System.out.println("\n# Initiative Identification: "+ initiative);
-				}
 
-				//System.out.printf("Initiative: %s, %s, %s, %s\n", initiative.getDomain(), initiative.getPurpose(), initiative.getScope(), initiative.getPeople());
-				request.getRequestDispatcher("initiativestarter.jsp").forward(request, response);
+					System.out.println("\n### STARTING APPLICATION ###");
+					System.out.println("\n# Initiative Identification: " + initiative);
+
+					request.getRequestDispatcher("initiativestarter.jsp").forward(request, response);
+				}
 
 			} else if (request.getParameter("action").equals("editInfo")) {
 				// Opening page for edition
 				request.getRequestDispatcher("initiativestarter.jsp").forward(request, response);
-			
+
 			} else if (request.getParameter("action").equals("accessMenu")) {
 				// Updating initiative
 				String purpose = (String) request.getParameter("purpose");
@@ -68,26 +72,22 @@ public class InitiativeStartServlet extends HttpServlet {
 		}
 	}
 
-	private SHInitiative recoverInitiative(String title, String pword) {
-		// TODO: test pword and recover initiative
-		// TODO: move to application
-		return new SHInitiative(title, "", "", "", null);
-	}
-
 	/* Defines the output log file. */
-	private void setLogOutput(String logpath) {
-		//logfile = logpath + "/log/SHLog." + new SimpleDateFormat("yyyy-MM-dd.HH-mm-ss").format(new Date()) + ".txt";
-		logfile = "log/SHLog." + new SimpleDateFormat("yyyy-MM-dd.HH-mm-ss").format(new Date()) + ".txt";
-		PrintStream ps;
-		try {
-			ps = new PrintStream(logpath + logfile);
-			System.setOut(ps);
-			System.setErr(ps);
-			System.out.println("SH Approach log file - " + new java.util.Date());
-			System.out.println("---------------------------------------------------");
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-	}
+	// private void setLogOutput(String logpath) {
+	// // logfile = logpath + "/log/SHLog." + new SimpleDateFormat("yyyy-MM-dd.HH-mm-ss").format(new Date()) + ".txt";
+	// logfile = "log/SHLog." + new SimpleDateFormat("yyyy-MM-dd.HH-mm-ss").format(new Date()) + ".txt";
+	// PrintStream ps;
+	// try {
+	// ps = new PrintStream(logpath + logfile);
+	// // ps = new PrintStream(logfile);
+	// // System.setOut(ps);
+	// // System.setErr(ps);
+	// System.out.println("SH Approach log file - " + new java.util.Date());
+	// System.out.println("---------------------------------------------------");
+	// System.out.println("Logfile: " + logfile);
+	// } catch (FileNotFoundException e) {
+	// e.printStackTrace();
+	// }
+	// }
 
 }

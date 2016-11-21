@@ -119,8 +119,8 @@
     $('#commentsfield').empty();
     $('#coveragediv').html($(responseXml).find('coveragetable').html());
     $('#covernumber').text($(responseXml).find('coveragetext').html());
-    //     $('.icon').remove();
-    //     $('#standarddiv').append($(responseXml).find('coverageicons').html());
+    $('.icon').remove();
+    $('#standarddiv').append($(responseXml).find('coverageicons').html());
   }
 
   /* Highlight the diagrams' elements/concepts and make then selectable. */
@@ -358,7 +358,7 @@
     <strong>Matches Established. (<a href=#nothing onclick="showCoverageStatus()">Coverage: <span
         id="covernumber">0%</span></a>)
     </strong>
-    <div id="matchingsdiv" style="font-size: 95%; overflow: auto; border: 1px solid gray; height: 400px"></div>
+    <div id="matchingsdiv" style="font-size: 95%; overflow: auto; border: 1px solid gray; height: 400px; padding:3px"></div>
   </div>
   <!--   </div> -->
 

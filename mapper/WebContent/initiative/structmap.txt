@@ -1,0 +1,22 @@
+﻿
+Mapping	Vertical	CMMI	SEON
+Process Area	Performed Process	EVENT
+Specific Goal	Performed Process	EVENT
+Generic Goal	Performed Process	EVENT
+
+Mapping	Vertical	12207	SEON
+Process	Performed Process	EVENT
+Activity	Performed Process	EVENT
+
+Mapping	Vertical	29110	SEON
+Process	Performed Process	EVENT
+Activity	Performed Process	EVENT
+
+Mapping	Diagonal	CMMI	ISM
+Purpose	Purpose	MOMENT
+
+Mapping	Diagonal	12207	ISM
+Purpose	Purpose	MOMENT
+
+Mapping	Diagonal	29110	ISM
+Purpose	Purpose	MOMENT

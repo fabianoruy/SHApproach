@@ -2,6 +2,8 @@ package shmapper.model;
 
 import com.change_vision.jude.api.inf.model.IClass;
 
+import shmapper.model.Ontology.Level;
+
 /* Represents a Concept from a Ontology. */
 public class Concept extends Notion {
 	private Ontology ontology;
@@ -12,6 +14,16 @@ public class Concept extends Notion {
 	}
 
 	public Ontology getOntology() {
+		return ontology;
+	}
+
+	@Override
+	public boolean isBasetype() {
+		return (ontology.getLevel() == Level.CORE || ontology.getLevel() == Level.FOUNDATIONAL);
+	}
+
+	@Override
+	public Package getPackage() {
 		return ontology;
 	}
 

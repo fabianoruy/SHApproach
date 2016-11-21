@@ -1,5 +1,9 @@
 package shmapper.model;
 
+import com.change_vision.jude.api.inf.model.IAssociation;
+import com.change_vision.jude.api.inf.model.IAttribute;
+import com.change_vision.jude.api.inf.model.IMultiplicityRange;
+
 /* Represents the Relations between Concepts or between Elements. */
 public class Relation {
 	private String	name;
@@ -12,15 +16,21 @@ public class Relation {
 	private String	targetMult;
 	private boolean	original;
 
-	public Relation(String name, String def, String ster, boolean composition, Notion source, Notion target, String smult, String tmult) {
-		this.name = name;
-		this.definition = def;
-		this.stereotype = ster;
-		this.composition = composition;
+	public Relation(Notion source, Notion target, IAssociation assoc) {
+		IAttribute firstEnd = assoc.getMemberEnds()[0];
+		IAttribute secondEnd = assoc.getMemberEnds()[1];
+
+		this.name = assoc.getName();
+		this.definition = assoc.getDefinition();
+		if (assoc.getStereotypes().length > 0) {
+			this.stereotype = assoc.getStereotypes()[0]; // only the first for while
+		}
+		this.composition = (firstEnd.isComposite() || firstEnd.isAggregate());
+		this.sourceMult = getMultiplicity(firstEnd);
+		this.targetMult = getMultiplicity(secondEnd);
+
 		this.source = source;
 		this.target = target;
-		this.sourceMult = smult;
-		this.targetMult = tmult;
 		this.original = true;
 	}
 
@@ -71,6 +81,27 @@ public class Relation {
 		if (composition) rname = "<>--" + name;
 		if (stereotype != null) ster = "  &lt&lt" + stereotype + "&gt&gt";
 		return source.getName() + " " + rname + " " + target.getName() + ster;
+		// String smult = " ";
+		// String tmult = " ";
+		// if (!sourceMult.isEmpty()) smult = " (" + sourceMult + ") ";
+		// if (!targetMult.isEmpty()) tmult = " (" + targetMult + ") ";
+		// return source.getName() + smult + rname + tmult + target.getName() + ster;
+	}
+
+	/* Returns the multiplicity of an end in text format (n..m). */
+	private String getMultiplicity(IAttribute iAttrib) {
+		IMultiplicityRange imult;
+		if (iAttrib.getMultiplicity().length > 0) {
+			imult = iAttrib.getMultiplicity()[0];
+			int lower = imult.getLower();
+			int upper = imult.getUpper();
+			if (lower == IMultiplicityRange.UNDEFINED) return "";
+			if (lower == IMultiplicityRange.UNLIMITED) return "*";
+			if (upper == IMultiplicityRange.UNDEFINED) return lower + "";
+			if (upper == IMultiplicityRange.UNLIMITED) return lower + "..*";
+			return lower + ".." + upper;
+		}
+		return "";
 	}
 
 }

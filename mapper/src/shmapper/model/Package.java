@@ -8,13 +8,11 @@ public abstract class Package {
 	private String		name;
 	private String		definition;
 	private Diagram		diagram;
-	//private IPackage	astahPack;
 
 	public Package(IPackage astahPack) {
 		this.id = astahPack.getId();
 		this.name = astahPack.getName();
 		this.definition = astahPack.getDefinition();
-		//this.astahPack = astahPack;
 	}
 
 	public String getId() {
@@ -41,10 +39,6 @@ public abstract class Package {
 		this.diagram = diagram;
 	}
 	
-//	public IPackage getAstahPack() {
-//		return astahPack;
-//	}
-
 	@Override
 	public String toString() {
 		return this.name;

@@ -6,7 +6,8 @@ public enum Coverage {
 	PARTIAL("is PART of"),
 	WIDER("is WIDER than"),
 	INTERSECTION("has INTERSECTION with"),
-	NOCOVERAGE("has NO COVERAGE.");
+	NOCOVERAGE("has NO COVERAGE."),
+	CORRESPONDENCE("is (structurally) CORRESPONDENT with");
 	
 	private final String text;
 	

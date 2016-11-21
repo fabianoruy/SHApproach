@@ -16,7 +16,17 @@ public class Element extends Notion {
 	}
 
 	public boolean isIntegrated() {
-		return standard == null;
+		return (standard == null);
+	}
+
+	@Override
+	public boolean isBasetype() {
+		return (standard.isStructural());
+	}
+
+	@Override
+	public Package getPackage() {
+		return standard;
 	}
 
 }

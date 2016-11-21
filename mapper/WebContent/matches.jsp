@@ -5,13 +5,20 @@
 <data>
   <matchestable>
     <table>
-      <c:forEach items="${mapping.matches}" var="match">
-        <tr>
-          <td><b>${match.source}</b></td>
-          <td>${match.coverage.text}</td>
+      <c:forEach items="${mapping.matches}" var="match" varStatus="loop">
+        <c:choose>
+          <c:when test="${loop.index%2 == 0}">
+            <tr>
+          </c:when>
+          <c:when test="${loop.index%2 == 1}">
+            <tr style="background-color:#F0F0F0">
+          </c:when>
+        </c:choose>
+          <td width="400px"><b>${match.source}</b></td>
+          <td width="180px">${match.coverage.text}</td>
           <c:choose>
             <c:when test="${match.getClass().simpleName eq 'SimpleMatch'}">
-              <td><b>${match.target}</b></td>
+              <td width="400px"><b>${match.target}</b></td>
               <c:if test="${empty match.comment}">
                 <td></td>
               </c:if>
@@ -20,7 +27,7 @@
               </c:if>
             </c:when>
             <c:when test="${match.getClass().simpleName eq 'CompositeMatch'}">
-              <td><b>(${match.matchesString})</b></td>
+              <td width="400px"><b>(${match.matchesString})</b></td>
               <td></td>
             </c:when>
           </c:choose>

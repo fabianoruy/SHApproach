@@ -12,13 +12,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import shmapper.applications.MappingApp;
-import shmapper.model.CompositeMatch;
 import shmapper.model.Diagram;
 import shmapper.model.Notion;
 import shmapper.model.NotionPosition;
 import shmapper.model.SHInitiative;
 import shmapper.model.SeonView;
-import shmapper.model.SimpleMatch;
 import shmapper.model.StandardModel;
 import shmapper.model.VerticalMapping;
 
@@ -70,7 +68,7 @@ public class VerticalMappingServlet extends HttpServlet {
 			String concId = request.getParameter("conc");
 			String cover = request.getParameter("cover");
 			String comm = request.getParameter("comm");
-			SimpleMatch match = mapp.createSimpleMatch(elemId, concId, cover, comm);
+			mapp.createSimpleMatch(elemId, concId, cover, comm);
 
 			updatePage(request, response);
 
@@ -78,7 +76,7 @@ public class VerticalMappingServlet extends HttpServlet {
 			// Creating a new Composite Match.
 			String elemId = request.getParameter("elem");
 			String cover = request.getParameter("cover");
-			CompositeMatch match = mapp.createCompositeMatch(elemId, cover);
+			mapp.createCompositeMatch(elemId, cover);
 
 			updatePage(request, response);
 
@@ -115,9 +113,9 @@ public class VerticalMappingServlet extends HttpServlet {
 	private JsonObject createJSON(Notion notion) {
 		JsonObject jobj = new JsonObject();
 		jobj.addProperty("name", notion.getName().replace("'", ""));
-		String definition = notion.getDefinition().replaceAll("@Ex.", "Ex.").replaceAll("(\\r\\n|\\n\\r|\\r|\\n)", " ").replace("'", "");
+		String definition = notion.getDefinition().replaceAll("@Ex.", "Ex.").replaceAll("(\\r\\n|\\n\\r|\\r|\\n)", " ").replace("'", "").replace("\"", "");
 		jobj.addProperty("definition", definition);
-		jobj.addProperty("basetype", notion.getBaseType().getName());
+		jobj.addProperty("basetype", notion.getBasetypes().toString().replaceAll("\\[|\\]", ""));
 		return jobj;
 	}
 
