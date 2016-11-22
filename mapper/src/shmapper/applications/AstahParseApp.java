@@ -55,7 +55,7 @@ public class AstahParseApp {
 
 	static {
 		String os = System.getProperty("os.name");
-		System.out.println("*SO: " + os);
+		System.out.println("* SO: " + os);
 		if (os.contains("Linux")) astahCommandPath = linuxPath;
 		else if (os.contains("Windows")) astahCommandPath = winPath;
 	}
@@ -405,8 +405,8 @@ public class AstahParseApp {
 			// Creating the diagram and getting its path
 			Diagram diagram = new Diagram(type, diag);
 			// System.out.println("AstahPath: "+ astahPath);
-			String filename = (String) astahPath.subSequence(astahPath.indexOf("uploaded_"), astahPath.indexOf(".asta"));
-			String initdir = (String) astahPath.subSequence(astahPath.indexOf("/mapper/"), astahPath.indexOf("uploaded_"));
+			String filename = astahPath.substring(astahPath.indexOf("uploaded_"), astahPath.indexOf(".asta"));
+			String initdir = astahPath.substring(astahPath.indexOf("mapper")-1, astahPath.indexOf("uploaded_"));
 			String path = initdir + "images/" + filename + File.separator + diag.getFullName(File.separator) + ".png";
 			diagram.setPath(path.replace("\\", "/"));
 

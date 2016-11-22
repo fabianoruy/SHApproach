@@ -123,12 +123,13 @@
 
       <div class="done">
         <div style="display: inline-block">
-          <b>1) Initiative Info</b><br />
+          <b>1) Initiative Info</b>
           <ul>
-            <li>Domain: ${initiative.domain}</li>
-            <li>Purpose: ${initiative.purpose}</li>
-            <li>Scope: ${initiative.scope}</li>
-            <li>People: ${initiative.people}</li>
+            <li><b>Domain: ${initiative.domain}</b></li>
+            <li>Status: ${initiative.status}</li>
+            <%--             <li>Purpose: ${initiative.purpose}</li> --%>
+            <%--             <li>Scope: ${initiative.scope}</li> --%>
+            <%--             <li>People: ${initiative.people}</li> --%>
           </ul>
         </div>
         <div style="display: inline-block; float: right">
@@ -141,7 +142,7 @@
 
       <p />
       <c:choose>
-        <c:when test="${initiative.status == 'CREATED'}">
+        <c:when test="${initiative.status == 'INITIATED'}">
           <div class="open">
             <div style="display: inline-block">
               <b>2) Astah Parsing</b><br /> <br />
@@ -150,7 +151,7 @@
         <c:otherwise>
           <div class="done">
             <div style="display: inline-block">
-              <b>2) Astah Parsing</b><br /> <br />
+              <b>2) Astah Parsing</b>
               <ul>
                 <li>SEON View: ${initiative.domain}</li>
                 <li>Integrated Model: ${initiative.integratedCM}</li>
@@ -171,7 +172,7 @@
 
     <p />
     <c:choose>
-      <c:when test="${initiative.status == 'CREATED'}">
+      <c:when test="${initiative.status == 'INITIATED'}">
         <div class="closed">
           <b>3) Structural Mapping</b><br /> <br />
         </div>
@@ -203,7 +204,7 @@
 
     <p />
     <c:choose>
-      <c:when test="${initiative.status == 'CREATED' || initiative.status == 'PARSED'}">
+      <c:when test="${initiative.status == 'INITIATED' || initiative.status == 'PARSED'}">
         <div class="closed">
       </c:when>
       <c:otherwise>
@@ -231,7 +232,7 @@
 
   <p />
   <c:choose>
-    <c:when test="${initiative.status == 'CREATED' || initiative.status == 'PARSED'}">
+    <c:when test="${initiative.status == 'INITIATED' || initiative.status == 'PARSED'}">
       <div class="closed">
         <b>5) ICM Mapping</b><br /> <br />
       </div>
@@ -255,7 +256,7 @@
 
   <p />
   <c:choose>
-    <c:when test="${initiative.status == 'CREATED' || initiative.status == 'PARSED'}">
+    <c:when test="${initiative.status == 'INITIATED' || initiative.status == 'PARSED'}">
       <div class="closed">
     </c:when>
     <c:otherwise>
@@ -281,25 +282,25 @@
 
   <p />
   <c:choose>
-    <c:when test="${initiative.status == 'CREATED' || initiative.status == 'PARSED'}">
+    <c:when test="${initiative.status == 'INITIATED' || initiative.status == 'PARSED'}">
       <div class="closed">
         <b>7) Harmonization Initiative Results</b><br /> <br />
       </div>
     </c:when>
     <c:otherwise>
-      <div class="closed">
-        <!--  <div class="open"> -->
+      <div class="open">
         <div style="display: inline-block">
           <b>7) Harmonization Initiative Results</b><br /> <br />
         </div>
         <div style="display: inline-block; float: right">
-          <button class="phasebutton" disabled>See Results</button>
+          <form action="PhaseSelectServlet" method="POST">
+            <input type="hidden" name="action" value="openResults">
+            <button class="phasebutton" id="resultsbutton">See Results</button>
+          </form>
         </div>
       </div>
     </c:otherwise>
   </c:choose>
-
-
 
   <div style="text-align: center; margin: 15px 0 0 0">
     <form action="PhaseSelectServlet" method="POST">

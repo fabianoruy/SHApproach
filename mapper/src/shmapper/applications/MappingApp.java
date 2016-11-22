@@ -20,18 +20,29 @@ import shmapper.model.SimpleMatch;
 
 /** Responsible for providing the services for the mapping tasks. */
 public class MappingApp {
-	private SHInitiative initiative;
-	private Mapping mapping; // current mapping
-	private String message;
-	private String question;
-	public static final String CHECKED = "<span style='color:green'><b>(\u2713)</b></span> ";
-	public static final String PROBLEM = "<span style='color:red'><b>(!)</b></span> ";
-	public static final String QUESTION = "<span style='color:blue'><b>(?)</b></span> ";
+	private SHInitiative		initiative;
+	private Mapping				mapping;															// current mapping
+	private String				message;
+	private String				question;
+	private QuestionType		questionType;
+	public static final String	CHECKED		= "<span style='color:green'><b>(\u2713)</b></span> ";
+	public static final String	PROBLEM		= "<span style='color:red'><b>(!)</b></span> ";
+	public static final String	QUESTION	= "<span style='color:blue'><b>(?)</b></span> ";
+
+	public static enum QuestionType {
+		Basetype, CompositeEquivalent, CompositeEquivalentPart
+	}
 
 	public MappingApp(SHInitiative initiative) {
 		this.initiative = initiative;
-		this.initiative.createContentMappings();
-		System.out.println("Mappings Created: " + initiative.getContentMappings());
+	}
+
+	/* Performs the creation of all content mappings. */
+	public void performContentMapping() {
+		if (initiative.getStatus() == InitiativeStatus.STRUCTURED && initiative.getContentMappings().isEmpty()) {
+			this.initiative.createContentMappings();
+			System.out.println("\nCreated Content Mappings: " + initiative.getContentMappings());
+		}
 	}
 
 	public void setCurrentMapping(Mapping mapping) {
@@ -55,21 +66,29 @@ public class MappingApp {
 		return quest;
 	}
 
+	public QuestionType getQuestionType() {
+		QuestionType qtype = questionType;
+		questionType = null;
+		return qtype;
+	}
+
 	/* Creates a new (simple) Match. */
-	public SimpleMatch createSimpleMatch(String elemId, String concId, String coverName, String comm) {
+	public SimpleMatch createSimpleMatch(String elemId, String concId, String coverName, String comm, boolean forceBT) {
 		Element source = (Element) initiative.getNotionById(elemId);
 		Concept target = (Concept) initiative.getNotionById(concId);
 		Coverage cover = Coverage.valueOf(coverName);
 
 		SimpleMatch match = new SimpleMatch(source, target, cover, comm);
 		if (validateOntologyDisjointness(match)) {
-			mapping.addMatch(match); // At this moment the match is registered
-			message = CHECKED + "Match <b>" + match + "</b> created!";
-			System.out.println("(" + mapping.getMatches().size() + ") " + match);
-			if(initiative.getStatus() == InitiativeStatus.STRUCTURED) {
-				initiative.setStatus(InitiativeStatus.CONTENTED);
+			if (forceBT || validateBasetypesCorrespondence(match)) {
+				mapping.addMatch(match); // At this moment the match is registered
+				message = CHECKED + "Match <b>" + match + "</b> created!";
+				System.out.println("(" + mapping.getMatches().size() + ") " + match);
+				if (initiative.getStatus() == InitiativeStatus.STRUCTURED) {
+					initiative.setStatus(InitiativeStatus.CONTENTED);
+				}
+				return match;
 			}
-			return match;
 		}
 		return null;
 	}
@@ -103,6 +122,27 @@ public class MappingApp {
 		System.out.println("Excluded: " + match);
 	}
 
+	/* Validates the Correspondences between the source and target basetypes using the structural mappings. */
+	private boolean validateBasetypesCorrespondence(SimpleMatch newMatch) {
+		List<Notion> sourcebts = newMatch.getSource().getAllBasetypes(); // Elements
+		List<Notion> targetbts = newMatch.getTarget().getAllBasetypes(); // Concepts
+		// Looking for BTs matches
+		for (Notion sbt : sourcebts) {
+			for (Notion tbt : targetbts) {
+				// Recovering the matches
+				List<SimpleMatch> matches = initiative.getSimpleMatches((Element) sbt, tbt);
+				if (!matches.isEmpty()) {
+					return true;
+				}
+			}
+		}
+		question += PROBLEM + "The selected Element and Concept have no correspondent basetypes.<br/>";
+		question += ("<code>(" + newMatch.getSource().getBasetypes() + ") X (" + newMatch.getTarget().getBasetypes() + ")</code><br/><b/>").replaceAll("\\[|\\]", "");
+		question += "<b>Do you really want to match them?</b>";
+		questionType = QuestionType.Basetype;
+		return false;
+	}
+
 	/* Validates the Ontology Disjointness (T1). */
 	private boolean validateOntologyDisjointness(SimpleMatch match) {
 		// Checks if the element is already matched with the same concept (T0).
@@ -118,38 +158,41 @@ public class MappingApp {
 			if (source.equals(osource)) {
 				// repeated source and target
 				if (match.getTarget().equals(omatch.getTarget())) {
-					message += PROBLEM + "The element <b>" + source + "</b> is already matched with the same concept ("
-							+ omatch + ")";
+					message += PROBLEM + "The element <b>" + source + "</b> is already matched with the same concept (" + omatch + ")";
 					return false;
 				}
-				message += "The element <b>" + source + "</b> is already matched with other concept (" + omatch
-						+ ").<br/>";
+				message += "The element <b>" + source + "</b> is already matched with other concept (" + omatch + ").<br/>";
 				repeatedMatches.add(omatch);
 				Coverage cover = match.getCoverage();
 				Coverage ocover = omatch.getCoverage();
 				// both coverages must be [W] or [I]
-				if (!((cover == Coverage.WIDER || cover == Coverage.INTERSECTION)
-						&& (ocover == Coverage.WIDER || ocover == Coverage.INTERSECTION))) {
+				if (!((cover == Coverage.WIDER || cover == Coverage.INTERSECTION) && (ocover == Coverage.WIDER || ocover == Coverage.INTERSECTION))) {
 					allowed = false;
 				}
 			}
 		}
 		if (!allowed) {
-			message += PROBLEM
-					+ "Multiple matches for the same element are allowed only for combinations of WIDER and INTERSECTION coverages.";
+			message += PROBLEM + "Multiple matches for the same Element are allowed only for combinations of WIDER and INTERSECTION coverages.";
 			return false;
 		} else if (repeatedMatches.size() > 0) {
+			int countIMatch = 0;
 			repeatedMatches.add(match);
-			question += "The element <b>" + source + "</b> has now " + repeatedMatches.size()
-					+ " matches with different concepts.<br/>";
+			question += "The element <b>" + source + "</b> has now " + repeatedMatches.size() + " matches with different concepts.<br/>";
 			question += "<code>";
 			for (SimpleMatch matchfor : repeatedMatches) {
 				question += "* <b>" + matchfor + "</b><br/>";
+				if (matchfor.getCoverage() == Coverage.INTERSECTION)
+					countIMatch++;
 			}
-			//TODO: if all matches are [W], only the EQUIVALENT, and NO options are available.
 			question += "</code><br/>";
-			question += QUESTION + "Is the element <b>" + source + "</b> <b>fully covered</b> by these " + repeatedMatches.size()	+ " concepts together?";
-			//question += QUESTION + "Do these " + repeatedMatches.size()	+ " concepts together <b>fully cover</b> the element <b>" + source + "</b>?";
+			question += QUESTION + "Is the element <b>" + source + "</b> <b>fully covered</b> by these " + repeatedMatches.size() + " concepts together?";
+			// if all matches are [W], only the EQUIVALENT and NO options are available.
+			if (countIMatch == 0) {
+				questionType = QuestionType.CompositeEquivalent;
+				// if there is an [I], the EQUIVALENT, PART OF and NO options are available.
+			} else {
+				questionType = QuestionType.CompositeEquivalentPart;
+			}
 		}
 		return true;
 	}
@@ -161,8 +204,7 @@ public class MappingApp {
 		for (NotionPosition position : diagram.getPositions()) {
 			Notion notion = position.getNotion();
 			// it is not a Structural Element
-			if (notion instanceof Concept
-					|| (notion instanceof Element && !((Element) notion).getModel().isStructural())) {
+			if (notion instanceof Concept || (notion instanceof Element && !((Element) notion).getModel().isStructural())) {
 				coordsHash.put(notion, position.getCoords());
 			}
 		}

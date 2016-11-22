@@ -5,12 +5,13 @@ import java.awt.geom.Rectangle2D;
 import com.change_vision.jude.api.inf.presentation.INodePresentation;
 
 /* Represents the position of a Notion in a Diagram. */
-public class NotionPosition {
-	private int		xPos;
-	private int		yPos;
-	private int		height;
-	private int		width;
-	private Notion	notion;
+public class NotionPosition extends SerializableObject {
+	private static final long	serialVersionUID	= -1833025877741195773L;
+	private int					xPos;
+	private int					yPos;
+	private int					height;
+	private int					width;
+	private Notion				notion;
 
 	public NotionPosition(Notion notion, INodePresentation node, Rectangle2D adjust) {
 		this.notion = notion;

@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import shmapper.applications.InitiativeStartApp;
+import shmapper.applications.MappingApp;
 import shmapper.model.SHInitiative;
 
 /** Servlet implementation class AstahParseServlet */
@@ -28,20 +29,20 @@ public class InitiativeStartServlet extends HttpServlet {
 				// Verifying the password and recovering the initiative (if exists)
 				String title = (String) request.getParameter("user");
 				String pword = (String) request.getParameter("pword");
-				System.out.println("Login: " + title + ", " + pword);
+				//System.out.println("Login: " + title + ", " + pword);
 
 				// Initializing the Application
 				String mapperdir = request.getSession().getServletContext().getRealPath("/");
 				this.startApp = new InitiativeStartApp(mapperdir);
 
 				// RECOVERING THE INITIATIVE
-				this.initiative = startApp.recoverInitiative(title, pword);
+				this.initiative = startApp.openInitiative(title, pword);
 				if (initiative != null) {
 					// SETTING THE INITIATIVE TO THE SESSION.
 					request.getSession().setAttribute("initiative", initiative);
 
 					// Creating and setting the logfile and initiative directory to the session.
-					initdir = "initiative/"+ title.toLowerCase().replaceAll("[^a-zA-Z0-9.-]", "") + File.separator;
+					initdir = "initiative/" + title.toLowerCase().replaceAll("[^a-zA-Z0-9.-]", "") + File.separator;
 					String logfile = startApp.createLogOutput();
 					request.getSession().setAttribute("initdir", initdir);
 					request.getSession().setAttribute("logfile", logfile);
@@ -49,7 +50,14 @@ public class InitiativeStartServlet extends HttpServlet {
 					System.out.println("\n### STARTING APPLICATION ###");
 					System.out.println("\n# Initiative Identification: " + initiative);
 
+					// Creating and Setting the MappingApp to the Session
+					MappingApp mapp = new MappingApp(initiative);
+					request.getSession().setAttribute("mappingapp", mapp);
+
 					request.getRequestDispatcher("initiativestarter.jsp").forward(request, response);
+				} else {
+					request.setAttribute("message", "Invalid Password!");
+					request.getRequestDispatcher("index.jsp").forward(request, response);
 				}
 
 			} else if (request.getParameter("action").equals("editInfo")) {

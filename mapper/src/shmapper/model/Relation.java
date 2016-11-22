@@ -5,16 +5,17 @@ import com.change_vision.jude.api.inf.model.IAttribute;
 import com.change_vision.jude.api.inf.model.IMultiplicityRange;
 
 /* Represents the Relations between Concepts or between Elements. */
-public class Relation {
-	private String	name;
-	private String	definition;
-	private String	stereotype;
-	private boolean	composition;
-	private Notion	source;
-	private Notion	target;
-	private String	sourceMult;
-	private String	targetMult;
-	private boolean	original;
+public class Relation extends SerializableObject {
+	private static final long	serialVersionUID	= -5299528956366422964L;
+	private String				name;
+	private String				definition;
+	private String				stereotype;
+	private boolean				composition;
+	private Notion				source;
+	private Notion				target;
+	private String				sourceMult;
+	private String				targetMult;
+	private boolean				original;
 
 	public Relation(Notion source, Notion target, IAssociation assoc) {
 		IAttribute firstEnd = assoc.getMemberEnds()[0];
@@ -78,8 +79,10 @@ public class Relation {
 	public String toString() {
 		String rname = name;
 		String ster = "";
-		if (composition) rname = "<>--" + name;
-		if (stereotype != null) ster = "  &lt&lt" + stereotype + "&gt&gt";
+		if (composition)
+			rname = "<>--" + name;
+		if (stereotype != null)
+			ster = "  &lt&lt" + stereotype + "&gt&gt";
 		return source.getName() + " " + rname + " " + target.getName() + ster;
 		// String smult = " ";
 		// String tmult = " ";
@@ -95,10 +98,14 @@ public class Relation {
 			imult = iAttrib.getMultiplicity()[0];
 			int lower = imult.getLower();
 			int upper = imult.getUpper();
-			if (lower == IMultiplicityRange.UNDEFINED) return "";
-			if (lower == IMultiplicityRange.UNLIMITED) return "*";
-			if (upper == IMultiplicityRange.UNDEFINED) return lower + "";
-			if (upper == IMultiplicityRange.UNLIMITED) return lower + "..*";
+			if (lower == IMultiplicityRange.UNDEFINED)
+				return "";
+			if (lower == IMultiplicityRange.UNLIMITED)
+				return "*";
+			if (upper == IMultiplicityRange.UNDEFINED)
+				return lower + "";
+			if (upper == IMultiplicityRange.UNLIMITED)
+				return lower + "..*";
 			return lower + ".." + upper;
 		}
 		return "";

@@ -3,29 +3,23 @@ package shmapper.model;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.UUID;
 
 /* Represents an abstract Mapping between a Model and an Ontology (vertical) or another Model (horizontal). */
-public abstract class Mapping {
-	private String			id;
-	private StandardModel	base;
-	private boolean			structural;
-	private List<Match>		matches;
-	private MappingStatus	status;
+public abstract class Mapping extends SerializableObject {
+	private static final long	serialVersionUID	= 1581632337297022767L;
+	private StandardModel		base;
+	private boolean				structural;
+	private List<Match>			matches;
+	private MappingStatus		status;
 
 	public static enum MappingStatus {
 		PLANNED, STARTED, FINISHED
 	}
 
 	public Mapping(StandardModel base) {
-		this.id = UUID.randomUUID().toString();
 		this.base = base;
 		this.status = MappingStatus.PLANNED;
 		this.matches = new ArrayList<Match>();
-	}
-
-	public String getId() {
-		return this.id;
 	}
 
 	public StandardModel getBase() {
@@ -58,7 +52,7 @@ public abstract class Mapping {
 	public MappingStatus getStatus() {
 		return status;
 	}
-	
+
 	public List<Match> getMatches() {
 		return this.matches;
 	}
@@ -105,7 +99,7 @@ public abstract class Mapping {
 		}
 		return smatches;
 	}
-	
+
 	/* Returns the simple matches which elem is the target. */
 	public List<SimpleMatch> getSimpleMatchesByTarget(Notion target) {
 		List<SimpleMatch> smatches = new ArrayList<SimpleMatch>();
@@ -117,6 +111,16 @@ public abstract class Mapping {
 		return smatches;
 	}
 
+	/* Returns all matches in the Mapping with the source and target. */
+	public List<SimpleMatch> getSimpleMatches(Element source, Notion target) {
+		List<SimpleMatch> smatches = new ArrayList<SimpleMatch>();
+		for (Match match : matches) {
+			if (match instanceof SimpleMatch && match.getSource().equals(source) && ((SimpleMatch) match).getTarget().equals(target)) {
+				smatches.add((SimpleMatch) match);
+			}
+		}
+		return smatches;
+	}
 
 	/* Returns the single composite match, in this mapping, within elem is the source. */
 	public CompositeMatch getCompositeMatch(Element elem) {
@@ -182,8 +186,13 @@ public abstract class Mapping {
 	public void addMatch(Match match) {
 		// Adds a simple match to the mapping.
 		if (match instanceof SimpleMatch) {
-			this.matches.add(match);
-		} else {
+			// If there's no simple match with the same source and target in the mapping
+			if (getSimpleMatches(match.getSource(), ((SimpleMatch) match).getTarget()).isEmpty()) {
+				this.matches.add(match);
+			} else {
+				return;
+			}
+		} else if (match instanceof CompositeMatch) {
 			// Adds a composite match to the mapping, replacing the previous with the same source.
 			Match previous = getCompositeMatch(match.getSource());
 			matches.remove(previous);
@@ -196,7 +205,7 @@ public abstract class Mapping {
 			status = MappingStatus.STARTED;
 		}
 	}
-	
+
 	/* Removes a Match to the Mapping. */
 	public void removeMatch(Match rmatch) {
 		matches.remove(rmatch);
@@ -218,7 +227,10 @@ public abstract class Mapping {
 
 	@Override
 	public String toString() {
-		return getBase() + " <--> " + getTarget();
+		String str = getBase() + " <--> " + getTarget();
+//		if (structural)
+//			str += " (" + getMatches().size() + ")";
+		return str;
 	}
 
 }

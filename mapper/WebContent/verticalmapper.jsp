@@ -39,7 +39,7 @@
     // Match button
     $('#matchbutton').click(function() {
       if (checkFields()) {
-        doMatch();
+        doMatch(false);
       }
     });
   });
@@ -59,7 +59,7 @@
   }
 
   /* Calls (the servlet via ajax) for creating a Match. */
-  function doMatch() {
+  function doMatch(force) {
     $.ajax({
       type : 'POST',
       url : 'VerticalMappingServlet',
@@ -68,7 +68,8 @@
         elem : $('#elementidfield').val(),
         conc : $('#conceptidfield').val(),
         cover : $('#coveringfield').val(),
-        comm : $('#commentsfield').val()
+        comm : $('#commentsfield').val(),
+        force : force
       },
       success : function(responseXml) {
         updateMapping(responseXml);
@@ -111,8 +112,21 @@
   function updateMapping(responseXml) {
     console.log(responseXml);
     var question = $(responseXml).find('questiontext').html();
-    if (question != "") {
-      showCompositeMatchQuestion(question, doCompositeMatch);
+    var qtype = $(responseXml).find('questiontype').html();
+    switch (qtype) {
+    case 'CompositeEquivalent':
+      showCompositeQuestionE(question, doCompositeMatch);
+      break;
+    case 'CompositeEquivalentPart':
+      showCompositeQuestionEP(question, doCompositeMatch);
+      break;
+    case 'Basetype':
+      showQuestion(question, function() {
+        doMatch(true)
+      });
+      break;
+    default:
+      break;
     }
     $('#matchingsdiv').html($(responseXml).find('matchestable').html());
     $('#messagediv').html($(responseXml).find('messagetext').html());
@@ -230,8 +244,28 @@
     });
   }
 
-  /* Shows a question message dialog. */
-  function showCompositeMatchQuestion(text, compositeFunction) {
+  /* Shows a question message dialog for Composite Matching (1 yes option). */
+  function showCompositeQuestionE(text, compositeFunction) {
+    $('#compositeText').empty().append(text);
+    $('#dialog-composite').dialog({
+      resizable : false,
+      height : "auto",
+      width : 600,
+      modal : true,
+      buttons : {
+        "Yes, the element is EQUIVALENT to the sun of the concepts." : function() {
+          $(this).dialog('close');
+          compositeFunction('EQUIVALENT');
+        },
+        "No, the element remains not fully covered." : function() {
+          $(this).dialog('close');
+        }
+      }
+    });
+  }
+
+  /* Shows a question message dialog for Composite Matching (2 yes options). */
+  function showCompositeQuestionEP(text, compositeFunction) {
     $('#compositeText').empty().append(text);
     $('#dialog-composite').dialog({
       resizable : false,
@@ -349,8 +383,8 @@
 
   <div style="display: inline-block; overflow: auto; width: 998px; margin: 15px 0 0 0">
     <strong>Message</strong>
-    <div id="messagediv"
-      style="font-size: 90%; border: 1px solid gray; height: 70px; border-radius: 10px; padding: 8px;"></div>
+    <div id="messagediv" style="font-size: 90%; border: 1px solid gray; height: 70px; border-radius: 10px; padding: 8px;"></div>
+    
   </div>
 
   <!--   <div> -->
@@ -358,7 +392,7 @@
     <strong>Matches Established. (<a href=#nothing onclick="showCoverageStatus()">Coverage: <span
         id="covernumber">0%</span></a>)
     </strong>
-    <div id="matchingsdiv" style="font-size: 95%; overflow: auto; border: 1px solid gray; height: 400px; padding:3px"></div>
+    <div id="matchingsdiv" style="font-size: 95%; overflow: auto; border: 1px solid gray; height: 400px; padding: 3px"></div>
   </div>
   <!--   </div> -->
 

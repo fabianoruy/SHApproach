@@ -68,7 +68,8 @@ public class VerticalMappingServlet extends HttpServlet {
 			String concId = request.getParameter("conc");
 			String cover = request.getParameter("cover");
 			String comm = request.getParameter("comm");
-			mapp.createSimpleMatch(elemId, concId, cover, comm);
+			boolean force = Boolean.valueOf(request.getParameter("force"));
+			mapp.createSimpleMatch(elemId, concId, cover, comm, force);
 
 			updatePage(request, response);
 
@@ -95,6 +96,7 @@ public class VerticalMappingServlet extends HttpServlet {
 		if (mapp != null) {
 			request.setAttribute("message", mapp.getMessage());
 			request.setAttribute("question", mapp.getQuestion());
+			request.setAttribute("qtype", mapp.getQuestionType());
 			request.setAttribute("mapping", mapp.getCurrentMapping());
 			request.getRequestDispatcher("matches.jsp").forward(request, response);
 		}

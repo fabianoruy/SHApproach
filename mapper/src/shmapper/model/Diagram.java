@@ -6,14 +6,14 @@ import java.util.List;
 import com.change_vision.jude.api.inf.model.IDiagram;
 
 /* Represents a Diagram (for the Seon View, a Standard Content Model or the ICM). */
-public class Diagram {
+public class Diagram extends SerializableObject {
+	private static final long		serialVersionUID	= -2739430268003131909L;
 	private String					name;
 	private String					description;
 	private String					path;
 	private String					width;
 	private DiagramType				type;
 	private List<NotionPosition>	positions;
-	// private IDiagram astahDiagram;
 
 	/* Seon View, Standard Structural Model, Integrated Structural Model, Standard Content Model, Integrated Content
 	 * Model. */
@@ -27,7 +27,6 @@ public class Diagram {
 		this.type = type;
 		this.width = String.valueOf(astahDiag.getBoundRect().getWidth());
 		this.positions = new ArrayList<NotionPosition>();
-		// this.astahDiagram = astahDiag;
 	}
 
 	public String getName() {
@@ -53,10 +52,6 @@ public class Diagram {
 	public DiagramType getType() {
 		return type;
 	}
-
-	// public IDiagram getAstahDiagram() {
-	// return astahDiagram;
-	// }
 
 	public List<NotionPosition> getPositions() {
 		return positions;

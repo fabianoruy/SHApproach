@@ -28,14 +28,19 @@ import shmapper.model.VerticalMapping;
 public class StructuralMappingApp {
 	private SHInitiative initiative;
 
-	public StructuralMappingApp(SHInitiative initiative, String smapfile) {
+	public StructuralMappingApp(SHInitiative initiative) {
 		this.initiative = initiative;
-		System.out.println("# StructuralMappingApp");
+		//System.out.println("# StructuralMappingApp");
+	}
+
+	/* Performs the creation of all structural mappings and matches. */
+	public void performStructuralMapping(String smapfile) {
 		createStructuralMappings();
 		populateStructuralMappings(smapfile);
 		deduceHorizontalMappings();
 		finishStructuralMappings();
 		initiative.setStatus(InitiativeStatus.STRUCTURED);
+		System.out.println("\nCreated Structural Mappings: " + initiative.getStructuralMappings());
 	}
 
 	/* Creates the structural mappings with the predefined structural matches. */
@@ -64,7 +69,7 @@ public class StructuralMappingApp {
 	/* Populates the structural mappings with the predefined structural matches (vertical and diagonal). */
 	private void populateStructuralMappings(String smapfile) {
 		// READING THE STRUCTURAL MAPPINGS FROM THE FILE and POPULATING THEM WITH THE DEFINED MATCHES
-		System.out.println("Reading file: " + smapfile);
+		System.out.println("\nReading file: " + smapfile);
 		String structmaps = null;
 		try {
 			// Reading the file to a String
@@ -113,7 +118,7 @@ public class StructuralMappingApp {
 					target = ((SeonView) currentMap.getTarget()).getConceptByName(tktarg);
 				} else if (tktype.equals("Diagonal")) {
 					target = ((IntegratedModel) currentMap.getTarget()).getElementByName(tktarg);
-					System.out.println("Target: "+ tktarg);
+					//System.out.println("Target: " + tktarg);
 				}
 				match = new SimpleMatch(source, target, Coverage.CORRESPONDENCE, null);
 				source.setUfotype(UFOType.valueOf(tkufo));
@@ -174,11 +179,10 @@ public class StructuralMappingApp {
 	private void finishStructuralMappings() {
 		for (Mapping smapping : initiative.getStructuralMappings()) {
 			smapping.finishMapping();
-
-			System.out.println("\nStructural Mapping: " + smapping);
-			for (Match match : smapping.getMatches()) {
-				System.out.println("- " + match);
-			}
+			// System.out.println("\nStructural Mappings: " + smapping + " (" + smapping.getMatches().size() + ")");
+			// for (Match match : smapping.getMatches()) {
+			// System.out.println("- " + match);
+			// }
 		}
 	}
 

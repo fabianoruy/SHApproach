@@ -7,8 +7,9 @@ import com.change_vision.jude.api.inf.model.IPackage;
 
 /* Represents an Ontology extracted from SEON. */
 public class Ontology extends Package {
-	private Level			level;
-	private List<Concept>	concepts;
+	private static final long	serialVersionUID	= 2597534839319969404L;
+	private Level				level;
+	private List<Concept>		concepts;
 
 	public static enum Level {
 		FOUNDATIONAL, CORE, DOMAIN

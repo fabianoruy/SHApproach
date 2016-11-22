@@ -7,8 +7,9 @@ import com.change_vision.jude.api.inf.model.IPackage;
 
 /* Represents a View extracted the SEON Ontologies. */
 public class SeonView extends Package {
-	private String			scope;
-	private List<Ontology>	ontologies;
+	private static final long	serialVersionUID	= 6480365986851483463L;
+	private String				scope;
+	private List<Ontology>		ontologies;
 
 	public SeonView(IPackage astahPack) {
 		super(astahPack);

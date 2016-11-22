@@ -26,14 +26,15 @@
       <div style="width: 60%; margin: auto; border: 1px solid gray; padding: 10px">
         <b>Select an Initiative:</b><br/>
         <select name="user" size="5" style="width:250px" required>
-            <option value="Quality Assurance">Quality Assurance</option>
+            <option value="Quality Assurance">Quality Assurance (test)</option>
             <option value="Configuration Management">Configuration Management</option>
-            <option value="Software Design">Software Design</option>
             <option value="Requirements Development">Requirements Development</option>
+            <option value="Software Design">Software Design</option>
         </select><br/>
-<!--         <label><b>Password:</b></label><br/> -->
-<!--         <input type="password" placeholder="Enter Password" name="pword" required style="width:250px"><br/> -->
+        <label><b>Password:</b></label><br/>
+        <input type="password" placeholder="Enter Password" name="pword" required style="width:250px"><br/>
         <button type="submit">Open</button>
+        <label style="color:red">${message}</label>
       </div>
     </form>
   </div>
@@ -43,15 +44,16 @@
       <p>
         In this version, you can:<br />
         - Parse your astah file<br />
-        - Do vertical mappings (simple and composite matches)<br/>
-        - Monitor mapping's coverage
+        - Import Structural mappings<br/>
+        - Do Vertical mappings (simple and composite matches, disjoint and basetype validations)<br/>
+        - Monitor mappings' coverage<br/>
+        - See initiative results<br />
+        - Save your progress
       </p>
       <p>
         In this version, you can't:<br />
         - Do ICM mappings<br />
-        - Do horizontal mappings<br />
-        - See initiative results<br />
-        - Save your progress
+        - Do Horizontal mappings
       </p>
     </code>
   </div>

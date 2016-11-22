@@ -38,6 +38,7 @@
                 },
                 success : function(servletResponse) {
                   $('#astahparsingdiv').append(servletResponse);
+                  $('#scrolldiv').scrollTop(1E10);
                   importImages();
                 },
                 error : {},
@@ -59,10 +60,12 @@
       },
       beforeSend : function() {
         $('#astahparsingdiv').append("Importing images... ");
+        $('#scrolldiv').scrollTop(1E10);
       },
       success : function(servletResponse) {
         $('#astahparsingdiv').append(servletResponse);
         $('#menubutton').prop('disabled', false);
+        $('#scrolldiv').scrollTop(1E10);
         //$('#logfile').prop('hidden', false);
       }
     });
@@ -88,7 +91,7 @@
             <li><i>1.SEON View</i>: with a single diagram representing this view, and the selected portion of SEON
               (in subpackages).</li>
             <li><i>2.Structure</i>: with a diagram for each Standard and one for the Integrated Structural Model
-              (ISM). The ISM additional elements stay here.</li>
+              (ISM). The ISM additional elements (e.g. Purpose) stay here.</li>
             <li><i>3.Content</i>: with a package for selected Standard (each one containing the Standard elements
               and a single diagram); and the resulting diagram Integrated Content Model (ICM) with the added new
               elements.</li>
@@ -96,7 +99,9 @@
         <li><i>Standards Structural Models</i> package: must have a subpackage for each Standard, each one
           containing a single diagram and the related concepts.</li>
       </ul>
-      Always try to avoid not used classes and relations.<br/>
+      Be sure that all packages, classes and diagrams are in the right place.<br/>
+      Try to avoid not used classes and relations. Only the classes appearing in diagrams will be parsed.<br/>
+      Try to stablish all the generalization and whole/part relations. They will be useful for tool advices.<br/>
       The definitions set for each element/class will be shown during the mappings to support the comparisons.        
     </div>
     <div style="display: inline-block; text-align: right; float: right">
@@ -111,7 +116,7 @@
       type="file" name="file" accept=".asta" /> <br /> <input id="uploadbutton" type="button" value="Start Parsing" />
   </form>
 
-  <div style="display: inline-block; overflow: auto; border: 1px solid blue; width: 100%; height: 580px">
+  <div id="scrolldiv" style="display: inline-block; overflow: auto; border: 1px solid blue; width: 100%; height: 580px">
     <div id="astahparsingdiv" style="font-size: 90%"></div>
   </div>
 

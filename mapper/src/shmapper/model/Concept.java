@@ -6,7 +6,8 @@ import shmapper.model.Ontology.Level;
 
 /* Represents a Concept from a Ontology. */
 public class Concept extends Notion {
-	private Ontology ontology;
+	private static final long	serialVersionUID	= 3167613498197598423L;
+	private Ontology			ontology;
 
 	public Concept(Ontology ontology, IClass astahClass) {
 		super(astahClass);

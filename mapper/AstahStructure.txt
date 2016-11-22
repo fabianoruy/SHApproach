@@ -85,10 +85,10 @@ Nov.20
 + Deduce Structural Horizontal Mappings
 + Initiative States control
 
-Nov.21
-- Saving and Recovering
-- Match basetype validation
-= Results (partial)
+Nov.21 (mapper3)
++ Saving and Recovering
++ Match basetype validation
++ Results (partial)
 
 Nov.22
 = ICM Elements

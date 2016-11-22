@@ -4,7 +4,8 @@ import com.change_vision.jude.api.inf.model.IClass;
 
 /* Represents an Element from a Standard Model. */
 public class Element extends Notion {
-	private Model standard;
+	private static final long	serialVersionUID	= -3365856985890766861L;
+	private Model				standard;
 
 	public Element(Model standard, IClass astahClass) {
 		super(astahClass);

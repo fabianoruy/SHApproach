@@ -7,8 +7,9 @@ import com.change_vision.jude.api.inf.model.IPackage;
 
 /* Represents a Model with Elements. */
 public abstract class Model extends Package {
-	private boolean			structural;
-	private List<Element>	elements;
+	private static final long	serialVersionUID	= 5300026087585445762L;
+	private boolean				structural;
+	private List<Element>		elements;
 
 	public Model(boolean struct, IPackage astahPack) {
 		super(astahPack);
@@ -27,10 +28,10 @@ public abstract class Model extends Package {
 	public void addElement(Element elem) {
 		this.elements.add(elem);
 	}
-	
+
 	public Element getElementByName(String name) {
 		for (Element element : elements) {
-			if(element.getName().equals(name)) {
+			if (element.getName().equals(name)) {
 				return element;
 			}
 		}

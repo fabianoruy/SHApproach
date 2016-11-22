@@ -2,7 +2,8 @@ package shmapper.model;
 
 /* Represents a Match between an Element and a Concept/Element. */
 public class SimpleMatch extends Match {
-	private Notion target;
+	private static final long	serialVersionUID	= 2134549264691121407L;
+	private Notion				target;
 
 	public SimpleMatch(Element source, Notion target, Coverage cover, String comm) {
 		super(source, cover, comm);

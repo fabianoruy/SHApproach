@@ -34,7 +34,7 @@ public class AstahParseServlet extends HttpServlet {
 	private Path				path				= null;
 	private String				results				= null;
 	private boolean				success				= true;
-	private boolean				importable			= false;
+	private boolean				importable			= true;
 
 	/* doPost method, for processing the upload and calling the parsers. */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -65,7 +65,8 @@ public class AstahParseServlet extends HttpServlet {
 			e.printStackTrace();
 		} finally {
 			response.getWriter().print(results);
-			if (!success) results = "";
+			if (!success)
+				results = "";
 		}
 	}
 
@@ -95,8 +96,8 @@ public class AstahParseServlet extends HttpServlet {
 			// Initializing the Application and Parsing the Models
 			initiative = (SHInitiative) request.getSession().getAttribute("initiative");
 			// reseting the initiative (removing all packages and mappings)
-			if (!initiative.getContentMappings().isEmpty()) {
-				System.out.println("* Initiative RESET");
+			if (initiative.getStatus() != InitiativeStatus.INITIATED) {
+				System.out.println("* INITIATIVE RESET");
 				initiative.resetInitiative();
 			}
 			parser = new AstahParseApp(initiative);
@@ -115,7 +116,7 @@ public class AstahParseServlet extends HttpServlet {
 			if (importable) {
 				parser.importImages(path.toString(), workingDir);
 				results += parser.getResults();
-				results += "<br/><span style='color:blue'><b>Astah File successfully read and parsed!</span></b><br/>Proceed to the Mapping.";
+				results += "<br/><span style='color:blue'><b>Astah File successfully read and parsed!</span></b><br/>Proceed to the Mappings.<br/>";
 			}
 			success = true;
 			initiative.setStatus(InitiativeStatus.PARSED);

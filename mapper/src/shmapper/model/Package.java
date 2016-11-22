@@ -3,20 +3,16 @@ package shmapper.model;
 import com.change_vision.jude.api.inf.model.IPackage;
 
 /* Represents an abstract Package (Ontology, Standard Model or ICM). */
-public abstract class Package {
-	private String		id;
-	private String		name;
-	private String		definition;
-	private Diagram		diagram;
+public abstract class Package extends SerializableObject {
+	private static final long	serialVersionUID	= -8983523819554241974L;
+	private String				name;
+	private String				definition;
+	private Diagram				diagram;
 
 	public Package(IPackage astahPack) {
-		this.id = astahPack.getId();
+		this.setId(astahPack.getId());
 		this.name = astahPack.getName();
 		this.definition = astahPack.getDefinition();
-	}
-
-	public String getId() {
-		return id;
 	}
 
 	public String getName() {
@@ -30,7 +26,7 @@ public abstract class Package {
 	public String getDefinition() {
 		return definition;
 	}
-	
+
 	public Diagram getDiagram() {
 		return diagram;
 	}
@@ -38,15 +34,10 @@ public abstract class Package {
 	public void setDiagram(Diagram diagram) {
 		this.diagram = diagram;
 	}
-	
+
 	@Override
 	public String toString() {
 		return this.name;
-	}
-
-	@Override
-	public boolean equals(Object other) {
-		return (other instanceof Package && ((Package) other).id.equals(this.id));
 	}
 
 }

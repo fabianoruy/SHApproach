@@ -4,7 +4,8 @@ import java.util.List;
 
 /* Represents a composition of Matches for the same source. */
 public class CompositeMatch extends Match {
-	private List<SimpleMatch> matches;
+	private static final long	serialVersionUID	= -6126451502312008378L;
+	private List<SimpleMatch>	matches;
 
 	public CompositeMatch(Element source, Coverage cover, String comm, List<SimpleMatch> matches) {
 		super(source, cover, comm);

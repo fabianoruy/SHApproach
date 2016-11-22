@@ -87,5 +87,6 @@
   <messagetext>${message}</messagetext>
   
   <questiontext>${question}</questiontext>
+  <questiontype>${qtype}</questiontype>
   
 </data>

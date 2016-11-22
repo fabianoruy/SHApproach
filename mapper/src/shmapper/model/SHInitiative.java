@@ -1,14 +1,17 @@
 package shmapper.model;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import shmapper.model.Mapping.MappingStatus;
-
 /* Represents a Standard Harmonization Initiative. */
-public class SHInitiative {
+public class SHInitiative extends SerializableObject {
+	private static final long	serialVersionUID	= 6817595375134398343L;
 	private String				domain;
 	private String				purpose;
 	private String				scope;
@@ -20,9 +23,10 @@ public class SHInitiative {
 	private List<Mapping>		structmaps;
 	private List<Mapping>		contentmaps;
 	private Map<String, Notion>	notionMap;
+	private transient String	datafile;
 
 	public static enum InitiativeStatus {
-		CREATED, PARSED, STRUCTURED, CONTENTED, FINISHED
+		INITIATED, PARSED, STRUCTURED, CONTENTED, FINISHED, CREATED
 	}
 
 	public SHInitiative(String domain) {
@@ -31,15 +35,7 @@ public class SHInitiative {
 		this.structmaps = new ArrayList<Mapping>();
 		this.contentmaps = new ArrayList<Mapping>();
 		this.notionMap = new HashMap<String, Notion>();
-		this.status = InitiativeStatus.CREATED;
-	}
-
-	public SHInitiative(String domain, String purpose, String scope, String people, String path) {
-		this(domain);
-		this.purpose = purpose;
-		this.scope = scope;
-		this.people = people;
-		this.astahPath = path;
+		this.status = InitiativeStatus.INITIATED;
 	}
 
 	/* Creating the Content Mappings for this Initiative. */
@@ -68,10 +64,10 @@ public class SHInitiative {
 	// Resets all the initiative's packages, mappings and notions.
 	public void resetInitiative() {
 		this.packages = new ArrayList<Package>();
-		this.contentmaps = new ArrayList<Mapping>();
 		this.structmaps = new ArrayList<Mapping>();
+		this.contentmaps = new ArrayList<Mapping>();
 		this.notionMap = new HashMap<String, Notion>();
-		this.status = InitiativeStatus.CREATED;
+		this.status = InitiativeStatus.INITIATED;
 	}
 
 	public String getDomain() {
@@ -142,20 +138,49 @@ public class SHInitiative {
 		return structmaps;
 	}
 
-	public int getStartedContentMappingsNumber() {
-		int count = 0;
-		for (Mapping mapping : contentmaps) {
-			if (mapping.getStatus() == MappingStatus.STARTED) count++;
+	/* Returns all matches in the Initiative with the source and target. */
+	public List<SimpleMatch> getSimpleMatches(Element source, Notion target) {
+		Mapping mapping = getMapping(source.getModel(), target.getPackage());
+		return mapping.getSimpleMatches(source, target);
+	}
+
+	/* Returns the unique Mapping for the given base and target. */
+	private Mapping getMapping(Model base, Package target) {
+		// Identifying the Mapping level
+		List<Mapping> mappings = (base.isStructural() ? structmaps : contentmaps);
+
+		// Identifying direction (VM, DM, HM) of the Mapping
+		if (target instanceof Ontology) {
+			// Selecting the unique Vertical Mapping with the same base
+			for (Mapping vmap : mappings) {
+				if (vmap instanceof VerticalMapping && base.equals(vmap.getBase()))
+					return vmap;
+			}
+		} else if (target instanceof IntegratedModel) {
+			// Selecting the unique Diagonal Mapping with the same base
+			for (Mapping dmap : mappings) {
+				if (dmap instanceof DiagonalMapping && base.equals(dmap.getBase()))
+					return dmap;
+			}
+		} else if (target instanceof StandardModel) {
+			// Selecting the unique Horizontal Mapping with the same base and target (or vice-versa)
+			for (Mapping hmap : mappings) {
+				if (hmap instanceof HorizontalMapping
+						&& ((base.equals(hmap.getBase()) && target.equals(hmap.getTarget())) || (base.equals(hmap.getTarget()) && target.equals(hmap.getBase()))))
+					return hmap;
+			}
 		}
-		return count;
+		return null;
 	}
 
 	public Mapping getMappingById(String mapId) {
 		for (Mapping map : contentmaps) {
-			if (map.getId().equals(mapId)) return map;
+			if (map.getId().equals(mapId))
+				return map;
 		}
 		for (Mapping map : structmaps) {
-			if (map.getId().equals(mapId)) return map;
+			if (map.getId().equals(mapId))
+				return map;
 		}
 		return null;
 	}
@@ -308,6 +333,29 @@ public class SHInitiative {
 	@Override
 	public String toString() {
 		return this.domain + " (" + status + ")";
+	}
+
+	/* Saves this initiative. */
+	public void saveInitiative() {
+		try {
+			new File(datafile).getParentFile().mkdirs();
+			FileOutputStream fileOut = new FileOutputStream(datafile);
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+			out.writeObject(this);
+			out.close();
+			fileOut.close();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		System.out.println(".");
+	}
+
+	public String getDatafile() {
+		return datafile;
+	}
+
+	public void setDatafile(String file) {
+		this.datafile = file;
 	}
 
 }
