@@ -58,6 +58,16 @@ public abstract class Notion extends SerializableObject {
 		this.generalizations.add(notion);
 	}
 
+	/* Returns the UFO type of this Notion, or of the closer ancestral. */
+	public UFOType getIndirectUfotype() {
+		if (ufotype != null)
+			return ufotype;
+		if (!generalizations.isEmpty())
+			// one branch is enough (assuming all braches have the same ufotype)
+			return generalizations.get(0).getIndirectUfotype();
+		return null;
+	}
+
 	/* Returns the basetypes (first found in each branch) of this Notion. */
 	public List<Notion> getBasetypes() {
 		ArrayList<Notion> basetypes = new ArrayList<Notion>();

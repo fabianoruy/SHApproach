@@ -5,6 +5,8 @@ import java.util.List;
 
 import com.change_vision.jude.api.inf.model.IPackage;
 
+import shmapper.model.Notion.UFOType;
+
 /* Represents a Model with Elements. */
 public abstract class Model extends Package {
 	private static final long	serialVersionUID	= 5300026087585445762L;
@@ -27,6 +29,16 @@ public abstract class Model extends Package {
 
 	public void addElement(Element elem) {
 		this.elements.add(elem);
+	}
+
+	public List<Element> getElementsByUfotype(UFOType type) {
+		List<Element> typedElements = new ArrayList<Element>();
+		for (Element elem : elements) {
+			if (elem.getIndirectUfotype() == type) {
+				typedElements.add(elem);
+			}
+		}
+		return typedElements;
 	}
 
 	public Element getElementByName(String name) {

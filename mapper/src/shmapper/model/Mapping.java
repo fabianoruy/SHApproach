@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import shmapper.model.Element.CoverateSituation;
+import shmapper.model.Notion.UFOType;
+
 /* Represents an abstract Mapping between a Model and an Ontology (vertical) or another Model (horizontal). */
 public abstract class Mapping extends SerializableObject {
 	private static final long	serialVersionUID	= 1581632337297022767L;
@@ -145,6 +148,23 @@ public abstract class Mapping extends SerializableObject {
 		return null;
 	}
 
+	/* Returns the Current Coverage Situation of an Element in the context of THIS MAPPING. */
+	public CoverateSituation getCoverageSituation(Element elem) {
+		CoverateSituation situation = CoverateSituation.NONCOVERED;
+		for (Match match : matches) {
+			if (match.getSource().equals(elem)) {
+				Coverage cover = match.getCoverage();
+				if (cover == Coverage.EQUIVALENT || cover == Coverage.PARTIAL) {
+					situation = CoverateSituation.FULLY;
+					break;
+				} else if (cover == Coverage.WIDER || cover == Coverage.INTERSECTION) {
+					situation = CoverateSituation.PARTIALLY;
+				}
+			}
+		}
+		return situation;
+	}
+
 	/* Returns the current non covered elements of the mapping. */
 	public List<Element> getNonCoveredElements() {
 		List<Element> elems = new LinkedList<Element>(base.getElements());
@@ -177,6 +197,19 @@ public abstract class Mapping extends SerializableObject {
 			// adding all elements with Equivalent or Partial matches
 			if (cover == Coverage.EQUIVALENT || cover == Coverage.PARTIAL) {
 				elems.add(match.getSource());
+			}
+		}
+		return elems;
+	}
+
+	/* Returns the current non/partially covered elements of the given type in the mapping. */
+	public List<Element> getNonFullyCoveredElementsByUfotype(UFOType type) {
+		List<Element> elems = new LinkedList<Element>(base.getElementsByUfotype(type));
+		for (Match match : matches) {
+			Coverage cover = match.getCoverage();
+			// removing elements with Equivalent or Partial, remmaining the ones with ONLY Wider/Intersection coverage.
+			if (cover == Coverage.EQUIVALENT || cover == Coverage.PARTIAL) {
+				elems.remove(match.getSource());
 			}
 		}
 		return elems;
@@ -228,8 +261,8 @@ public abstract class Mapping extends SerializableObject {
 	@Override
 	public String toString() {
 		String str = getBase() + " <--> " + getTarget();
-//		if (structural)
-//			str += " (" + getMatches().size() + ")";
+		// if (structural)
+		// str += " (" + getMatches().size() + ")";
 		return str;
 	}
 

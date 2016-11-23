@@ -80,22 +80,4 @@ public class InitiativeStartServlet extends HttpServlet {
 		}
 	}
 
-	/* Defines the output log file. */
-	// private void setLogOutput(String logpath) {
-	// // logfile = logpath + "/log/SHLog." + new SimpleDateFormat("yyyy-MM-dd.HH-mm-ss").format(new Date()) + ".txt";
-	// logfile = "log/SHLog." + new SimpleDateFormat("yyyy-MM-dd.HH-mm-ss").format(new Date()) + ".txt";
-	// PrintStream ps;
-	// try {
-	// ps = new PrintStream(logpath + logfile);
-	// // ps = new PrintStream(logfile);
-	// // System.setOut(ps);
-	// // System.setErr(ps);
-	// System.out.println("SH Approach log file - " + new java.util.Date());
-	// System.out.println("---------------------------------------------------");
-	// System.out.println("Logfile: " + logfile);
-	// } catch (FileNotFoundException e) {
-	// e.printStackTrace();
-	// }
-	// }
-
 }

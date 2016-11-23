@@ -56,8 +56,10 @@ public class AstahParseApp {
 	static {
 		String os = System.getProperty("os.name");
 		System.out.println("* SO: " + os);
-		if (os.contains("Linux")) astahCommandPath = linuxPath;
-		else if (os.contains("Windows")) astahCommandPath = winPath;
+		if (os.contains("Linux"))
+			astahCommandPath = linuxPath;
+		else if (os.contains("Windows"))
+			astahCommandPath = winPath;
 	}
 
 	public AstahParseApp(SHInitiative initiative) {
@@ -157,9 +159,12 @@ public class AstahParseApp {
 			if (node instanceof IPackage) {
 				IPackage levelpack = (IPackage) node;
 				Level level = null;
-				if (levelpack.getName().contains("Domain Level")) level = Level.DOMAIN;
-				else if (levelpack.getName().contains("Core Level")) level = Level.CORE;
-				else if (levelpack.getName().contains("Foundational Level")) level = Level.FOUNDATIONAL;
+				if (levelpack.getName().contains("Domain Level"))
+					level = Level.DOMAIN;
+				else if (levelpack.getName().contains("Core Level"))
+					level = Level.CORE;
+				else if (levelpack.getName().contains("Foundational Level"))
+					level = Level.FOUNDATIONAL;
 				for (INamedElement pack : levelpack.getOwnedElements()) {
 					if (pack instanceof IPackage) {
 						IPackage ontopack = (IPackage) pack;
@@ -305,7 +310,7 @@ public class AstahParseApp {
 					}
 				}
 			}
-			if(ecount == 0 && im.isStructural()) {
+			if (ecount == 0 && im.isStructural()) {
 				throw new ParserException("No elements were found in the Integrated Structural Model");
 			}
 		} catch (InvalidUsingException e) {
@@ -318,6 +323,7 @@ public class AstahParseApp {
 		int rcount = 0;
 		for (Notion source : notions) {
 			// Reading and creating relations
+			//System.out.println("-> Source: " + source);
 			for (IAttribute attrib : astahClassMap.get(source.getId()).getAttributes()) {
 				IAssociation assoc = attrib.getAssociation();
 				if (assoc != null) { // it is an Association, not an Attribute
@@ -406,7 +412,7 @@ public class AstahParseApp {
 			Diagram diagram = new Diagram(type, diag);
 			// System.out.println("AstahPath: "+ astahPath);
 			String filename = astahPath.substring(astahPath.indexOf("uploaded_"), astahPath.indexOf(".asta"));
-			String initdir = astahPath.substring(astahPath.indexOf("mapper")-1, astahPath.indexOf("uploaded_"));
+			String initdir = astahPath.substring(astahPath.indexOf("mapper") - 1, astahPath.indexOf("uploaded_"));
 			String path = initdir + "images/" + filename + File.separator + diag.getFullName(File.separator) + ".png";
 			diagram.setPath(path.replace("\\", "/"));
 
@@ -503,63 +509,63 @@ public class AstahParseApp {
 	}
 
 	/* Imports the astah PNG images (from astah file) to the images directory. */
-//	public void importImages2(String astahFile, String workingDir) throws ParserException {
-//		String targetPath = workingDir + "images/";
-//		File dir = new File(targetPath);
-//		if (!dir.exists()) dir.mkdirs();
-//		try {
-//			// TODO: remove
-//			System.out.println("Who am I?");
-//			ProcessBuilder pb = new ProcessBuilder("whoami");
-//			pb.redirectOutput(Redirect.INHERIT);
-//			pb.redirectError(Redirect.INHERIT);
-//			Process p = pb.start();
-//
-//			// Exporting images from the Astah file (using command line).
-//			System.out.println("\n# Exporting images from Astah");
-//			String command = astahCommandPath; // command for exporting
-//			command += " -image cl"; // selecting only Class diagrams
-//			command += " -f " + astahFile; // defining input astah file
-//			command += " -o " + targetPath; // defining output directory
-//			System.out.println("$ " + command);
-//
-//			long start = System.currentTimeMillis();
-//			// process = Runtime.getRuntime().exec(command); // Executing command
-//			pb = new ProcessBuilder(command);
-//			pb.redirectOutput(Redirect.INHERIT);
-//			pb.redirectError(Redirect.INHERIT);
-//			p = pb.start();
-//			p.waitFor();
-//
-//			// process.waitFor();
-//			System.out.print("[ -] Time: " + (System.currentTimeMillis() - start) + " - ");
-//
-//			// TODO: test images exporting in other machines/conditions.
-//			// Waiting for all files being copied.
-//			int files = 0;
-//			int before = 0;
-//			int diff = 0;
-//			while (files == 0 || diff > 0) {
-//				waitFor(3, 1000);
-//				files = FileUtils.listFiles(dir, new String[] { "png" }, true).size();
-//				diff = files - before;
-//				before = files;
-//				System.out.print("[" + files + "] Time: " + (System.currentTimeMillis() - start) + " - ");
-//			}
-//
-//			// Counting the identified diagrams' paths
-//			int dcount = 0;
-//			for (Package pack : initiative.getAllPackages()) {
-//				if (pack.getDiagram() != null) {
-//					dcount++;
-//				}
-//			}
-//			addResult(dcount + " diagrams imported.\n");
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			throw new ParserException("Failed during astah images importing/copying.");
-//		}
-//	}
+	// public void importImages2(String astahFile, String workingDir) throws ParserException {
+	// String targetPath = workingDir + "images/";
+	// File dir = new File(targetPath);
+	// if (!dir.exists()) dir.mkdirs();
+	// try {
+	// // TODO: remove
+	// System.out.println("Who am I?");
+	// ProcessBuilder pb = new ProcessBuilder("whoami");
+	// pb.redirectOutput(Redirect.INHERIT);
+	// pb.redirectError(Redirect.INHERIT);
+	// Process p = pb.start();
+	//
+	// // Exporting images from the Astah file (using command line).
+	// System.out.println("\n# Exporting images from Astah");
+	// String command = astahCommandPath; // command for exporting
+	// command += " -image cl"; // selecting only Class diagrams
+	// command += " -f " + astahFile; // defining input astah file
+	// command += " -o " + targetPath; // defining output directory
+	// System.out.println("$ " + command);
+	//
+	// long start = System.currentTimeMillis();
+	// // process = Runtime.getRuntime().exec(command); // Executing command
+	// pb = new ProcessBuilder(command);
+	// pb.redirectOutput(Redirect.INHERIT);
+	// pb.redirectError(Redirect.INHERIT);
+	// p = pb.start();
+	// p.waitFor();
+	//
+	// // process.waitFor();
+	// System.out.print("[ -] Time: " + (System.currentTimeMillis() - start) + " - ");
+	//
+	// // TODO: test images exporting in other machines/conditions.
+	// // Waiting for all files being copied.
+	// int files = 0;
+	// int before = 0;
+	// int diff = 0;
+	// while (files == 0 || diff > 0) {
+	// waitFor(3, 1000);
+	// files = FileUtils.listFiles(dir, new String[] { "png" }, true).size();
+	// diff = files - before;
+	// before = files;
+	// System.out.print("[" + files + "] Time: " + (System.currentTimeMillis() - start) + " - ");
+	// }
+	//
+	// // Counting the identified diagrams' paths
+	// int dcount = 0;
+	// for (Package pack : initiative.getAllPackages()) {
+	// if (pack.getDiagram() != null) {
+	// dcount++;
+	// }
+	// }
+	// addResult(dcount + " diagrams imported.\n");
+	// } catch (Exception e) {
+	// e.printStackTrace();
+	// throw new ParserException("Failed during astah images importing/copying.");
+	// }
+	// }
 
 	/* Waits for a period (millis) a number of times (times). */
 	private void waitFor(int times, long millis) {

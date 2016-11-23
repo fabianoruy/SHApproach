@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import shmapper.model.Element.CoverateSituation;
+
 /* Represents a Standard Harmonization Initiative. */
 public class SHInitiative extends SerializableObject {
 	private static final long	serialVersionUID	= 6817595375134398343L;
@@ -37,6 +39,16 @@ public class SHInitiative extends SerializableObject {
 		this.notionMap = new HashMap<String, Notion>();
 		this.status = InitiativeStatus.INITIATED;
 	}
+	
+	/* Resets all the initiative's packages, mappings and notions. */
+	public void resetInitiative() {
+		System.out.println("* INITIATIVE RESET");
+		this.packages = new ArrayList<Package>();
+		this.structmaps = new ArrayList<Mapping>();
+		this.contentmaps = new ArrayList<Mapping>();
+		this.notionMap = new HashMap<String, Notion>();
+		this.status = InitiativeStatus.INITIATED;
+	}
 
 	/* Creating the Content Mappings for this Initiative. */
 	public void createContentMappings() {
@@ -59,15 +71,6 @@ public class SHInitiative extends SerializableObject {
 		for (int i = 0; i < standards.size(); i++) {
 			contentmaps.add(new DiagonalMapping(standards.get(i), integrated));
 		}
-	}
-
-	// Resets all the initiative's packages, mappings and notions.
-	public void resetInitiative() {
-		this.packages = new ArrayList<Package>();
-		this.structmaps = new ArrayList<Mapping>();
-		this.contentmaps = new ArrayList<Mapping>();
-		this.notionMap = new HashMap<String, Notion>();
-		this.status = InitiativeStatus.INITIATED;
 	}
 
 	public String getDomain() {
@@ -136,6 +139,28 @@ public class SHInitiative extends SerializableObject {
 
 	public List<Mapping> getStructuralMappings() {
 		return structmaps;
+	}
+
+	/* Returns the Current Coverage Situation of an Element in the context of the Initiative. */
+	public CoverateSituation getCoverageSituation(Element elem) {
+		Model model = elem.getModel();
+		VerticalMapping vmapping = null;
+		DiagonalMapping dmapping = null;
+		// Accessing the Vertical and Diagonal Mappings of the element.
+		for (Mapping map : contentmaps) {
+			if (map.getBase().equals(model)) {
+				if (map instanceof VerticalMapping) {
+					vmapping = (VerticalMapping) map;
+				} else if (map instanceof DiagonalMapping) {
+					dmapping = (DiagonalMapping) map;
+				}
+			}
+		}
+		// Checking the situation on each Mapping. 
+		CoverateSituation situation = dmapping.getCoverageSituation(elem);
+		if (situation == CoverateSituation.NONCOVERED)
+			situation = vmapping.getCoverageSituation(elem);
+		return situation;
 	}
 
 	/* Returns all matches in the Initiative with the source and target. */

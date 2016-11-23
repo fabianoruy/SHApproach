@@ -56,57 +56,56 @@ public class AstahParseServlet extends HttpServlet {
 			} else {
 				System.out.println("No action identified");
 			}
-		} catch (ServletException | IOException | ParserException e) {
+		} catch (Exception e) {
 			results += parser.getResults();
 			results += "<span style='color:red'>" + e.getMessage().replaceAll("\n", "<br/>") + "</span>";
 			results += "<br/><b>Please, fix your astah file and try again.</b>";
-			results += "<br/><a id='logfile' href='" + request.getSession().getAttribute("logfile") + "' target='_blank' hidden><code>log file</code></a>";
 			success = false;
+			// e.printStackTrace(System.err);
 			e.printStackTrace();
 		} finally {
+			if (!success) {
+				System.out.println("(!) Parse has failed! Cleaning data.");
+				initiative.resetInitiative();
+				initiative.saveInitiative();
+				response.setStatus(500);
+			}
+			System.out.println("doPost");
 			response.getWriter().print(results);
-			if (!success)
-				results = "";
+			response.flushBuffer();
+			results = "";
 		}
 	}
 
 	/* Gets the uploaded file, saves it, and starts the parsing. */
-	private void uploadAstah(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, ParserException {
+	private void uploadAstah(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, ParserException, FileUploadException {
 		// Accessing, saving and processing the uploaded astah file.
-		try {
-			List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(request);
-			String filename = null;
-			for (FileItem item : items) {
-				filename = item.getName();
-				InputStream content = item.getInputStream();
+		List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(request);
+		String filename = null;
+		for (FileItem item : items) {
+			filename = item.getName();
+			InputStream content = item.getInputStream();
 
-				response.setContentType("text/plain");
-				response.setCharacterEncoding("UTF-8");
+			response.setContentType("text/plain");
+			response.setCharacterEncoding("UTF-8");
 
-				// Saving file on disk
-				String initdir = (String) request.getSession().getAttribute("initdir");
-				workingDir = request.getSession().getServletContext().getRealPath("/") + initdir;
-				path = Paths.get(workingDir + "/uploaded_" + filename.replaceAll("[^a-zA-Z0-9.-]", "_")); // eliminating
-																											// special
-																											// chars
-				Files.copy(content, path, StandardCopyOption.REPLACE_EXISTING);
-			}
-			results = "File <i>" + filename + "</i> uploaded for the initiative.<br/>";
-
-			// Initializing the Application and Parsing the Models
-			initiative = (SHInitiative) request.getSession().getAttribute("initiative");
-			// reseting the initiative (removing all packages and mappings)
-			if (initiative.getStatus() != InitiativeStatus.INITIATED) {
-				System.out.println("* INITIATIVE RESET");
-				initiative.resetInitiative();
-			}
-			parser = new AstahParseApp(initiative);
-			parser.parseAstah(path.toString().replace("\\", "/"));
-			results += parser.getResults();
-
-		} catch (FileUploadException e) {
-			throw new ServletException("Parsing file upload failed.", e);
+			// Saving file on disk
+			String initdir = (String) request.getSession().getAttribute("initdir");
+			workingDir = request.getSession().getServletContext().getRealPath("/") + initdir;
+			path = Paths.get(workingDir + "/uploaded_" + filename.replaceAll("[^a-zA-Z0-9.-]", "_")); // no special
+																										// chars
+			Files.copy(content, path, StandardCopyOption.REPLACE_EXISTING);
 		}
+		results = "File <i>" + filename + "</i> uploaded for the initiative.<br/>";
+
+		// Initializing the Application and Parsing the Models
+		initiative = (SHInitiative) request.getSession().getAttribute("initiative");
+		// RESETING the initiative (removing all packages and mappings, if exists)
+		initiative.resetInitiative();
+
+		parser = new AstahParseApp(initiative);
+		parser.parseAstah(path.toString().replace("\\", "/"));
+		results += parser.getResults();
 	}
 
 	/* Imports the images from the uploaded astha file. */

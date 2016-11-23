@@ -238,8 +238,8 @@
       </div>
     </c:when>
     <c:otherwise>
-      <div class="closed">
-        <!--  <div class="open"> -->
+      <!--       <div class="closed"> -->
+      <div class="open">
         <div style="display: inline-block">
           <b>5) ICM Mapping</b><br /> <br />
           <c:forEach items="${initiative.diagonalContentMappings}" var="map" varStatus="loop">
@@ -247,7 +247,10 @@
           </c:forEach>
         </div>
         <div style="display: inline-block; float: right">
-          <button class="phasebutton" disabled>Do Mapping</button>
+          <form action="DiagonalMappingServlet" method="POST">
+            <input type="hidden" name="action" value="startMapping">
+            <button class="phasebutton" id="dmappingbutton">Do Mapping</button>
+          </form>
         </div>
       </div>
     </c:otherwise>

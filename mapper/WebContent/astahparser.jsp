@@ -41,7 +41,11 @@
                   $('#scrolldiv').scrollTop(1E10);
                   importImages();
                 },
-                error : {},
+                error : function(xhr) {
+                  $('#astahparsingdiv').append(xhr.responseText);
+                  $('#scrolldiv').scrollTop(1E10);
+                  $('#menubutton').prop('disabled', false);
+                },
                 //telling jQuery not to process data or worry about content-type.
                 cache : false,
                 contentType : false,
@@ -66,7 +70,11 @@
         $('#astahparsingdiv').append(servletResponse);
         $('#menubutton').prop('disabled', false);
         $('#scrolldiv').scrollTop(1E10);
-        //$('#logfile').prop('hidden', false);
+      },
+      error : function(xhr) {
+        $('#astahparsingdiv').append(xhr.responseText);
+        $('#menubutton').prop('disabled', false);
+        $('#scrolldiv').scrollTop(1E10);
       }
     });
   }
@@ -99,10 +107,10 @@
         <li><i>Standards Structural Models</i> package: must have a subpackage for each Standard, each one
           containing a single diagram and the related concepts.</li>
       </ul>
-      Be sure that all packages, classes and diagrams are in the right place.<br/>
-      Try to avoid not used classes and relations. Only the classes appearing in diagrams will be parsed.<br/>
-      Try to stablish all the generalization and whole/part relations. They will be useful for tool advices.<br/>
-      The definitions set for each element/class will be shown during the mappings to support the comparisons.        
+      Be sure that all packages, classes and diagrams are in the right place.<br /> Try to avoid not used classes and
+      relations. Only the classes appearing in diagrams will be parsed.<br /> Try to stablish all the generalization
+      and whole/part relations. They will be useful for tool advices.<br /> The definitions set for each element/class
+      will be shown during the mappings to support the comparisons.
     </div>
     <div style="display: inline-block; text-align: right; float: right">
       <IMG src="images/AstahStructure.png" />

@@ -7,6 +7,10 @@ public class Element extends Notion {
 	private static final long	serialVersionUID	= -3365856985890766861L;
 	private Model				standard;
 
+	public static enum CoverateSituation {
+		NONCOVERED, PARTIALLY, FULLY, DISCARDED;
+	}
+
 	public Element(Model standard, IClass astahClass) {
 		super(astahClass);
 		this.standard = standard;
