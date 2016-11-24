@@ -6,31 +6,14 @@
   <matchestable>
     <table>
       <c:forEach items="${mapping.matches}" var="match" varStatus="loop">
-        <c:choose>
-          <c:when test="${loop.index%2 == 0}">
-            <tr>
-          </c:when>
-          <c:when test="${loop.index%2 == 1}">
-            <tr style="background-color:#F0F0F0">
-          </c:when>
-        </c:choose>
+        <c:if test="${loop.index%2 == 0}"><tr></c:if>
+        <c:if test="${loop.index%2 == 1}"><tr style="background-color:#F0F0F0"></c:if>
           <td width="400px"><b>${match.source}</b></td>
           <td width="180px">${match.coverage.text}</td>
-          <c:choose>
-            <c:when test="${match.getClass().simpleName eq 'SimpleMatch'}">
-              <td width="400px"><b>${match.target}</b></td>
-              <c:if test="${empty match.comment}">
-                <td></td>
-              </c:if>
-              <c:if test="${not empty match.comment}">
-                <td>{<span title="${match.comment}" style="cursor:pointer"><i>C</i></span>}</td>
-              </c:if>
-            </c:when>
-            <c:when test="${match.getClass().simpleName eq 'CompositeMatch'}">
-              <td width="400px"><b>(${match.matchesString})</b></td>
-              <td></td>
-            </c:when>
-          </c:choose>
+          <td width="400px"><b>${match.target}</b></td>
+          <td><c:if test="${not empty match.comment}">
+            {<span title="${match.comment}" style="cursor:pointer"><i>C</i></span>}
+          </c:if></td>
           <td>
             <img id="${match.id}" src="images/favicon-remove.ico" title="Remove Match" width="16px" style="cursor:pointer" onclick="removeMatch('${match.id}')"/>
           </td>
@@ -44,7 +27,7 @@
     <table>
       <c:forEach items="${mapping.nonCoveredElements}" var="elem">
         <tr>
-          <td>${" -"}</td>
+          <td>${" - "}</td>
           <td> ${elem}</td>
         </tr>
       </c:forEach>
@@ -85,7 +68,6 @@
   <coveragetext>${mapping.coverage}%</coveragetext>
   
   <messagetext>${message}</messagetext>
-  
   <questiontext>${question}</questiontext>
   <questiontype>${qtype}</questiontype>
   

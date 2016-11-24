@@ -26,6 +26,7 @@ public class SimpleMatch extends Match {
 	@Override
 	public boolean equals(Object other) {
 		// Equal if they have same source and target.
+		// SEE use of contains method before changing it!
 		SimpleMatch omatch;
 		if (other instanceof SimpleMatch) {
 			omatch = (SimpleMatch) other;

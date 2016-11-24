@@ -1,6 +1,5 @@
 package shmapper.applications;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,8 +7,10 @@ import java.util.Map;
 import shmapper.model.CompositeMatch;
 import shmapper.model.Concept;
 import shmapper.model.Coverage;
+import shmapper.model.DiagonalMapping;
 import shmapper.model.Diagram;
 import shmapper.model.Element;
+import shmapper.model.IntegratedModel;
 import shmapper.model.Mapping;
 import shmapper.model.Match;
 import shmapper.model.Notion;
@@ -72,6 +73,8 @@ public class MappingApp {
 		return qtype;
 	}
 
+	//////////////////////////// VERTICAL MAPPING ////////////////////////////
+
 	/* Creates a new (simple) Match. */
 	public SimpleMatch createSimpleMatch(String elemId, String concId, String coverName, String comm, boolean forceBT) {
 		Element source = (Element) initiative.getNotionById(elemId);
@@ -79,15 +82,19 @@ public class MappingApp {
 		Coverage cover = Coverage.valueOf(coverName);
 
 		SimpleMatch match = new SimpleMatch(source, target, cover, comm);
-		if (validateOntologyDisjointness(match)) {
-			if (forceBT || validateBasetypesCorrespondence(match)) {
-				mapping.addMatch(match); // At this moment the match is registered
-				message = CHECKED + "Match <b>" + match + "</b> created!";
-				System.out.println("(" + mapping.getMatches().size() + ") " + match);
-				if (initiative.getStatus() == InitiativeStatus.STRUCTURED) {
-					initiative.setStatus(InitiativeStatus.CONTENTED);
+		if (validateMatchUniqueness(match)) {
+			if (validateOntologyDisjointness(match)) {
+				if (forceBT || validateBasetypesCorrespondence(match)) {
+					mapping.addMatch(match); // At this moment the match is registered
+					message = CHECKED + "Match <b>" + match + "</b> created!";
+					System.out.println("(" + mapping.getMatches().size() + ") " + match);
+					if (initiative.getStatus() == InitiativeStatus.STRUCTURED) {
+						initiative.setStatus(InitiativeStatus.CONTENTED);
+					}
+					// for asking if a Composite Match also has to be created
+					checkCompositeMatch(match);
+					return match;
 				}
-				return match;
 			}
 		}
 		return null;
@@ -111,15 +118,45 @@ public class MappingApp {
 		Match match = mapping.getMatchById(matchId);
 		if (match instanceof SimpleMatch) {
 			// If there is a Composite Match related
-			CompositeMatch cmatch = mapping.getCompositeMatch((SimpleMatch) match);
+			CompositeMatch cmatch = mapping.getCompositeMatchByComponent((SimpleMatch) match);
 			if (cmatch != null) {
 				message = PROBLEM + "This match has an associated Composite Match (" + cmatch + ")! Remove it before.";
 				return;
 			}
 		}
 		mapping.removeMatch(match); // At this moment the match is excluded
-		message = CHECKED + "Match <b>" + match + "</b> has been removed from the mapping.";
+		message = CHECKED + "Match <b>" + match + "</b> has been <b>removed</b> from the mapping.";
 		System.out.println("Excluded: " + match);
+	}
+
+	/* Validates the Match Uniqueness (T0). */
+	private boolean validateMatchUniqueness(SimpleMatch match) {
+		// Validates if the element (source) is not already matched with the same concept (target) (T0).
+		List<SimpleMatch> matches = mapping.getSimpleMatches(match.getSource(), match.getTarget());
+		if (!matches.isEmpty()) {
+			message += PROBLEM + "The element <b>" + match.getSource() + "</b> is already matched with the same concept: " + matches + ".";
+			return false;
+		}
+		return true;
+	}
+
+	/* Validates the Ontology Disjointness (T1). */
+	private boolean validateOntologyDisjointness(SimpleMatch match) {
+		// Validates if the element (source) is not already fully covered ([E] or [P]) by other matches (T1).
+		Element source = match.getSource();
+		List<Match> matches = mapping.getMatchesBySource(source);
+		// message = "";
+		for (Match omatch : matches) {
+			message += "The element <b>" + source + "</b> is already matched with other concept: (" + omatch + ").<br/>";
+			Coverage cover = match.getCoverage();
+			Coverage ocover = omatch.getCoverage();
+			// both coverages must be [W] or [I]
+			if (!((cover == Coverage.WIDER || cover == Coverage.INTERSECTION) && (ocover == Coverage.WIDER || ocover == Coverage.INTERSECTION))) {
+				message += PROBLEM + "Multiple matches for the same Element are allowed only for combinations of WIDER and INTERSECTION coverages.";
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/* Validates the Correspondences between the source and target basetypes using the structural mappings. */
@@ -143,58 +180,32 @@ public class MappingApp {
 		return false;
 	}
 
-	/* Validates the Ontology Disjointness (T1). */
-	private boolean validateOntologyDisjointness(SimpleMatch match) {
-		// Checks if the element is already matched with the same concept (T0).
-		// Checks if the element is already fully covered ([E] or [P]) by other matches (ontology disjointness (T1)).
+	/* Checks if a given match (just created) can lead to a composite match. */
+	private void checkCompositeMatch(SimpleMatch match) {
+		// Checks if the element has a set of only partial coverages ([W] or [I]) possibly leading to a Composite Match.
+		Coverage cover = match.getCoverage();
 		Element source = match.getSource();
-		List<SimpleMatch> repeatedMatches = new ArrayList<SimpleMatch>();
-		boolean allowed = true;
-		message = "";
-		question = "";
-		for (SimpleMatch omatch : mapping.getSimpleMatches()) {
-			Element osource = omatch.getSource();
-			// repeated source
-			if (source.equals(osource)) {
-				// repeated source and target
-				if (match.getTarget().equals(omatch.getTarget())) {
-					message += PROBLEM + "The element <b>" + source + "</b> is already matched with the same concept (" + omatch + ")";
-					return false;
+		if (cover == Coverage.WIDER || cover == Coverage.INTERSECTION) {
+			List<SimpleMatch> repMatches = mapping.getSimpleMatchesBySource(source);
+			if (repMatches.size() > 1) {
+				question = message + "<br/><br/>";
+				question += "The element <b>" + source + "</b> has now " + repMatches.size() + " matches with different concepts.<br/>";
+				question += "<code>";
+				int countIMatch = 0;
+				for (SimpleMatch omatch : repMatches) {
+					question += "* <b>" + omatch + "</b><br/>";
+					if (omatch.getCoverage() == Coverage.INTERSECTION)
+						countIMatch++;
 				}
-				message += "The element <b>" + source + "</b> is already matched with other concept (" + omatch + ").<br/>";
-				repeatedMatches.add(omatch);
-				Coverage cover = match.getCoverage();
-				Coverage ocover = omatch.getCoverage();
-				// both coverages must be [W] or [I]
-				if (!((cover == Coverage.WIDER || cover == Coverage.INTERSECTION) && (ocover == Coverage.WIDER || ocover == Coverage.INTERSECTION))) {
-					allowed = false;
-				}
+				question += "</code><br/>";
+				question += QUESTION + "Is the element <b>" + source + "</b> <b>fully covered</b> by these " + repMatches.size() + " concepts together?";
+
+				if (countIMatch == 0) // if all matches are [W], only the EQUIVALENT and NO options are available.
+					questionType = QuestionType.CompositeEquivalent;
+				else // if there is an [I], the EQUIVALENT, PART OF and NO options are available.
+					questionType = QuestionType.CompositeEquivalentPart;
 			}
 		}
-		if (!allowed) {
-			message += PROBLEM + "Multiple matches for the same Element are allowed only for combinations of WIDER and INTERSECTION coverages.";
-			return false;
-		} else if (repeatedMatches.size() > 0) {
-			int countIMatch = 0;
-			repeatedMatches.add(match);
-			question += "The element <b>" + source + "</b> has now " + repeatedMatches.size() + " matches with different concepts.<br/>";
-			question += "<code>";
-			for (SimpleMatch matchfor : repeatedMatches) {
-				question += "* <b>" + matchfor + "</b><br/>";
-				if (matchfor.getCoverage() == Coverage.INTERSECTION)
-					countIMatch++;
-			}
-			question += "</code><br/>";
-			question += QUESTION + "Is the element <b>" + source + "</b> <b>fully covered</b> by these " + repeatedMatches.size() + " concepts together?";
-			// if all matches are [W], only the EQUIVALENT and NO options are available.
-			if (countIMatch == 0) {
-				questionType = QuestionType.CompositeEquivalent;
-				// if there is an [I], the EQUIVALENT, PART OF and NO options are available.
-			} else {
-				questionType = QuestionType.CompositeEquivalentPart;
-			}
-		}
-		return true;
 	}
 
 	/* Creates a hash containg all the diagram notions (as keys) and their respective coords in the diagram. */
@@ -209,6 +220,19 @@ public class MappingApp {
 			}
 		}
 		return coordsHash;
+	}
+
+	//////////////////////////// DIAGONAL MAPPING ////////////////////////////
+	/* Creates a new ICM Element. */
+	public Element createICMElement(String name, String definition, String typeId) {
+		Notion type = initiative.getNotionById(typeId);
+		IntegratedModel icm = ((DiagonalMapping)mapping).getTarget();
+		Element elem = new Element(name, definition, type, icm);
+//		icm.addElement(elem);
+//		initiative.addNotion(elem);
+		
+		System.out.println("Creating a new ICM Element: " + name + "(" + type + ")");
+		return elem;
 	}
 
 }

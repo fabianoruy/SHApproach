@@ -28,65 +28,70 @@ public class VerticalMappingServlet extends HttpServlet {
 	private MappingApp			mapp;
 
 	/* HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response). */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
 		// System.out.println(">VerticalMappingServlet: " + request.getParameter("action"));
+		try {
+			if (request.getParameter("action").equals("startMapping")) {
+				System.out.println("\n# Vertical Mapping");
+				// Starting the mapping.
+				// Accessing the initiative and application from the Session
+				initiative = (SHInitiative) request.getSession().getAttribute("initiative");
+				mapp = (MappingApp) request.getSession().getAttribute("mappingapp");
 
-		if (request.getParameter("action").equals("startMapping")) {
-			System.out.println("\n# Vertical Mapping");
-			// Starting the mapping.
-			// Accessing the initiative and application from the Session
-			initiative = (SHInitiative) request.getSession().getAttribute("initiative");
-			mapp = (MappingApp) request.getSession().getAttribute("mappingapp");
+				// Getting the Mapping.
+				String mapId = request.getParameter("mapId");
+				VerticalMapping mapping = (VerticalMapping) initiative.getMappingById(mapId);
+				mapp.setCurrentMapping(mapping);
+				StandardModel std = mapping.getBase();
+				SeonView seon = mapping.getTarget();
 
-			// Getting the Mapping.
-			String mapId = request.getParameter("mapId");
-			VerticalMapping mapping = (VerticalMapping) initiative.getMappingById(mapId);
-			mapp.setCurrentMapping(mapping);
-			StandardModel std = mapping.getBase();
-			SeonView seon = mapping.getTarget();
+				// Creating the JSON
+				JsonElement stdJson = createJSON(std.getDiagram());
+				JsonElement ontoJson = createJSON(seon.getDiagram());
 
-			// Creating the JSON
-			JsonElement stdJson = createJSON(std.getDiagram());
-			JsonElement ontoJson = createJSON(seon.getDiagram());
+				// Setting attributes and calling the page
+				request.setAttribute("stdJson", stdJson);
+				request.setAttribute("ontoJson", ontoJson);
+				request.setAttribute("standard", std);
+				request.setAttribute("ontology", seon);
+				// request.setAttribute("mapping", mapp.getCurrentMapping());
+				request.setAttribute("stdCoords", mapp.createNotionsCoordsHash(std.getDiagram()));
+				request.setAttribute("ontoCoords", mapp.createNotionsCoordsHash(seon.getDiagram()));
 
-			// Setting attributes and calling the page
-			request.setAttribute("stdJson", stdJson);
-			request.setAttribute("ontoJson", ontoJson);
-			request.setAttribute("standard", std);
-			request.setAttribute("ontology", seon);
-			request.setAttribute("stdCoords", mapp.createNotionsCoordsHash(std.getDiagram()));
-			request.setAttribute("ontoCoords", mapp.createNotionsCoordsHash(seon.getDiagram()));
-			request.getRequestDispatcher("verticalmapper.jsp").forward(request, response);
+				request.getRequestDispatcher("verticalmapper.jsp").forward(request, response);
 
-		} else if (request.getParameter("action").equals("update")) {
-			// Updating the page with the current mapping
-			updatePage(request, response);
+			} else if (request.getParameter("action").equals("update")) {
+				// Updating the page with the current mapping
+				updatePage(request, response);
 
-		} else if (request.getParameter("action").equals("match")) {
-			// Creating a new Simple Match
-			String elemId = request.getParameter("elem");
-			String concId = request.getParameter("conc");
-			String cover = request.getParameter("cover");
-			String comm = request.getParameter("comm");
-			boolean force = Boolean.valueOf(request.getParameter("force"));
-			mapp.createSimpleMatch(elemId, concId, cover, comm, force);
+			} else if (request.getParameter("action").equals("match")) {
+				// Creating a new Simple Match
+				String elemId = request.getParameter("elem");
+				String concId = request.getParameter("conc");
+				String cover = request.getParameter("cover");
+				String comm = request.getParameter("comm");
+				boolean force = Boolean.valueOf(request.getParameter("force"));
+				mapp.createSimpleMatch(elemId, concId, cover, comm, force);
 
-			updatePage(request, response);
+				updatePage(request, response);
 
-		} else if (request.getParameter("action").equals("compositeMatch")) {
-			// Creating a new Composite Match.
-			String elemId = request.getParameter("elem");
-			String cover = request.getParameter("cover");
-			mapp.createCompositeMatch(elemId, cover);
+			} else if (request.getParameter("action").equals("compositeMatch")) {
+				// Creating a new Composite Match.
+				String elemId = request.getParameter("elem");
+				String cover = request.getParameter("cover");
+				mapp.createCompositeMatch(elemId, cover);
 
-			updatePage(request, response);
+				updatePage(request, response);
 
-		} else if (request.getParameter("action").equals("removeMatch")) {
-			// Removing a Match
-			String matchId = request.getParameter("matchId");
-			mapp.removeMatch(matchId);
+			} else if (request.getParameter("action").equals("removeMatch")) {
+				// Removing a Match
+				String matchId = request.getParameter("matchId");
+				mapp.removeMatch(matchId);
 
-			updatePage(request, response);
+				updatePage(request, response);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 

@@ -39,7 +39,7 @@ public class SHInitiative extends SerializableObject {
 		this.notionMap = new HashMap<String, Notion>();
 		this.status = InitiativeStatus.INITIATED;
 	}
-	
+
 	/* Resets all the initiative's packages, mappings and notions. */
 	public void resetInitiative() {
 		System.out.println("* INITIATIVE RESET");
@@ -156,11 +156,39 @@ public class SHInitiative extends SerializableObject {
 				}
 			}
 		}
-		// Checking the situation on each Mapping. 
+		// Checking the situation on each Mapping.
 		CoverateSituation situation = dmapping.getCoverageSituation(elem);
 		if (situation == CoverateSituation.NONCOVERED)
 			situation = vmapping.getCoverageSituation(elem);
 		return situation;
+	}
+
+	/* Returns All matches of Vertical mappings of the given source Element. */
+	public List<Match> getAllVerticalMatches(Element elem) {
+		// Accessing the vertical mapping
+		for (Mapping map : contentmaps) {
+			// try {
+			if (map instanceof VerticalMapping && map.getBase().equals(elem.getModel())) {
+				return map.getMatchesBySource(elem);
+			}
+			// } catch (Exception e) {
+			// System.out.println(map);
+			// System.out.println(elem);
+			// e.printStackTrace();
+			// }
+		}
+		return new ArrayList<Match>(); // empty list
+	}
+
+	/* Returns All matches of Diagonal mappings of the given source Element. */
+	public List<Match> getAllDiagonalMatches(Element elem) {
+		// Accessing the vertical mapping
+		for (Mapping map : contentmaps) {
+			if (map instanceof DiagonalMapping && map.getBase().equals(elem.getModel())) {
+				return map.getMatchesBySource(elem);
+			}
+		}
+		return new ArrayList<Match>(); // empty list
 	}
 
 	/* Returns all matches in the Initiative with the source and target. */

@@ -1,6 +1,8 @@
 package shmapper.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import com.change_vision.jude.api.inf.model.IPackage;
@@ -22,6 +24,21 @@ public class IntegratedModel extends Model {
 
 	public List<Concept> getConcepts() {
 		return concepts;
+	}
+
+	public List<Notion> getNotionsOrdered() {
+		List<Notion> notions = new ArrayList<Notion>();
+		notions.addAll(concepts);
+		notions.addAll(getElements());
+		Collections.sort(notions, new Comparator<Notion>() {
+			public int compare(Notion notion, Notion other) {
+				int result = notion.getIndirectUfotype().toString().compareTo(other.getIndirectUfotype().toString());
+				if (result == 0)
+					return notion.getName().compareToIgnoreCase(other.getName());
+				return result;
+			}
+		});
+		return notions;
 	}
 
 	public void addConcept(Concept concept) {

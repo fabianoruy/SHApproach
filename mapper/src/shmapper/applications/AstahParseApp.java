@@ -203,8 +203,12 @@ public class AstahParseApp {
 		ism.setName("Integrated Structural Model");
 		initiative.addPackage(ism);
 		addResult(" * Integrated SM created.\n\n");
-		parseIMElements(ism, ismpack);
 
+		// Parse the ISM Diagram and elements
+		parseIMElements(ism, ismpack);
+		// Diagram diagram = parseDiagram(ismpack, DiagramType.ISM); Doesn't work! There are more diagrams in the
+		// package.
+		// ism.setDiagram(diagram);
 	}
 
 	/* Reads the content model package and creates the SCMs. */
@@ -238,7 +242,6 @@ public class AstahParseApp {
 		parseIMElements(icm, contentpack);
 		Diagram diagram = parseDiagram(contentpack, DiagramType.ICM);
 		icm.setDiagram(diagram);
-
 	}
 
 	/* Reads the classes of an Ontology package and creates the Concepts. */
@@ -296,6 +299,7 @@ public class AstahParseApp {
 	private void parseIMElements(IntegratedModel im, IPackage pack) throws ParserException {
 		int ecount = 0;
 		try {
+			// Parsing the Elements inside the package
 			for (INamedElement node : pack.getOwnedElements()) {
 				// Parsing classes and creating Elements
 				if (node instanceof IClass) {
@@ -313,6 +317,13 @@ public class AstahParseApp {
 			if (ecount == 0 && im.isStructural()) {
 				throw new ParserException("No elements were found in the Integrated Structural Model");
 			}
+			// Including the already parsed Concepts (all Concepts from SEON) in the IM (Domain to ICM, Core to ISM)
+			for (Concept concept : initiative.getSeonView().getConcepts()) {
+				if (im.isStructural() == concept.isBasetype()) {
+					im.addConcept(concept);
+					System.out.println(concept + " included to " + im);
+				}
+			}
 		} catch (InvalidUsingException e) {
 			e.printStackTrace();
 		}
@@ -323,7 +334,7 @@ public class AstahParseApp {
 		int rcount = 0;
 		for (Notion source : notions) {
 			// Reading and creating relations
-			//System.out.println("-> Source: " + source);
+			// System.out.println("-> Source: " + source);
 			for (IAttribute attrib : astahClassMap.get(source.getId()).getAttributes()) {
 				IAssociation assoc = attrib.getAssociation();
 				if (assoc != null) { // it is an Association, not an Attribute
@@ -383,23 +394,6 @@ public class AstahParseApp {
 		}
 		return count;
 	}
-
-	// if (!basetype.equals(notion)) {
-	// if (basetype instanceof Element) {
-	// Model model = ((Element) basetype).getModel();
-	// if (!model.isStructural()) {
-	// addResult("The element " + notion + " has no generalization to a Structural Model Element.\n");
-	// System.out.println("BT: "+ basetype);
-	// count++;
-	// }
-	// } else if (basetype instanceof Concept) {
-	// Ontology onto = ((Concept) basetype).getOntology();
-	// if (onto.getLevel() != Level.CORE && onto.getLevel() != Level.FOUNDATIONAL) {
-	// addResult("The concept " + notion + " has no generalization to a Core/Foundational Ontology Concept.\n");
-	// System.out.println("BT: "+ ((Concept)basetype).getOntology().getLevel());
-	// count++;
-	// }
-	// }
 
 	/* Reads and creates an astah Diagrams from a package. */
 	private Diagram parseDiagram(IPackage pack, DiagramType type) throws ParserException {

@@ -5,29 +5,29 @@ import java.util.List;
 /* Represents a composition of Matches for the same source. */
 public class CompositeMatch extends Match {
 	private static final long	serialVersionUID	= -6126451502312008378L;
-	private List<SimpleMatch>	matches;
+	private List<SimpleMatch>	components;
 
 	public CompositeMatch(Element source, Coverage cover, String comm, List<SimpleMatch> matches) {
 		super(source, cover, comm);
-		this.matches = matches;
+		this.components = matches;
 	}
 
-	public List<SimpleMatch> getMatches() {
-		return matches;
+	public List<SimpleMatch> getComponents() {
+		return components;
 	}
 
-	public String getMatchesString() {
+	public String getTarget() {
 		String text = "";
-		for (SimpleMatch match : matches) {
+		for (SimpleMatch match : components) {
 			text += match.getTarget() + " + ";
 		}
-		text = text.substring(0, text.length() - 3);
+		text = "(" + text.substring(0, text.length() - 3) + ")";
 		return text;
 	}
 
 	@Override
 	public String toString() {
-		return getSource() + " [" + getCoverage().name().charAt(0) + "] (" + getMatchesString() + ")";
+		return getSource() + " [" + getCoverage().name().charAt(0) + "] " + getTarget();
 	}
 
 	@Override

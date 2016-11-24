@@ -92,6 +92,17 @@ public abstract class Mapping extends SerializableObject {
 		return cmatches;
 	}
 
+	/* Returns the matches which elem is the source. */
+	public List<Match> getMatchesBySource(Element source) {
+		List<Match> smatches = new ArrayList<Match>();
+		for (Match match : matches) {
+			if (match.getSource().equals(source)) {
+				smatches.add(match);
+			}
+		}
+		return smatches;
+	}
+
 	/* Returns the simple matches which elem is the source. */
 	public List<SimpleMatch> getSimpleMatchesBySource(Element source) {
 		List<SimpleMatch> smatches = new ArrayList<SimpleMatch>();
@@ -114,7 +125,7 @@ public abstract class Mapping extends SerializableObject {
 		return smatches;
 	}
 
-	/* Returns all matches in the Mapping with the source and target. */
+	/** Returns all (1) simple matches in the Mapping with the same source and target. */
 	public List<SimpleMatch> getSimpleMatches(Element source, Notion target) {
 		List<SimpleMatch> smatches = new ArrayList<SimpleMatch>();
 		for (Match match : matches) {
@@ -126,7 +137,7 @@ public abstract class Mapping extends SerializableObject {
 	}
 
 	/* Returns the single composite match, in this mapping, within elem is the source. */
-	public CompositeMatch getCompositeMatch(Element elem) {
+	public CompositeMatch getCompositeMatchBySource(Element elem) {
 		for (Match match : matches) {
 			if (match instanceof CompositeMatch && match.getSource().equals(elem)) {
 				return (CompositeMatch) match;
@@ -136,9 +147,9 @@ public abstract class Mapping extends SerializableObject {
 	}
 
 	/* Returns the single composite match, in this mapping, for the simple match. */
-	public CompositeMatch getCompositeMatch(SimpleMatch match) {
+	public CompositeMatch getCompositeMatchByComponent(SimpleMatch match) {
 		for (CompositeMatch cmatch : getCompositeMatches()) {
-			for (SimpleMatch smatch : cmatch.getMatches()) {
+			for (SimpleMatch smatch : cmatch.getComponents()) {
 				// is the simple match part of a composite match?
 				if (match.equals(smatch)) {
 					return cmatch;
@@ -227,7 +238,7 @@ public abstract class Mapping extends SerializableObject {
 			}
 		} else if (match instanceof CompositeMatch) {
 			// Adds a composite match to the mapping, replacing the previous with the same source.
-			Match previous = getCompositeMatch(match.getSource());
+			Match previous = getCompositeMatchBySource(match.getSource());
 			matches.remove(previous);
 			matches.add(match);
 		}

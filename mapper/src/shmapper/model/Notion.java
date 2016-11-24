@@ -19,14 +19,24 @@ public abstract class Notion extends SerializableObject {
 		EVENT, OBJECT, AGENT, MOMENT, SITUATION;
 	}
 
+	/* General constructor. */
 	public Notion(IClass astahClass) {
-		this.setId(astahClass.getId());
+		super.setId(astahClass.getId());
 		this.name = astahClass.getName();
 		this.definition = astahClass.getDefinition();
 		if (astahClass.getStereotypes().length > 0) {
 			stereotype = astahClass.getStereotypes()[0]; // only the first for while
 		} else this.stereotype = "";
 		this.generalizations = new ArrayList<Notion>();
+		this.relations = new ArrayList<Relation>();
+	}
+
+	/* Protected constructor for new ICM Elements (no astahClass). */
+	protected Notion(String name, String def, Notion type) {
+		this.name = name;
+		this.definition = def;
+		this.generalizations = new ArrayList<Notion>();
+		this.addGeneralization(type);
 		this.relations = new ArrayList<Relation>();
 	}
 

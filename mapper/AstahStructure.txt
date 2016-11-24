@@ -95,12 +95,19 @@ Nov.22
 + Flow fixes
 
 Nov.23
+/ ICM Elements (assembling page)
++ Concepts included to IMs
+
+NEMO:
+- catch all excepts to log
+- gather all selected selects (diagonal mapping)
+- how to better organize divs
+
+Nov.24
 = ICM Elements
 = Horizontal Mapping
 - Harmonization Results
 - Match validation (T2)
-
-
 
 
 * Ver como salvar e recuperar tudo.

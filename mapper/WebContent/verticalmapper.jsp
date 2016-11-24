@@ -59,7 +59,7 @@
   }
 
   /* Calls (the servlet via ajax) for creating a Match. */
-  function doMatch(force) {
+  function doMatch(forceBT) {
     $.ajax({
       type : 'POST',
       url : 'VerticalMappingServlet',
@@ -69,7 +69,7 @@
         conc : $('#conceptidfield').val(),
         cover : $('#coveringfield').val(),
         comm : $('#commentsfield').val(),
-        force : force
+        force : forceBT
       },
       success : function(responseXml) {
         updateMapping(responseXml);
@@ -135,6 +135,7 @@
     $('#covernumber').text($(responseXml).find('coveragetext').html());
     $('.icon').remove();
     $('#standarddiv').append($(responseXml).find('coverageicons').html());
+    $('#messagediv').scrollTop(1E10);
   }
 
   /* Highlight the diagrams' elements/concepts and make then selectable. */
@@ -205,7 +206,8 @@
 
   function showCoverageStatus() {
     $("#coveragediv").dialog({
-      width : 530
+      width : 530,
+      height : 700
     });
   }
 
@@ -215,7 +217,7 @@
     $('#dialog-message').show();
     $('#dialog-message').dialog({
       modal : true,
-      width : 500,
+      width : 600,
       buttons : {
         Ok : function() {
           $(this).dialog('close');
@@ -230,7 +232,7 @@
     $('#dialog-question').dialog({
       resizable : false,
       height : "auto",
-      width : 600,
+      width : 700,
       modal : true,
       buttons : {
         Yes : function() {
@@ -250,7 +252,7 @@
     $('#dialog-composite').dialog({
       resizable : false,
       height : "auto",
-      width : 600,
+      width : 700,
       modal : true,
       buttons : {
         "Yes, the element is EQUIVALENT to the sun of the concepts." : function() {
@@ -270,7 +272,7 @@
     $('#dialog-composite').dialog({
       resizable : false,
       height : "auto",
-      width : 600,
+      width : 700,
       modal : true,
       buttons : {
         "Yes, the element is EQUIVALENT to the sun of the concepts." : function() {
@@ -381,10 +383,10 @@
     <textarea id="commentsfield" title="Describe the non-covered portions of the Element." rows="4" cols="139"></textarea>
   </div>
 
-  <div style="display: inline-block; overflow: auto; width: 998px; margin: 15px 0 0 0">
+  <div style="display: inline-block; width: 998px; margin: 15px 0 0 0">
     <strong>Message</strong>
-    <div id="messagediv" style="font-size: 90%; border: 1px solid gray; height: 70px; border-radius: 10px; padding: 8px;"></div>
-    
+    <div id="messagediv" style="font-size: 90%; height: 80px; overflow: auto; border: 1px solid gray; border-radius: 8px; padding: 6px;">
+    </div>
   </div>
 
   <!--   <div> -->
@@ -407,7 +409,8 @@
 
   <!-- Information Dialog -->
   <div id="coveragediv" title="Coverage Status"
-    style="font-size: 95%; overflow: auto; border: 1px solid gray; width: 500px; height: 500px" hidden></div>
+    style="font-size: 95%; overflow: auto; border: 1px solid gray; width: 500px; height: 500px" hidden>
+  </div>
 
   <!-- Information Dialog -->
   <div id="coverinfo" title="Coverage Relations" hidden>
@@ -485,24 +488,19 @@
 
   <!-- Simple Message -->
   <div id="dialog-message" title="Message" hidden>
-    <p><span class="ui-icon ui-icon-circle-check" style="float: left; margin: 0 7px 50px 0;"></span>
-    <div id="messageText"></div>
-    </p>
+<!--     <p><span class="ui-icon ui-icon-circle-check" style="float: left; margin: 0 7px 50px 0;"></span> -->
+    <p><div id="messageText"></div></p>
   </div>
 
   <!-- Question Message -->
   <div id="dialog-question" title="Question" hidden>
-    <p><span class="ui-icon ui-icon-help" style="float: left; margin: 12px 12px 20px 0;"></span>
-    <p>
-    <div id="questionText"></div>
-    </p>
+<!--     <p><span class="ui-icon ui-icon-help" style="float: left; margin: 12px 12px 20px 0;"></span> -->
+    <p><div id="questionText"></div></p>
   </div>
 
   <!-- Composite Match Question Message -->
   <div id="dialog-composite" title="Is it a Composite Match?" hidden>
-    <p>
-    <div id="compositeText"></div>
-    </p>
+    <p><div id="compositeText"></div></p>
   </div>
 
   <!-- ***** Dialog Boxes ***** -->
