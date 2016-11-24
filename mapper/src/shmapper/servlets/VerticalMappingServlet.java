@@ -23,9 +23,9 @@ import shmapper.model.VerticalMapping;
 /* Servlet implementation class VerticalMappingServlet */
 @WebServlet("/VerticalMappingServlet")
 public class VerticalMappingServlet extends HttpServlet {
-	private static final long	serialVersionUID	= 1L;
-	private SHInitiative		initiative;
-	private MappingApp			mapp;
+	private static final long serialVersionUID = 1L;
+	private SHInitiative initiative;
+	private MappingApp mapp;
 
 	/* HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response). */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
@@ -96,7 +96,8 @@ public class VerticalMappingServlet extends HttpServlet {
 	}
 
 	/* Updates the verticalmapper page via ajax. */
-	private void updatePage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void updatePage(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 		// Setting attributes and calling the page
 		if (mapp != null) {
 			request.setAttribute("message", mapp.getMessage());
@@ -120,7 +121,8 @@ public class VerticalMappingServlet extends HttpServlet {
 	private JsonObject createJSON(Notion notion) {
 		JsonObject jobj = new JsonObject();
 		jobj.addProperty("name", notion.getName().replace("'", ""));
-		String definition = notion.getDefinition().replaceAll("@Ex.", "Ex.").replaceAll("(\\r\\n|\\n\\r|\\r|\\n)", " ").replace("'", "").replace("\"", "");
+		String definition = notion.getDefinition().replaceAll("@Ex.", "Ex.").replaceAll("(\\r\\n|\\n\\r|\\r|\\n)", " ")
+				.replace("'", "").replace("\"", "");
 		jobj.addProperty("definition", definition);
 		jobj.addProperty("basetype", notion.getBasetypes().toString().replaceAll("\\[|\\]", ""));
 		return jobj;

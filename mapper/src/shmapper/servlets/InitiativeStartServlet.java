@@ -1,9 +1,7 @@
 package shmapper.servlets;
 
 import java.io.File;
-import java.io.IOException;
 
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -16,14 +14,13 @@ import shmapper.model.SHInitiative;
 /** Servlet implementation class AstahParseServlet */
 @WebServlet("/InitiativeStartServlet")
 public class InitiativeStartServlet extends HttpServlet {
-	private static final long	serialVersionUID	= 1L;
-	private InitiativeStartApp	startApp			= null;
-	private SHInitiative		initiative			= null;
-	private String				initdir				= "";
+	private static final long serialVersionUID = 1L;
+	private InitiativeStartApp startApp = null;
+	private SHInitiative initiative = null;
+	private String initdir = "";
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
 		// System.out.println(">InitiativeStartServlet: " + request.getParameter("action"));
-
 		try {
 			if (request.getParameter("action").equals("login")) {
 				// Verifying the password and recovering the initiative (if exists)
@@ -75,7 +72,7 @@ public class InitiativeStartServlet extends HttpServlet {
 
 				request.getRequestDispatcher("phaseselector.jsp").forward(request, response);
 			}
-		} catch (ServletException | IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

@@ -27,14 +27,14 @@ import shmapper.model.SHInitiative.InitiativeStatus;
 /** Servlet implementation class AstahParseServlet */
 @WebServlet("/AstahParseServlet")
 public class AstahParseServlet extends HttpServlet {
-	private static final long	serialVersionUID	= 1L;
-	private SHInitiative		initiative			= null;
-	private AstahParseApp		parser				= null;
-	private String				workingDir			= "";
-	private Path				path				= null;
-	private String				results				= null;
-	private boolean				success				= true;
-	private boolean				importable			= true;
+	private static final long serialVersionUID = 1L;
+	private SHInitiative initiative = null;
+	private AstahParseApp parser = null;
+	private String workingDir = "";
+	private Path path = null;
+	private String results = null;
+	private boolean success = true;
+	private boolean importable = true;
 
 	/* doPost method, for processing the upload and calling the parsers. */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -70,7 +70,6 @@ public class AstahParseServlet extends HttpServlet {
 				initiative.saveInitiative();
 				response.setStatus(500);
 			}
-			System.out.println("doPost");
 			response.getWriter().print(results);
 			response.flushBuffer();
 			results = "";
@@ -78,7 +77,8 @@ public class AstahParseServlet extends HttpServlet {
 	}
 
 	/* Gets the uploaded file, saves it, and starts the parsing. */
-	private void uploadAstah(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, ParserException, FileUploadException {
+	private void uploadAstah(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException, ParserException, FileUploadException {
 		// Accessing, saving and processing the uploaded astah file.
 		List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(request);
 		String filename = null;
@@ -93,7 +93,7 @@ public class AstahParseServlet extends HttpServlet {
 			String initdir = (String) request.getSession().getAttribute("initdir");
 			workingDir = request.getSession().getServletContext().getRealPath("/") + initdir;
 			path = Paths.get(workingDir + "/uploaded_" + filename.replaceAll("[^a-zA-Z0-9.-]", "_")); // no special
-																										// chars
+																									  // chars
 			Files.copy(content, path, StandardCopyOption.REPLACE_EXISTING);
 		}
 		results = "File <i>" + filename + "</i> uploaded for the initiative.<br/>";
@@ -109,16 +109,18 @@ public class AstahParseServlet extends HttpServlet {
 	}
 
 	/* Imports the images from the uploaded astha file. */
-	private void importImages(HttpServletRequest request, HttpServletResponse response) throws IOException, ParserException {
+	private void importImages(HttpServletRequest request, HttpServletResponse response)
+			throws IOException, ParserException {
 		if (success) {
 			results = "";
 			if (importable) {
 				parser.importImages(path.toString(), workingDir);
 				results += parser.getResults();
-				results += "<br/><span style='color:blue'><b>Astah File successfully read and parsed!</span></b><br/>Proceed to the Mappings.<br/>";
+				results += "<br/><span style='color:blue'><b>Astah File successfully read and parsed! \\o/ </span></b><br/>Proceed to the Mappings.<br/>";
 			}
 			success = true;
 			initiative.setStatus(InitiativeStatus.PARSED);
+			initiative.saveInitiative();
 		}
 	}
 

@@ -21,7 +21,7 @@
 
 .concbox {
   border-radius: 8px;
-  border: 2px solid red;
+  border: 2px solid green;
   padding: 8px;
   min-height: 140px;
 }
@@ -327,7 +327,7 @@
       </MAP>
     </div>
 
-    <div style="width: 49%; height: 600px; overflow: auto; display: inline-block; border: 3px solid red">
+    <div style="width: 49%; height: 600px; overflow: auto; display: inline-block; border: 3px solid green">
       <IMG src="${ontology.diagram.path}" width="${ontology.diagram.width}" class="map" usemap="#Ontology">
       <MAP id="OntologyMap" name="Ontology">
         <c:forEach var="entry" items="${ontoCoords}">

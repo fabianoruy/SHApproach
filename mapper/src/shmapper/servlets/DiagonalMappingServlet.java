@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.gson.Gson;
+
 import shmapper.applications.MappingApp;
 import shmapper.model.DiagonalMapping;
 import shmapper.model.Element;
@@ -22,9 +24,9 @@ import shmapper.model.VerticalMapping;
 /* Servlet implementation class DiagonalMappingServlet */
 @WebServlet("/DiagonalMappingServlet")
 public class DiagonalMappingServlet extends HttpServlet {
-	private static final long	serialVersionUID	= 1L;
-	private SHInitiative		initiative;
-	private MappingApp			mapp;
+	private static final long serialVersionUID = 1L;
+	private SHInitiative initiative;
+	private MappingApp mapp;
 
 	/* HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response). */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
@@ -68,14 +70,16 @@ public class DiagonalMappingServlet extends HttpServlet {
 								List<Match> matches = initiative.getAllVerticalMatches(elem);
 								String strmatches = "";
 								if (!matches.isEmpty()) {
-									strmatches += matches.size() + (matches.size() == 1 ? " match" : " matches") + " in Vertical Mapping:\n";
+									strmatches += matches.size() + (matches.size() == 1 ? " match" : " matches")
+											+ " in Vertical Mapping:\n";
 									for (Match match : matches) {
 										strmatches += match + "\n{" + match.getComment() + "}\n";
 									}
 								}
 								matches = initiative.getAllDiagonalMatches(elem);
 								if (!matches.isEmpty()) {
-									strmatches += matches.size() + (matches.size() == 1 ? " match" : " matches") + " in ICM Mapping:\n";
+									strmatches += matches.size() + (matches.size() == 1 ? " match" : " matches")
+											+ " in ICM Mapping:\n";
 									for (Match match : matches) {
 										strmatches += match + "\n{" + match.getComment() + "}\n";
 									}
@@ -109,8 +113,8 @@ public class DiagonalMappingServlet extends HttpServlet {
 				String name = request.getParameter("elemname");
 				String typeId = request.getParameter("ismtype");
 				String definition = request.getParameter("elemdef");
-				// TODO: get all the source elements to match
-				mapp.createICMElement(name, definition, typeId);
+				String[][] selectedElems = new Gson().fromJson(request.getParameter("elems"), String[][].class);
+				mapp.createICMElement(name, definition, typeId, selectedElems, false);
 
 				updatePage(request, response);
 
@@ -135,7 +139,8 @@ public class DiagonalMappingServlet extends HttpServlet {
 	}
 
 	/* Updates the verticalmapper page via ajax. */
-	private void updatePage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void updatePage(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 		// Setting attributes and calling the page
 		if (mapp != null) {
 			request.setAttribute("message", mapp.getMessage());

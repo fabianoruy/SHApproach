@@ -1,5 +1,6 @@
 package shmapper.applications;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,14 +22,14 @@ import shmapper.model.SimpleMatch;
 
 /** Responsible for providing the services for the mapping tasks. */
 public class MappingApp {
-	private SHInitiative		initiative;
-	private Mapping				mapping;															// current mapping
-	private String				message;
-	private String				question;
-	private QuestionType		questionType;
-	public static final String	CHECKED		= "<span style='color:green'><b>(\u2713)</b></span> ";
-	public static final String	PROBLEM		= "<span style='color:red'><b>(!)</b></span> ";
-	public static final String	QUESTION	= "<span style='color:blue'><b>(?)</b></span> ";
+	private SHInitiative initiative;
+	private Mapping mapping; // current mapping
+	private String message;
+	private String question;
+	private QuestionType questionType;
+	public static final String CHECKED = "<span style='color:green'><b>(\u2713)</b></span> ";
+	public static final String PROBLEM = "<span style='color:red'><b>(!)</b></span> ";
+	public static final String QUESTION = "<span style='color:blue'><b>(?)</b></span> ";
 
 	public static enum QuestionType {
 		Basetype, CompositeEquivalent, CompositeEquivalentPart
@@ -161,8 +162,10 @@ public class MappingApp {
 
 	/* Validates the Correspondences between the source and target basetypes using the structural mappings. */
 	private boolean validateBasetypesCorrespondence(SimpleMatch newMatch) {
-		List<Notion> sourcebts = newMatch.getSource().getAllBasetypes(); // Elements
-		List<Notion> targetbts = newMatch.getTarget().getAllBasetypes(); // Concepts
+		Element source = newMatch.getSource();
+		Notion target = newMatch.getTarget();
+		List<Notion> sourcebts = source.getAllBasetypes(); // Elements
+		List<Notion> targetbts = target.getAllBasetypes(); // Concepts
 		// Looking for BTs matches
 		for (Notion sbt : sourcebts) {
 			for (Notion tbt : targetbts) {
@@ -173,8 +176,8 @@ public class MappingApp {
 				}
 			}
 		}
-		question += PROBLEM + "The selected Element and Concept have no correspondent basetypes.<br/>";
-		question += ("<code>(" + newMatch.getSource().getBasetypes() + ") X (" + newMatch.getTarget().getBasetypes() + ")</code><br/><b/>").replaceAll("\\[|\\]", "");
+		question += PROBLEM + "The selected Element and " + target.getClass() + " have no corresponding basetypes.<br/>";
+		question += ("<code>(" + source.getBasetypes() + ") X (" + target.getBasetypes() + ")</code><br/><b/>").replaceAll("\\[|\\]", "");
 		question += "<b>Do you really want to match them?</b>";
 		questionType = QuestionType.Basetype;
 		return false;
@@ -208,7 +211,7 @@ public class MappingApp {
 		}
 	}
 
-	/* Creates a hash containg all the diagram notions (as keys) and their respective coords in the diagram. */
+	/* Creates a hash containing all the diagram notions (as keys) and their respective coords in the diagram. */
 	public Map<Notion, String> createNotionsCoordsHash(Diagram diagram) {
 		Map<Notion, String> coordsHash = new HashMap<Notion, String>();
 		// Getting each Notion (Class) in the Diagram and its position.
@@ -223,16 +226,66 @@ public class MappingApp {
 	}
 
 	//////////////////////////// DIAGONAL MAPPING ////////////////////////////
+
 	/* Creates a new ICM Element. */
-	public Element createICMElement(String name, String definition, String typeId) {
+	public Element createICMElement(String name, String definition, String typeId, String[][] selectedElems, boolean forceBT) {
+		// Creating new Element
 		Notion type = initiative.getNotionById(typeId);
-		IntegratedModel icm = ((DiagonalMapping)mapping).getTarget();
+		IntegratedModel icm = ((DiagonalMapping) mapping).getTarget();
 		Element elem = new Element(name, definition, type, icm);
-//		icm.addElement(elem);
-//		initiative.addNotion(elem);
-		
-		System.out.println("Creating a new ICM Element: " + name + "(" + type + ")");
-		return elem;
+		System.out.println("\nCreating a new ICM Element: " + elem + " " + elem.getBasetypes());
+
+		// Creating Matches
+		List<Element> sources = new ArrayList<>();
+		for (String[] elems : selectedElems) {
+			sources.add((Element) initiative.getNotionById(elems[0]));
+		}
+		//if (forceBT || validateBasetypesCorrespondences(elem, sources)) {
+			Element target = elem;
+			for (String[] elems : selectedElems) {
+				Element source = (Element) initiative.getNotionById(elems[0]);
+				Coverage cover = Coverage.valueOf(elems[1]);
+				SimpleMatch match = new SimpleMatch(source, target, cover, null);
+
+				System.out.println("Match: " + match);
+				// Putting the match in the proper mapping
+				for (DiagonalMapping dmap : initiative.getDiagonalContentMappings()) {
+					if (source.getModel().equals(dmap.getBase())) {
+						//dmap.addMatch(match);
+					}
+				}
+			}
+			//icm.addElement(elem);
+			//initiative.addNotion(elem);
+			return elem;
+		//}
+		//return null;
+	}
+
+	/* Validates the Correspondences between the sources and the new element target basetypes using the structural
+	 * mappings (for Diagonal Mappings). */
+	private boolean validateBasetypesCorrespondences(List<Element> sources, Element target) {
+		List<Notion> targetbts = target.getAllBasetypes(); // Concepts/Elements
+		next: for (Element source : sources) {
+			List<Notion> sourcebts = source.getAllBasetypes(); // Elements
+			// Looking for BTs matches
+			boolean found = false;
+			for (Notion sbt : sourcebts) {
+				for (Notion tbt : targetbts) {
+					// Recovering the matches
+					List<SimpleMatch> matches = initiative.getSimpleMatches((Element) sbt, tbt);
+					if (!matches.isEmpty()) {
+						found = true;
+						question += ("<code>(" + source.getBasetypes() + ") X (" + target.getBasetypes() + ")</code><br/><b/>").replaceAll("\\[|\\]", "");
+						continue next;
+					}
+				}
+			}
+		}
+		question += PROBLEM + "The selected Element and " + target.getClass() + " have no corresponding basetypes.<br/>";
+		question += "<b>Do you really want to match them?</b>";
+		questionType = QuestionType.Basetype;
+		return false;
 	}
 
 }
