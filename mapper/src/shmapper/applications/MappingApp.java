@@ -22,14 +22,14 @@ import shmapper.model.SimpleMatch;
 
 /** Responsible for providing the services for the mapping tasks. */
 public class MappingApp {
-	private SHInitiative		initiative;
-	private Mapping				mapping;															// current mapping
-	private String				message;
-	private String				question;
-	private QuestionType		questionType;
-	public static final String	CHECKED		= "<span style='color:green'><b>(\u2713)</b></span> ";
-	public static final String	PROBLEM		= "<span style='color:red'><b>(!)</b></span> ";
-	public static final String	QUESTION	= "<span style='color:blue'><b>(?)</b></span> ";
+	private SHInitiative initiative;
+	private Mapping mapping; // current mapping
+	private String message;
+	private String question;
+	private QuestionType questionType;
+	public static final String CHECKED = "<span style='color:green'><b>(\u2713)</b></span> ";
+	public static final String PROBLEM = "<span style='color:red'><b>(!)</b></span> ";
+	public static final String QUESTION = "<span style='color:blue'><b>(?)</b></span> ";
 
 	public static enum QuestionType {
 		Basetype, CompositeEquivalent, CompositeEquivalentPart
@@ -236,15 +236,17 @@ public class MappingApp {
 		Notion type = initiative.getNotionById(typeId);
 		IntegratedModel icm = ((DiagonalMapping) mapping).getTarget();
 		Element elem = new Element(name, definition, type, icm);
-		System.out.println("\nCreating a new ICM Element: " + elem + " " + elem.getBasetypes());
+		System.out.println("trying to create: " + elem + ": " + definition);
 
 		// Creating Matches
-		List<Element> sources = new ArrayList<>();
+		List<Element> sources = new ArrayList<Element>();
 		for (String[] elems : selectedElems) {
 			sources.add((Element) initiative.getNotionById(elems[0]));
 		}
 		if (forceBT || validateBasetypesCorrespondences(sources, elem)) {
+			System.out.println("\nNew ICM Element: " + elem + " " + elem.getBasetypes());
 			Element target = elem;
+			int mcount = 0;
 			for (String[] elems : selectedElems) {
 				Element source = (Element) initiative.getNotionById(elems[0]);
 				Coverage cover = Coverage.valueOf(elems[1]);
@@ -254,15 +256,35 @@ public class MappingApp {
 				// Putting the match in the proper mapping
 				for (DiagonalMapping dmap : initiative.getDiagonalContentMappings()) {
 					if (source.getModel().equals(dmap.getBase())) {
-						// dmap.addMatch(match);
+						dmap.addMatch(match);
+						mcount++;
 					}
 				}
 			}
-			// icm.addElement(elem);
-			// initiative.addNotion(elem);
+			icm.addElement(elem);
+			initiative.addNotion(elem);
+			message = CHECKED + "Element <b>" + elem + "</b> has been created with " + mcount + " related matches.";
 			return elem;
 		}
 		return null;
+	}
+
+	/* Removes an ICM Element with all existing (diagonal) Matches. */
+	public void removeICMElement(String elemId) {
+		Element elem = (Element) initiative.getNotionById(elemId);
+
+		// Finding and removing the element matches from the proper mappings
+		for (DiagonalMapping dmap : initiative.getDiagonalContentMappings()) {
+			for (Match match : dmap.getSimpleMatchesByTarget(elem)) {
+				dmap.removeMatch(match); // At this moment a match is excluded
+			}
+		}
+		IntegratedModel icm = ((DiagonalMapping) mapping).getTarget();
+		icm.removeElement(elem);
+		initiative.removeNotion(elem);
+
+		message = CHECKED + "Element <b>" + elem + "</b> has been <b>removed</b> from the ICM, together with all its matches.";
+		System.out.println("Excluded: " + elem);
 	}
 
 	/* Validates the Correspondences between basetypes of the sources and new element target using the structural
@@ -272,6 +294,7 @@ public class MappingApp {
 		int count = 0;
 		next: for (Element source : sources) {
 			List<Notion> sourcebts = source.getAllBasetypes(); // Elements
+			System.out.println(source + "(" + source.getBasetypes() + ") X " + target + "(" + target.getBasetypes() + ")");
 			// Looking for BTs matches
 			for (Notion sbt : sourcebts) {
 				for (Notion tbt : targetbts) {
@@ -283,14 +306,17 @@ public class MappingApp {
 				}
 			}
 			count++;
-			question += ("<code>" + source + " (" + source.getBasetypes() + ") X " + target + " (" + target.getBasetypes() + ")</code><br/>").replaceAll("\\[|\\]", "");
+			question += ("<code>" + target + " (" + target.getBasetypes() + ") X " + source + " (" + source.getBasetypes() + ")</code><br/>")
+					.replaceAll("\\[|\\]", "");
 		}
 		if (count > 0) {
-			question = PROBLEM + "The new Element <b>" + target + "</b> has no corresponding basetypes with " + count + " of the selected Elements:<br/>" + question;
-			question += "<b>Do you really want to create this Element with these related matches?</b>";
+			question = PROBLEM + "The new Element <b>" + target + "</b> has no corresponding basetypes with " + count + " of the selected Elements:<br/>"
+					+ question;
+			question += "<br/><b>Do you really want to create this Element with these related matches?</b>";
 			questionType = QuestionType.Basetype;
+			return false;
 		}
-		return false;
+		return true;
 	}
 
 }

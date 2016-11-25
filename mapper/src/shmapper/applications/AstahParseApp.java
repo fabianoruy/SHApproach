@@ -45,13 +45,13 @@ import shmapper.model.StandardModel;
 
 /** Responsible for parsing the provided Astah file, creating the objects' model. */
 public class AstahParseApp {
-	private SHInitiative		initiative;
-	private String				astahPath;
-	private StringBuffer		parsingResults	= new StringBuffer();
-	private Map<String, IClass>	astahClassMap	= new HashMap<String, IClass>();
-	private static String		winPath			= '"' + "C:/Program Files/astah-professional/astah-commandw.exe" + '"';
-	private static String		linuxPath		= "/var/lib/tomcat7/astah/astah_professional/astah-command.sh";
-	private static String		astahCommandPath;
+	private SHInitiative initiative;
+	private String astahPath;
+	private StringBuffer parsingResults = new StringBuffer();
+	private Map<String, IClass> astahClassMap = new HashMap<String, IClass>();
+	private static String winPath = '"' + "C:/Program Files/astah-professional/astah-commandw.exe" + '"';
+	private static String linuxPath = "/var/lib/tomcat7/astah/astah_professional/astah-command.sh";
+	private static String astahCommandPath;
 
 	static {
 		String os = System.getProperty("os.name");
@@ -87,7 +87,8 @@ public class AstahParseApp {
 			// Reading the model Packages (Ontologies and Models) and Notions (Concepts and Elements)
 			parseAstahModel(model);
 
-		} catch (IOException | ClassNotFoundException | LicenseNotFoundException | ProjectNotFoundException | NonCompatibleException | ProjectLockedException e) {
+		} catch (IOException | ClassNotFoundException | LicenseNotFoundException | ProjectNotFoundException | NonCompatibleException
+				| ProjectLockedException e) {
 			e.printStackTrace();
 		} finally {
 			accessor.close();
@@ -297,27 +298,30 @@ public class AstahParseApp {
 
 	/* Reads the classes of a Standard Model package and creates the Elements. */
 	private void parseIMElements(IntegratedModel im, IPackage pack) throws ParserException {
+		boolean parseICMPackageElements = false;
 		int ecount = 0;
 		try {
-			// Parsing the Elements inside the package
-			for (INamedElement node : pack.getOwnedElements()) {
-				// Parsing classes and creating Elements
-				if (node instanceof IClass) {
-					if (node.getPresentations().length > 0) { // selects only visible classes (appear in some diagram)
-						Element element = new Element(im, (IClass) node);
-						im.addElement(element);
-						initiative.addNotion(element);
-						astahClassMap.put(node.getId(), (IClass) node);
-						ecount++;
-					} else {
-						System.out.println("Discarded Element: " + node.getName());
+			if (im.isStructural() || parseICMPackageElements) {
+				// Parsing the Elements inside the package
+				for (INamedElement node : pack.getOwnedElements()) {
+					// Parsing classes and creating Elements
+					if (node instanceof IClass) {
+						if (node.getPresentations().length > 0) { // selects only visible classes (appear in some diagram)
+							Element element = new Element(im, (IClass) node);
+							im.addElement(element);
+							initiative.addNotion(element);
+							astahClassMap.put(node.getId(), (IClass) node);
+							ecount++;
+						} else {
+							System.out.println("Discarded Element: " + node.getName());
+						}
 					}
 				}
+				if (ecount == 0 && im.isStructural()) {
+					throw new ParserException("No elements were found in the Integrated Structural Model");
+				}
 			}
-			if (ecount == 0 && im.isStructural()) {
-				throw new ParserException("No elements were found in the Integrated Structural Model");
-			}
-			// Including the already parsed Concepts (all Concepts from SEON) in the IM (Domain to ICM, Core to ISM)
+			// Including the already parsed Concepts (all Concepts from SEON View) in the IM (Domain to ICM, Core to ISM)
 			for (Concept concept : initiative.getSeonView().getConcepts()) {
 				if (im.isStructural() == concept.isBasetype()) {
 					im.addConcept(concept);
@@ -384,7 +388,8 @@ public class AstahParseApp {
 				List<Notion> basetypes = notion.getBasetypes();
 				if (basetypes.isEmpty()) {
 					if (notion instanceof Concept) {
-						addResult("The concept " + notion + " (package " + notion.getPackage() + ") has no generalization to a Core/Foundational Ontology Concept.\n");
+						addResult("The concept " + notion + " (package " + notion.getPackage()
+								+ ") has no generalization to a Core/Foundational Ontology Concept.\n");
 					} else if (notion instanceof Element) {
 						addResult("The element " + notion + " (package " + notion.getPackage() + ") has no generalization to a Structural Model Element.\n");
 					}

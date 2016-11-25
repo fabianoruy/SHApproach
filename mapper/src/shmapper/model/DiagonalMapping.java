@@ -15,10 +15,10 @@ public class DiagonalMapping extends Mapping {
 		return target;
 	}
 
-	/* Returns the coverage of the matchs over the base Elements. */
-	@Override
-	public int getCoverage() {
-		return 0;
-	}
+//	/* Returns the coverage of the matchs over the base Elements. */
+//	@Override
+//	public int getCoverage() {
+//		return 0;
+//	}
 
 }

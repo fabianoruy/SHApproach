@@ -9,9 +9,9 @@ import com.change_vision.jude.api.inf.model.IPackage;
 
 /* Represents the Integrated Content Model (ICM) of an Initiative. */
 public class IntegratedModel extends Model {
-	private static final long	serialVersionUID	= 8909961454762309968L;
-	private String				description;
-	private List<Concept>		concepts;
+	private static final long serialVersionUID = 8909961454762309968L;
+	private String description;
+	private List<Concept> concepts;
 
 	public IntegratedModel(boolean struct, IPackage astahPack) {
 		super(struct, astahPack);

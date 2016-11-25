@@ -30,6 +30,11 @@ public abstract class Model extends Package {
 	public void addElement(Element elem) {
 		this.elements.add(elem);
 	}
+	
+	/* Removes an Element from this Model. */
+	public void removeElement(Element elem) {
+		this.elements.remove(elem);
+	}
 
 	public List<Element> getElementsByUfotype(UFOType type) {
 		List<Element> typedElements = new ArrayList<Element>();

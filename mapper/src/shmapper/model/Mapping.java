@@ -92,7 +92,7 @@ public abstract class Mapping extends SerializableObject {
 		return cmatches;
 	}
 
-	/* Returns the matches which elem is the source. */
+	/* Returns the matches (simple or composite) which elem is the source. */
 	public List<Match> getMatchesBySource(Element source) {
 		List<Match> smatches = new ArrayList<Match>();
 		for (Match match : matches) {
@@ -250,7 +250,7 @@ public abstract class Mapping extends SerializableObject {
 		}
 	}
 
-	/* Removes a Match to the Mapping. */
+	/* Removes a Match from the Mapping. */
 	public void removeMatch(Match rmatch) {
 		matches.remove(rmatch);
 	}

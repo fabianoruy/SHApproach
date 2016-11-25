@@ -13,19 +13,19 @@ import shmapper.model.Element.CoverateSituation;
 
 /* Represents a Standard Harmonization Initiative. */
 public class SHInitiative extends SerializableObject {
-	private static final long	serialVersionUID	= 6817595375134398343L;
-	private String				domain;
-	private String				purpose;
-	private String				scope;
-	private String				people;
-	private String				description;
-	private String				astahPath;
-	private InitiativeStatus	status;
-	private List<Package>		packages;
-	private List<Mapping>		structmaps;
-	private List<Mapping>		contentmaps;
-	private Map<String, Notion>	notionMap;
-	private transient String	datafile;
+	private static final long serialVersionUID = 6817595375134398343L;
+	private String domain;
+	private String purpose;
+	private String scope;
+	private String people;
+	private String description;
+	private String astahPath;
+	private InitiativeStatus status;
+	private List<Package> packages;
+	private List<Mapping> structmaps;
+	private List<Mapping> contentmaps;
+	private Map<String, Notion> notionMap;
+	private transient String datafile;
 
 	public static enum InitiativeStatus {
 		INITIATED, PARSED, STRUCTURED, CONTENTED, FINISHED, CREATED
@@ -218,8 +218,8 @@ public class SHInitiative extends SerializableObject {
 		} else if (target instanceof StandardModel) {
 			// Selecting the unique Horizontal Mapping with the same base and target (or vice-versa)
 			for (Mapping hmap : mappings) {
-				if (hmap instanceof HorizontalMapping
-						&& ((base.equals(hmap.getBase()) && target.equals(hmap.getTarget())) || (base.equals(hmap.getTarget()) && target.equals(hmap.getBase()))))
+				if (hmap instanceof HorizontalMapping && ((base.equals(hmap.getBase()) && target.equals(hmap.getTarget()))
+						|| (base.equals(hmap.getTarget()) && target.equals(hmap.getBase()))))
 					return hmap;
 			}
 		}
@@ -248,7 +248,7 @@ public class SHInitiative extends SerializableObject {
 		// System.out.println("Returning " + vmaps.size() + " VMs: " + vmaps);
 		return vmaps;
 	}
-	
+
 	/* Returns the unique Vertical Content Mapping for the given base. */
 	public Mapping getVerticalContentMapping(StandardModel base) {
 		// Selecting the unique Vertical Mapping with the same base
@@ -258,7 +258,6 @@ public class SHInitiative extends SerializableObject {
 		}
 		return null;
 	}
-
 
 	public List<VerticalMapping> getVerticalStructuralMappings() {
 		List<VerticalMapping> vmaps = new ArrayList<VerticalMapping>();
@@ -324,12 +323,17 @@ public class SHInitiative extends SerializableObject {
 		return new ArrayList<Notion>(notionMap.values());
 	}
 
+	public Notion getNotionById(String id) {
+		return notionMap.get(id);
+	}
+
 	public void addNotion(Notion notion) {
 		this.notionMap.put(notion.getId(), notion);
 	}
 
-	public Notion getNotionById(String id) {
-		return notionMap.get(id);
+	/* Removes a Notion from the Initiative. */
+	public void removeNotion(Notion notion) {
+		this.notionMap.remove(notion.getId());
 	}
 
 	/* Returns a Package by id. */

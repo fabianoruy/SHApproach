@@ -83,8 +83,8 @@ public abstract class Notion extends SerializableObject {
 		ArrayList<Notion> basetypes = new ArrayList<Notion>();
 		for (Notion general : getGeneralizations()) {
 			if (general == null) {
-				System.err.println("Null Generalization: " + this);
-				System.err.flush();
+				System.out.println("Null Generalization: " + this);
+				System.out.flush();
 			} else {
 				if (general.isBasetype()) {
 					basetypes.add(general);
@@ -102,9 +102,9 @@ public abstract class Notion extends SerializableObject {
 		for (Notion general : getGeneralizations()) {
 			if (general.isBasetype()) {
 				basetypes.add(general);
-				basetypes.addAll(general.getBasetypes());
+				basetypes.addAll(general.getAllBasetypes());
 			} else {
-				basetypes.addAll(general.getBasetypes());
+				basetypes.addAll(general.getAllBasetypes());
 			}
 		}
 		return basetypes;

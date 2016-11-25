@@ -3,13 +3,13 @@
 
 <data> <uncovereddiv>
 <table>
-  <tr style="background-color: #99ccff">
+  <tr style="background-color: #808080">
     <c:forEach items="${initiative.diagonalContentMappings}" var="map">
-      <th style="width: 30%">${map.base}</th>
+      <th style="width: 30%; font-size:120%">${map.base}</th>
     </c:forEach>
   </tr>
   <c:forEach items="${typesMatrix}" var="elements" varStatus="loop">
-    <tr style="background-color: #ccf2ff">
+    <tr style="background-color: #c8c8c8">
       <td colspan="100%">${ufotypes[loop.index]}<c:if test="${empty ufotypes[loop.index]}">Type not defined</c:if>
       </td>
     </tr>
@@ -20,10 +20,12 @@
             <div style="font-size: 90%">
               <c:if test="${not empty cell[0]}">
                 <label title="${cell[0].definition}">${cell[0]}</label>
-                <%-- <label title="This it the title">${cell[0]}</label> --%>
                 <div style="float: right; display: inline">
                   <c:if test="${not empty cell[1]}">
                     <label title="${cell[1]}">[M]</label>
+                  </c:if>
+                  <c:if test="${cell[2] == 'FULLY'}">
+                    <select disabled><option></option><option>[W]</option></select>
                   </c:if>
                   <c:if test="${cell[2] != 'FULLY'}">
                     <select class="covers" id="${cell[0].id}"
@@ -50,10 +52,10 @@
 <table>
   <c:forEach items="${initiative.integratedCM.elements}" var="element">
     <tr>
-      <td><b>${element}</b><br />(${element.basetypes[0]})</td>
+      <td><b>${element}</b> <br />(${element.basetypes[0]})</td>
       <td style="font-size: 90%">${element.definition}</td>
       <td><img src="images/favicon-remove.ico" title="Remove Element" width="16px" style="cursor: pointer"
-        onclick="removeElement('${element.id}')" /></td>
+        onclick="showQuestion('Do you want to remove the element <b>${element}</b> together with all its matches?', function() {removeElement('${element.id}');})" /></td>
     </tr>
   </c:forEach>
 </table>

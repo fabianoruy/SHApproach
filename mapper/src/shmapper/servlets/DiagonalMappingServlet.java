@@ -25,9 +25,9 @@ import shmapper.model.VerticalMapping;
 /* Servlet implementation class DiagonalMappingServlet */
 @WebServlet("/DiagonalMappingServlet")
 public class DiagonalMappingServlet extends HttpServlet {
-	private static final long	serialVersionUID	= 1L;
-	private SHInitiative		initiative;
-	private MappingApp			mapp;
+	private static final long serialVersionUID = 1L;
+	private SHInitiative initiative;
+	private MappingApp mapp;
 
 	/* HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response). */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
@@ -53,15 +53,16 @@ public class DiagonalMappingServlet extends HttpServlet {
 				String typeId = request.getParameter("ismt");
 				String definition = request.getParameter("def");
 				String[][] selectedElems = new Gson().fromJson(request.getParameter("elems"), String[][].class);
-				mapp.createICMElement(name, definition, typeId, selectedElems, false);
+				boolean force = Boolean.valueOf(request.getParameter("force"));
+				mapp.createICMElement(name, definition, typeId, selectedElems, force);
 
 				updatePage(request, response);
 
 			} else if (request.getParameter("action").equals("remove")) {
 				// Removing a Match
 				String elemId = request.getParameter("elemId");
-				System.out.println("Element to be removed with all matches: "+ initiative.getNotionById(elemId));
-				// mapp.removeICMElement(elemId);
+				System.out.println("Element to be removed with all matches: " + initiative.getNotionById(elemId));
+				mapp.removeICMElement(elemId);
 
 				updatePage(request, response);
 			}
@@ -109,10 +110,11 @@ public class DiagonalMappingServlet extends HttpServlet {
 								}
 							}
 							matches = initiative.getAllDiagonalMatches(elem);
+							strmatches += "\n";
 							if (!matches.isEmpty()) {
 								strmatches += matches.size() + (matches.size() == 1 ? " match" : " matches") + " in ICM Mapping:\n";
 								for (Match match : matches) {
-									strmatches += match + "\n{" + match.getComment() + "}\n";
+									strmatches += match + "\n";
 								}
 							}
 							elements[j][i][0] = elem;
@@ -121,13 +123,14 @@ public class DiagonalMappingServlet extends HttpServlet {
 						} else {
 							elements[j][i][0] = null;
 							elements[j][i][1] = null;
-							elements[j][i][2] = CoverateSituation.NONCOVERED;
+							elements[j][i][2] = "EMPTY";
 						}
 					}
 				}
 				typesMatrix[t] = elements;
-				System.out.println(ufotypes[t] + " lines: " + elements.length);
+				System.out.print(ufotypes[t] + " (" + elements.length + ") ");
 			}
+			System.out.println("");
 
 			// Coverage numbers
 			String[][] coverages = new String[dmappings.size()][3];

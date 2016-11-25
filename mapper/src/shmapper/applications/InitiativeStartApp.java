@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -18,10 +19,10 @@ import shmapper.model.User;
 
 /** Responsible for manager the starting of an initiative. */
 public class InitiativeStartApp {
-	private String			mapperdir;
-	private String			initdir;
-	private SHInitiative	initiative;
-	private static boolean	readUsers	= false;
+	private String mapperdir;
+	private String initdir;
+	private SHInitiative initiative;
+	private static boolean readUsers = false;
 
 	public InitiativeStartApp(String mapperdir) {
 		this.mapperdir = mapperdir;
@@ -89,6 +90,7 @@ public class InitiativeStartApp {
 
 	/* Saves the users to the disk (to be called just once). */
 	private static void createUsers(String path) {
+		// Creates the users and save them in a index file
 		List<User> users = new ArrayList<User>();
 		users.add(new User("Quality Assurance", "."));
 		users.add(new User("Configuration Management", "CM17"));
@@ -100,13 +102,25 @@ public class InitiativeStartApp {
 			out.writeObject(users);
 			out.close();
 			fileOut.close();
-		} catch (IOException e1) {
-			e1.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		// Creates a log index file
+		PrintStream logindex;
+		try {
+			logindex = new PrintStream(path + "initiative/logindex.txt");
+			logindex.println("SH Approach Log Index - " + new java.util.Date());
+			logindex.println("---------------------------------------------------");
+			logindex.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
 	/* Defines the output log file. */
 	public String createLogOutput() {
+		
 		String logfile = "log/SHLog." + new SimpleDateFormat("yyyy-MM-dd.HH-mm-ss").format(new Date()) + ".txt";
 		PrintStream ps;
 		new File(mapperdir + initdir + logfile).getParentFile().mkdirs();
@@ -117,7 +131,12 @@ public class InitiativeStartApp {
 			//System.setErr(ps);
 			System.out.println("SH Approach log file - " + new java.util.Date());
 			System.out.println("---------------------------------------------------");
-		} catch (FileNotFoundException e) {
+			ps.close();
+			
+			FileWriter fw = new FileWriter(mapperdir + "initiative/logindex.txt", true);
+			fw.write(mapperdir + initdir + logfile + "\n");
+		    fw.close();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return initdir + logfile;

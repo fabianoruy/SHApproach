@@ -54,7 +54,7 @@
             $('#parsebutton')
                 .click(
                     function(e) {
-                      console.log(reset);
+                      //console.log(reset);
                       if (reset == false) {
                         var status = '${initiative.status}';
                         if (status == 'STRUCTURED') {
@@ -67,7 +67,6 @@
                           e.preventDefault();
                           showQuestion("You already have finished your Mappings! Parsing astah again will RESET ALL THE MAPPINGS. Are you sure?");
                         }
-
                       }
                     });
           });

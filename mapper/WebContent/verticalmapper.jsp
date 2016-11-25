@@ -13,17 +13,17 @@
 
 <style>
 .elembox {
-  border-radius: 8px;
-  border: 2px solid blue;
-  padding: 8px;
-  min-height: 140px;
+	border-radius: 8px;
+	border: 2px solid blue;
+	padding: 8px;
+	min-height: 140px;
 }
 
 .concbox {
-  border-radius: 8px;
-  border: 2px solid green;
-  padding: 8px;
-  min-height: 140px;
+	border-radius: 8px;
+	border: 2px solid green;
+	padding: 8px;
+	min-height: 140px;
 }
 </style>
 <script src="js/jquery.min.js"></script>
@@ -110,7 +110,7 @@
 
   /* Updates the page with the current information. */
   function updateMapping(responseXml) {
-    console.log(responseXml);
+    //console.log(responseXml);
     var question = $(responseXml).find('questiontext').html();
     var qtype = $(responseXml).find('questiontype').html();
     switch (qtype) {
@@ -124,13 +124,14 @@
       showQuestion(question, function() {
         doMatch(true)
       });
+      return;
       break;
     default:
       break;
     }
     $('#matchingsdiv').html($(responseXml).find('matchestable').html());
     $('#messagediv').html($(responseXml).find('messagetext').html());
-    $('#commentsfield').empty();
+    $('#commentsfield').val("");
     $('#coveragediv').html($(responseXml).find('coveragetable').html());
     $('#covernumber').text($(responseXml).find('coveragetext').html());
     $('.icon').remove();
@@ -296,15 +297,20 @@
   <h3 align="center">Approach for Harmonizing SE Standards</h3>
   <h1 align="center">(4) Vertical Mappings</h1>
 
-  <h2><b>Content Vertical Mapping</b></h2>
+  <h2>
+    <b>Content Vertical Mapping</b>
+  </h2>
 
   <h2>Map the Standards' Models to the Domain Ontologies</h2>
-  <p align="justify" style="width: 98%"><b>The standards' elements shall be mapped to the domain ontologies'
-      concepts (vertical mapping).</b> <br /> This tool supports the mapping by providing features for selecting the
-    desired elements and concepts and establishing different types of matches between them. Select an element from the
-    left-hand side model (the Standard Model) and select a concept from the right-hand side model (the SEON View). Then,
-    choose the suitable <a href=#nothing onclick="showCoverageInfo()">coverage relation</a> and add comments for the
-    match. Try to achieve a larger standard coverage by making as many suitable matches as possible.</p>
+  <p align="justify" style="width: 98%">
+    <b>The standards' elements shall be mapped to the domain ontologies' concepts (vertical mapping).</b>
+    <br />
+    This tool supports the mapping by providing features for selecting the desired elements and concepts and
+    establishing different types of matches between them. Select an element from the left-hand side model (the Standard
+    Model) and select a concept from the right-hand side model (the SEON View). Then, choose the suitable <a
+      href=#nothing onclick="showCoverageInfo()">coverage relation</a> and add comments for the match. Try to achieve a
+    larger standard coverage by making as many suitable matches as possible.
+  </p>
 
   <!-- ##### Diagrams Blocks ##### -->
   <div>
@@ -343,18 +349,26 @@
   <h3>How do the Standard's Elements cover the Ontology's Concepts?</h3>
   <div style="display: inline-block; width: 100%">
     <div style="width: 410px; display: inline-block; float: left">
-      <label><b>Standard Element</b></label> <br />
+      <label>
+        <b>Standard Element</b>
+      </label>
+      <br />
       <div class="elembox" title="Select an Element from the Standard model">
-        <input id="elementidfield" type="hidden" /> <span id="elementfield" style="font-weight: bold">(select an
-          element)</span><br /> <span id="ebasetypefield"></span><br /> <span id="edefinitionfield" style="font-size: 90%"></span>
+        <input id="elementidfield" type="hidden" />
+        <span id="elementfield" style="font-weight: bold">(select an element)</span>
+        <br />
+        <span id="ebasetypefield"></span>
+        <br />
+        <span id="edefinitionfield" style="font-size: 90%"></span>
       </div>
     </div>
 
     <div style="width: 140px; display: inline-block; float: left; margin: 0 20px 0 20px">
       <div style="display: inline-block">
         <b>Coverage (<a href=#nothing onclick="showCoverageInfo()">?</a>)
-        </b> <br /> <select id="coveringfield" title="Which is the coverage of the Element on the Concept?"
-          onchange="cleanOC(this)">
+        </b>
+        <br />
+        <select id="coveringfield" title="Which is the coverage of the Element on the Concept?" onchange="cleanOC(this)">
           <option value="EQUIVALENT">[E] EQUIVALENT</option>
           <option value="PARTIAL">[P] PART OF</option>
           <option value="WIDER">[W] WIDER</option>
@@ -370,17 +384,25 @@
 
 
     <div style="width: 410px; display: inline-block; float: left">
-      <label><b>Ontology Concept</b></label> <br />
+      <label>
+        <b>Ontology Concept</b>
+      </label>
+      <br />
       <div class="concbox" title="Select a Concept from the Ontology model.">
-        <input id="conceptidfield" type="hidden" /> <span id="conceptfield" style="font-weight: bold">(select
-          concept)</span><br /> <span id="cbasetypefield"></span><br /> <span id="cdefinitionfield" style="font-size: 90%"></span>
+        <input id="conceptidfield" type="hidden" />
+        <span id="conceptfield" style="font-weight: bold">(select concept)</span>
+        <br />
+        <span id="cbasetypefield"></span>
+        <br />
+        <span id="cdefinitionfield" style="font-size: 90%"></span>
       </div>
     </div>
 
   </div>
 
   <div style="width: 600px; margin: 15px 0 0 0">
-    <b>Covering Comments</b> <br />
+    <b>Covering Comments</b>
+    <br />
     <textarea id="commentsfield" title="Describe the non-covered portions of the Element." rows="4" cols="139"></textarea>
   </div>
 
@@ -417,13 +439,15 @@
 
   <!-- Information Dialog -->
   <div id="coverinfo" title="Coverage Relations" hidden>
-    <p>Some symbols are used to establish a relation between a <b>Standard&rsquo;s Element</b> and an <b>Ontology&rsquo;s
+    <p>
+      Some symbols are used to establish a relation between a <b>Standard&rsquo;s Element</b> and an <b>Ontology&rsquo;s
         Concept</b> (or between two Elements from different Standards). It is always a binary relation comparing the <b>notions&rsquo;
         coverage</b> on the domain, i.e. <em>how the domain portion covered by an Element is related to the domain
-        portion covered by a Concept (or by another Element</em>).<br /> For example, <b>A [P] O</b> (A is PART OF O), means
-      that &ldquo;<em>Element A covers a portion of the domain that <b>is part of</b> the portion covered by
-        Concept O
-    </em>&rdquo;.
+        portion covered by a Concept (or by another Element</em>).
+      <br />
+      For example, <b>A [P] O</b> (A is PART OF O), means that &ldquo;<em>Element A covers a portion of the domain
+        that <b>is part of</b> the portion covered by Concept O
+      </em>&rdquo;.
     </p>
     <p>For the matches where an Element remains with non-covered portions (WIDER or INTERSECTION relations), a
       comment is required for explaining such portions.</p>
@@ -443,7 +467,8 @@
             the portion covered by Concept O.
           </td>
           <td style="text-align: center"><IMG src="images/Equivalent.png"></td>
-          <td>(Element) Risk Plan<br /> <b>[E]</b><br /> (Concept) Plan of Risks
+          <td>(Element) Risk Plan<br /> <b>[E]</b>
+          <br /> (Concept) Plan of Risks
           </td>
         </tr>
         <tr>
@@ -453,7 +478,8 @@
             covered by Concept O (O includes A).
           </td>
           <td style="text-align: center"><IMG src="images/Partof.png"></td>
-          <td>(Element) Risk Plan<br /> <b>[P]</b><br /> (Concept) Project Plan
+          <td>(Element) Risk Plan<br /> <b>[P]</b>
+          <br /> (Concept) Project Plan
           </td>
         </tr>
         <tr>
@@ -463,8 +489,8 @@
             portion covered by Concept O (A includes O).
           </td>
           <td style="text-align: center"><IMG src="images/Wider.png"></td>
-          <td>(Element) Risk Plan<br /> <b>[W]</b><br /> (Concept) Mitigation Plan<br /> <br /> <b>{contingency
-              actions not covered}</b>
+          <td>(Element) Risk Plan<br /> <b>[W]</b>
+          <br /> (Concept) Mitigation Plan<br /> <br /> <b>{contingency actions not covered}</b>
           </td>
         </tr>
         <tr>
@@ -480,9 +506,12 @@
         </tr>
       </tbody>
     </table>
-    <p>An Element that is EQUIVALENT or PART OF any Concept is considered <b>fully covered</b> <img
-      src="images/favicon-full.ico">.<br /> An Element that is WIDER than or have INTERSECTION with any Concept
-      is considered <b>partially covered</b> <img src="images/favicon-part.ico">.
+    <p>
+      An Element that is EQUIVALENT or PART OF any Concept is considered <b>fully covered</b> <img
+        src="images/favicon-full.ico">.
+      <br />
+      An Element that is WIDER than or have INTERSECTION with any Concept is considered <b>partially covered</b> <img
+        src="images/favicon-part.ico">.
     </p>
   </div>
 

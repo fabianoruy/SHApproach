@@ -104,7 +104,7 @@ public class VerticalMappingServlet extends HttpServlet {
 			request.setAttribute("question", mapp.getQuestion());
 			request.setAttribute("qtype", mapp.getQuestionType());
 			request.setAttribute("mapping", mapp.getCurrentMapping());
-			request.getRequestDispatcher("dmatches.jsp").forward(request, response);
+			request.getRequestDispatcher("vmatches.jsp").forward(request, response);
 		}
 	}
 
