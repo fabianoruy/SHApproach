@@ -113,8 +113,8 @@ public class InitiativeStartApp {
 		System.out.println("# log: " + mapperdir + initdir + logfile + "\n");
 		try {
 			ps = new PrintStream(mapperdir + initdir + logfile);
-			System.setOut(ps);
-			System.setErr(ps);
+			//System.setOut(ps);
+			//System.setErr(ps);
 			System.out.println("SH Approach log file - " + new java.util.Date());
 			System.out.println("---------------------------------------------------");
 		} catch (FileNotFoundException e) {

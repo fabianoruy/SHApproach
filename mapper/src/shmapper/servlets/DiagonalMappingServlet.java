@@ -19,14 +19,15 @@ import shmapper.model.Mapping;
 import shmapper.model.Match;
 import shmapper.model.Notion.UFOType;
 import shmapper.model.SHInitiative;
+import shmapper.model.StandardModel;
 import shmapper.model.VerticalMapping;
 
 /* Servlet implementation class DiagonalMappingServlet */
 @WebServlet("/DiagonalMappingServlet")
 public class DiagonalMappingServlet extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-	private SHInitiative initiative;
-	private MappingApp mapp;
+	private static final long	serialVersionUID	= 1L;
+	private SHInitiative		initiative;
+	private MappingApp			mapp;
 
 	/* HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response). */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
@@ -38,69 +39,7 @@ public class DiagonalMappingServlet extends HttpServlet {
 				// Accessing the initiative and application from the Session
 				initiative = (SHInitiative) request.getSession().getAttribute("initiative");
 				mapp = (MappingApp) request.getSession().getAttribute("mappingapp");
-				DiagonalMapping dmapping = initiative.getDiagonalContentMappings().get(0); // Setting a diagonal mapping
-				mapp.setCurrentMapping(dmapping);
-
-				List<VerticalMapping> vmappings = initiative.getVerticalContentMappings();
-				int mcount = vmappings.size();
-
-				UFOType[] ufotypes = new UFOType[UFOType.values().length + 1];
-				for (int i = 0; i < UFOType.values().length; i++) {
-					ufotypes[i] = UFOType.values()[i];
-				}
-				// UFOType[] ufotypes = UFOType.values();
-
-				Object[][][][] typesMatrix = new Object[ufotypes.length][][][];
-				for (int t = 0; t < ufotypes.length; t++) {
-					// Determining the max row number for the type
-					int ecount = 0;
-					for (Mapping vmap : vmappings) {
-						List<Element> elems = vmap.getNonFullyCoveredElementsByUfotype(ufotypes[t]);
-						if (elems.size() > ecount) {
-							ecount = elems.size();
-						}
-					}
-					Object[][][] elements = new Object[ecount][mcount][3];
-					for (int i = 0; i < mcount; i++) {
-						// Getting the non covered elements of each type
-						List<Element> elems = vmappings.get(i).getNonFullyCoveredElementsByUfotype(ufotypes[t]);
-						for (int j = 0; j < ecount; j++) {
-							if (elems.size() > j) {
-								Element elem = elems.get(j);
-								List<Match> matches = initiative.getAllVerticalMatches(elem);
-								String strmatches = "";
-								if (!matches.isEmpty()) {
-									strmatches += matches.size() + (matches.size() == 1 ? " match" : " matches")
-											+ " in Vertical Mapping:\n";
-									for (Match match : matches) {
-										strmatches += match + "\n{" + match.getComment() + "}\n";
-									}
-								}
-								matches = initiative.getAllDiagonalMatches(elem);
-								if (!matches.isEmpty()) {
-									strmatches += matches.size() + (matches.size() == 1 ? " match" : " matches")
-											+ " in ICM Mapping:\n";
-									for (Match match : matches) {
-										strmatches += match + "\n{" + match.getComment() + "}\n";
-									}
-								}
-								elements[j][i][0] = elem;
-								elements[j][i][1] = strmatches;
-								elements[j][i][2] = initiative.getCoverageSituation(elem);
-							} else {
-								elements[j][i][0] = null;
-								elements[j][i][1] = null;
-								elements[j][i][2] = CoverateSituation.NONCOVERED;
-							}
-						}
-					}
-					typesMatrix[t] = elements;
-					System.out.println(ufotypes[t] + " elements:\n" + elements);
-				}
-
-				// Setting attributes and calling the page
-				request.setAttribute("ufotypes", ufotypes);
-				request.setAttribute("typesMatrix", typesMatrix);
+				mapp.setCurrentMapping(initiative.getDiagonalContentMappings().get(0)); // Setting a diagonal mapping
 
 				request.getRequestDispatcher("diagonalmapper.jsp").forward(request, response);
 
@@ -110,26 +49,19 @@ public class DiagonalMappingServlet extends HttpServlet {
 
 			} else if (request.getParameter("action").equals("create")) {
 				// Creating a new ICM Element
-				String name = request.getParameter("elemname");
-				String typeId = request.getParameter("ismtype");
-				String definition = request.getParameter("elemdef");
+				String name = request.getParameter("name");
+				String typeId = request.getParameter("ismt");
+				String definition = request.getParameter("def");
 				String[][] selectedElems = new Gson().fromJson(request.getParameter("elems"), String[][].class);
 				mapp.createICMElement(name, definition, typeId, selectedElems, false);
-
-				updatePage(request, response);
-
-			} else if (request.getParameter("action").equals("compositeMatch")) {
-				// Creating a new Composite Match.
-				String elemId = request.getParameter("elem");
-				String cover = request.getParameter("cover");
-				mapp.createCompositeMatch(elemId, cover);
 
 				updatePage(request, response);
 
 			} else if (request.getParameter("action").equals("remove")) {
 				// Removing a Match
 				String elemId = request.getParameter("elemId");
-				mapp.removeMatch(elemId);
+				System.out.println("Element to be removed with all matches: "+ initiative.getNotionById(elemId));
+				// mapp.removeICMElement(elemId);
 
 				updatePage(request, response);
 			}
@@ -139,15 +71,81 @@ public class DiagonalMappingServlet extends HttpServlet {
 	}
 
 	/* Updates the verticalmapper page via ajax. */
-	private void updatePage(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	private void updatePage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// Setting attributes and calling the page
 		if (mapp != null) {
+			List<VerticalMapping> vmappings = initiative.getVerticalContentMappings();
+			List<DiagonalMapping> dmappings = initiative.getDiagonalContentMappings();
+
+			int mcount = vmappings.size();
+			UFOType[] ufotypes = new UFOType[UFOType.values().length + 1];
+			for (int i = 0; i < UFOType.values().length; i++) {
+				ufotypes[i] = UFOType.values()[i];
+			}
+
+			Object[][][][] typesMatrix = new Object[ufotypes.length][][][];
+			for (int t = 0; t < ufotypes.length; t++) {
+				// Determining the max row number for the type
+				int ecount = 0;
+				for (Mapping vmap : vmappings) {
+					List<Element> elems = vmap.getNonFullyCoveredElementsByUfotype(ufotypes[t]);
+					if (elems.size() > ecount) {
+						ecount = elems.size();
+					}
+				}
+				Object[][][] elements = new Object[ecount][mcount][3];
+				for (int i = 0; i < mcount; i++) {
+					// Getting the non covered elements of each type
+					List<Element> elems = vmappings.get(i).getNonFullyCoveredElementsByUfotype(ufotypes[t]);
+					for (int j = 0; j < ecount; j++) {
+						if (elems.size() > j) {
+							Element elem = elems.get(j);
+							List<Match> matches = initiative.getAllVerticalMatches(elem);
+							String strmatches = "";
+							if (!matches.isEmpty()) {
+								strmatches += matches.size() + (matches.size() == 1 ? " match" : " matches") + " in Vertical Mapping:\n";
+								for (Match match : matches) {
+									strmatches += match + "\n{" + match.getComment() + "}\n";
+								}
+							}
+							matches = initiative.getAllDiagonalMatches(elem);
+							if (!matches.isEmpty()) {
+								strmatches += matches.size() + (matches.size() == 1 ? " match" : " matches") + " in ICM Mapping:\n";
+								for (Match match : matches) {
+									strmatches += match + "\n{" + match.getComment() + "}\n";
+								}
+							}
+							elements[j][i][0] = elem;
+							elements[j][i][1] = strmatches;
+							elements[j][i][2] = initiative.getCoverageSituation(elem);
+						} else {
+							elements[j][i][0] = null;
+							elements[j][i][1] = null;
+							elements[j][i][2] = CoverateSituation.NONCOVERED;
+						}
+					}
+				}
+				typesMatrix[t] = elements;
+				System.out.println(ufotypes[t] + " lines: " + elements.length);
+			}
+
+			// Coverage numbers
+			String[][] coverages = new String[dmappings.size()][3];
+			for (int i = 0; i < coverages.length; i++) {
+				StandardModel std = dmappings.get(i).getBase();
+				coverages[i][0] = std.getName();
+				coverages[i][1] = initiative.getVerticalContentMapping(std).getCoverage() + "%";
+				coverages[i][2] = dmappings.get(i).getCoverage() + "%";
+			}
+
+			// Setting attributes and calling the page
+			request.setAttribute("ufotypes", ufotypes);
+			request.setAttribute("typesMatrix", typesMatrix);
+			request.setAttribute("coverages", coverages);
 			request.setAttribute("message", mapp.getMessage());
 			request.setAttribute("question", mapp.getQuestion());
 			request.setAttribute("qtype", mapp.getQuestionType());
-			request.setAttribute("mapping", mapp.getCurrentMapping());
-			request.getRequestDispatcher("icmelements.jsp").forward(request, response);
+			request.getRequestDispatcher("dmatches.jsp").forward(request, response);
 		}
 	}
 

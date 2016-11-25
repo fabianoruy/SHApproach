@@ -248,6 +248,17 @@ public class SHInitiative extends SerializableObject {
 		// System.out.println("Returning " + vmaps.size() + " VMs: " + vmaps);
 		return vmaps;
 	}
+	
+	/* Returns the unique Vertical Content Mapping for the given base. */
+	public Mapping getVerticalContentMapping(StandardModel base) {
+		// Selecting the unique Vertical Mapping with the same base
+		for (Mapping vmap : contentmaps) {
+			if (vmap instanceof VerticalMapping && base.equals(vmap.getBase()))
+				return vmap;
+		}
+		return null;
+	}
+
 
 	public List<VerticalMapping> getVerticalStructuralMappings() {
 		List<VerticalMapping> vmaps = new ArrayList<VerticalMapping>();

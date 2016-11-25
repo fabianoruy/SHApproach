@@ -325,6 +325,7 @@
           <area shape="rect" coords="${entry.value}" id="${entry.key.id}">
         </c:forEach>
       </MAP>
+      <!-- diagram icons included here by ajax -->
     </div>
 
     <div style="width: 49%; height: 600px; overflow: auto; display: inline-block; border: 3px solid green">
@@ -385,7 +386,9 @@
 
   <div style="display: inline-block; width: 998px; margin: 15px 0 0 0">
     <strong>Message</strong>
-    <div id="messagediv" style="font-size: 90%; height: 80px; overflow: auto; border: 1px solid gray; border-radius: 8px; padding: 6px;">
+    <div id="messagediv"
+      style="font-size: 90%; height: 80px; overflow: auto; border: 1px solid gray; border-radius: 8px; padding: 6px;">
+      <!-- Messages included here by ajax -->
     </div>
   </div>
 
@@ -394,23 +397,23 @@
     <strong>Matches Established. (<a href=#nothing onclick="showCoverageStatus()">Coverage: <span
         id="covernumber">0%</span></a>)
     </strong>
-    <div id="matchingsdiv" style="font-size: 95%; overflow: auto; border: 1px solid gray; height: 400px; padding: 3px"></div>
+    <div id="matchingsdiv" style="font-size: 95%; overflow: auto; border: 1px solid gray; height: 400px; padding: 3px">
+      <!-- Matches included here by ajax -->
+    </div>
   </div>
   <!--   </div> -->
 
   <div style="text-align: center; width: 998px; margin: 10px 0 0 0">
     <form action="PhaseSelectServlet" method="POST">
       <input type="hidden" name="action" value="openSelection">
-      <button id="finishbutton">Back to Menu</button>
+      <button id="finishbutton">SAVE and Back to Menu</button>
     </form>
   </div>
-
   <!-- ***** Match Blocks ***** -->
 
   <!-- Information Dialog -->
   <div id="coveragediv" title="Coverage Status"
-    style="font-size: 95%; overflow: auto; border: 1px solid gray; width: 500px; height: 500px" hidden>
-  </div>
+    style="font-size: 95%; overflow: auto; border: 1px solid gray; width: 500px; height: 500px" hidden></div>
 
   <!-- Information Dialog -->
   <div id="coverinfo" title="Coverage Relations" hidden>
@@ -488,19 +491,25 @@
 
   <!-- Simple Message -->
   <div id="dialog-message" title="Message" hidden>
-<!--     <p><span class="ui-icon ui-icon-circle-check" style="float: left; margin: 0 7px 50px 0;"></span> -->
-    <p><div id="messageText"></div></p>
+    <!--     <p><span class="ui-icon ui-icon-circle-check" style="float: left; margin: 0 7px 50px 0;"></span> -->
+    <p>
+    <div id="messageText"></div>
+    </p>
   </div>
 
   <!-- Question Message -->
   <div id="dialog-question" title="Question" hidden>
-<!--     <p><span class="ui-icon ui-icon-help" style="float: left; margin: 12px 12px 20px 0;"></span> -->
-    <p><div id="questionText"></div></p>
+    <!--     <p><span class="ui-icon ui-icon-help" style="float: left; margin: 12px 12px 20px 0;"></span> -->
+    <p>
+    <div id="questionText"></div>
+    </p>
   </div>
 
   <!-- Composite Match Question Message -->
   <div id="dialog-composite" title="Is it a Composite Match?" hidden>
-    <p><div id="compositeText"></div></p>
+    <p>
+    <div id="compositeText"></div>
+    </p>
   </div>
 
   <!-- ***** Dialog Boxes ***** -->

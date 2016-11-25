@@ -22,14 +22,14 @@ import shmapper.model.SimpleMatch;
 
 /** Responsible for providing the services for the mapping tasks. */
 public class MappingApp {
-	private SHInitiative initiative;
-	private Mapping mapping; // current mapping
-	private String message;
-	private String question;
-	private QuestionType questionType;
-	public static final String CHECKED = "<span style='color:green'><b>(\u2713)</b></span> ";
-	public static final String PROBLEM = "<span style='color:red'><b>(!)</b></span> ";
-	public static final String QUESTION = "<span style='color:blue'><b>(?)</b></span> ";
+	private SHInitiative		initiative;
+	private Mapping				mapping;															// current mapping
+	private String				message;
+	private String				question;
+	private QuestionType		questionType;
+	public static final String	CHECKED		= "<span style='color:green'><b>(\u2713)</b></span> ";
+	public static final String	PROBLEM		= "<span style='color:red'><b>(!)</b></span> ";
+	public static final String	QUESTION	= "<span style='color:blue'><b>(?)</b></span> ";
 
 	public static enum QuestionType {
 		Basetype, CompositeEquivalent, CompositeEquivalentPart
@@ -49,6 +49,9 @@ public class MappingApp {
 
 	public void setCurrentMapping(Mapping mapping) {
 		this.mapping = mapping;
+		message = "";
+		question = "";
+		questionType = null;
 		System.out.println("* Current Mapping: " + this.mapping);
 	}
 
@@ -177,7 +180,7 @@ public class MappingApp {
 			}
 		}
 		question += PROBLEM + "The selected Element and " + target.getClass() + " have no corresponding basetypes.<br/>";
-		question += ("<code>(" + source.getBasetypes() + ") X (" + target.getBasetypes() + ")</code><br/><b/>").replaceAll("\\[|\\]", "");
+		question += ("<code>(" + source.getBasetypes() + ") X (" + target.getBasetypes() + ")</code><br/><br/>").replaceAll("\\[|\\]", "");
 		question += "<b>Do you really want to match them?</b>";
 		questionType = QuestionType.Basetype;
 		return false;
@@ -240,7 +243,7 @@ public class MappingApp {
 		for (String[] elems : selectedElems) {
 			sources.add((Element) initiative.getNotionById(elems[0]));
 		}
-		//if (forceBT || validateBasetypesCorrespondences(elem, sources)) {
+		if (forceBT || validateBasetypesCorrespondences(sources, elem)) {
 			Element target = elem;
 			for (String[] elems : selectedElems) {
 				Element source = (Element) initiative.getNotionById(elems[0]);
@@ -251,40 +254,42 @@ public class MappingApp {
 				// Putting the match in the proper mapping
 				for (DiagonalMapping dmap : initiative.getDiagonalContentMappings()) {
 					if (source.getModel().equals(dmap.getBase())) {
-						//dmap.addMatch(match);
+						// dmap.addMatch(match);
 					}
 				}
 			}
-			//icm.addElement(elem);
-			//initiative.addNotion(elem);
+			// icm.addElement(elem);
+			// initiative.addNotion(elem);
 			return elem;
-		//}
-		//return null;
+		}
+		return null;
 	}
 
-	/* Validates the Correspondences between the sources and the new element target basetypes using the structural
+	/* Validates the Correspondences between basetypes of the sources and new element target using the structural
 	 * mappings (for Diagonal Mappings). */
 	private boolean validateBasetypesCorrespondences(List<Element> sources, Element target) {
 		List<Notion> targetbts = target.getAllBasetypes(); // Concepts/Elements
+		int count = 0;
 		next: for (Element source : sources) {
 			List<Notion> sourcebts = source.getAllBasetypes(); // Elements
 			// Looking for BTs matches
-			boolean found = false;
 			for (Notion sbt : sourcebts) {
 				for (Notion tbt : targetbts) {
 					// Recovering the matches
 					List<SimpleMatch> matches = initiative.getSimpleMatches((Element) sbt, tbt);
 					if (!matches.isEmpty()) {
-						found = true;
-						question += ("<code>(" + source.getBasetypes() + ") X (" + target.getBasetypes() + ")</code><br/><b/>").replaceAll("\\[|\\]", "");
 						continue next;
 					}
 				}
 			}
+			count++;
+			question += ("<code>" + source + " (" + source.getBasetypes() + ") X " + target + " (" + target.getBasetypes() + ")</code><br/>").replaceAll("\\[|\\]", "");
 		}
-		question += PROBLEM + "The selected Element and " + target.getClass() + " have no corresponding basetypes.<br/>";
-		question += "<b>Do you really want to match them?</b>";
-		questionType = QuestionType.Basetype;
+		if (count > 0) {
+			question = PROBLEM + "The new Element <b>" + target + "</b> has no corresponding basetypes with " + count + " of the selected Elements:<br/>" + question;
+			question += "<b>Do you really want to create this Element with these related matches?</b>";
+			questionType = QuestionType.Basetype;
+		}
 		return false;
 	}
 
