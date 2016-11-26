@@ -13,19 +13,19 @@ import shmapper.model.Element.CoverateSituation;
 
 /* Represents a Standard Harmonization Initiative. */
 public class SHInitiative extends SerializableObject {
-	private static final long serialVersionUID = 6817595375134398343L;
-	private String domain;
-	private String purpose;
-	private String scope;
-	private String people;
-	private String description;
-	private String astahPath;
-	private InitiativeStatus status;
-	private List<Package> packages;
-	private List<Mapping> structmaps;
-	private List<Mapping> contentmaps;
-	private Map<String, Notion> notionMap;
-	private transient String datafile;
+	private static final long	serialVersionUID	= 6817595375134398343L;
+	private String				domain;
+	private String				purpose;
+	private String				scope;
+	private String				people;
+	private String				description;
+	private String				astahPath;
+	private InitiativeStatus	status;
+	private List<Package>		packages;
+	private List<Mapping>		structmaps;
+	private List<Mapping>		contentmaps;
+	private Map<String, Notion>	notionMap;
+	private transient String	datafile;
 
 	public static enum InitiativeStatus {
 		INITIATED, PARSED, STRUCTURED, CONTENTED, FINISHED, CREATED
@@ -191,7 +191,7 @@ public class SHInitiative extends SerializableObject {
 		return new ArrayList<Match>(); // empty list
 	}
 
-	/* Returns all matches in the Initiative with the source and target. */
+	/* Returns all simple matches in the Initiative with the source and target. */
 	public List<SimpleMatch> getSimpleMatches(Element source, Notion target) {
 		Mapping mapping = getMapping(source.getModel(), target.getPackage());
 		return mapping.getSimpleMatches(source, target);
@@ -218,8 +218,8 @@ public class SHInitiative extends SerializableObject {
 		} else if (target instanceof StandardModel) {
 			// Selecting the unique Horizontal Mapping with the same base and target (or vice-versa)
 			for (Mapping hmap : mappings) {
-				if (hmap instanceof HorizontalMapping && ((base.equals(hmap.getBase()) && target.equals(hmap.getTarget()))
-						|| (base.equals(hmap.getTarget()) && target.equals(hmap.getBase()))))
+				if (hmap instanceof HorizontalMapping
+						&& ((base.equals(hmap.getBase()) && target.equals(hmap.getTarget())) || (base.equals(hmap.getTarget()) && target.equals(hmap.getBase()))))
 					return hmap;
 			}
 		}
@@ -250,11 +250,21 @@ public class SHInitiative extends SerializableObject {
 	}
 
 	/* Returns the unique Vertical Content Mapping for the given base. */
-	public Mapping getVerticalContentMapping(StandardModel base) {
+	public VerticalMapping getVerticalContentMapping(StandardModel base) {
 		// Selecting the unique Vertical Mapping with the same base
 		for (Mapping vmap : contentmaps) {
 			if (vmap instanceof VerticalMapping && base.equals(vmap.getBase()))
-				return vmap;
+				return (VerticalMapping) vmap;
+		}
+		return null;
+	}
+
+	/* Returns the unique Diagonal Content Mapping for the given base. */
+	public DiagonalMapping getDiagonalContentMapping(StandardModel base) {
+		// Selecting the unique Vertical Mapping with the same base
+		for (Mapping dmap : contentmaps) {
+			if (dmap instanceof DiagonalMapping && base.equals(dmap.getBase()))
+				return (DiagonalMapping) dmap;
 		}
 		return null;
 	}

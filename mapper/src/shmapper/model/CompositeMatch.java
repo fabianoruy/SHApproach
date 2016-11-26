@@ -27,7 +27,7 @@ public class CompositeMatch extends Match {
 
 	@Override
 	public String toString() {
-		return getSource() + " [" + getCoverage().name().charAt(0) + "] " + getTarget();
+		return getSource() + " " + getCoverage().getAbbreviation() + " " + getTarget();
 	}
 
 	@Override

@@ -98,16 +98,15 @@ Nov.23
 / ICM Elements (assembling page)
 + Concepts included to IMs
 
-NEMO:
-- catch all excepts to log
-- gather all selected selects (diagonal mapping)
-- how to better organize divs
+Nov.24/25
++ ICM Elements (create, remove, presentation, checks)
 
-Nov.24
-= ICM Elements
+Nov.26
 = Horizontal Mapping
 - Harmonization Results
 - Match validation (T2)
+
+
 
 
 * Ver como salvar e recuperar tudo.
@@ -116,6 +115,6 @@ Nov.24
 
 * Após o Parsing, há 3 fases:
   - Vertical: aqui é livre, o que o usuário fez fica guardado, e é recuperado. Se tentar excluir um simple match, avisar que o composite vai junto.
-  - Diagonal: sempre que voltar aqui, recalcular os nonconvered, e verificar se os matches continuam válidos. Mostrar e excluir os não válidos.
+  - Diagonal: sempre que voltar aqui, recalcular os nonconvered, e verificar se os matches continuam válidos. Mostrar e excluir os não válidos. (validade verificada no vertical, exceto para composite)
   - Horizontal: sempre que voltar aqui, recalcular as deduções, e verificar se os matches continuam válidos. Mostrar e excluir os não válidos.
 Acredito que possa deixar todas abertas. Apenas alertar que o ideal é finalizar as anteriores antes de seguir para um próxima (ou seja, só há o botão open).

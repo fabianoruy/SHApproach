@@ -23,4 +23,8 @@ public enum Coverage {
     public String toString() {
         return text;
     }
+    
+    public String getAbbreviation() {
+		return "[" + this.name().charAt(0) + "]";
+    }
 }

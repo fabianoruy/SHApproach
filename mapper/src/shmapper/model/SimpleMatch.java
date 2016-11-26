@@ -20,7 +20,7 @@ public class SimpleMatch extends Match {
 
 	@Override
 	public String toString() {
-		return getSource() + " [" + getCoverage().name().charAt(0) + "] " + target;
+		return getSource() + " " + getCoverage().getAbbreviation() + " " + target;
 	}
 
 	@Override

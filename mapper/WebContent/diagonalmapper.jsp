@@ -27,7 +27,7 @@ table {
 }
 
 td, th {
-	border: 2px solid lightgrey;
+	border: 1px solid lightgrey;
 	padding: 4px;
 }
 
@@ -306,7 +306,7 @@ td, th {
       <label id="coveragelabel">
         <!-- Coverage numbers included here by ajax -->
       </label>
-      <div id="elementsdiv" style="font-size: 95%; overflow: auto; border: 1px solid gray; height: 400px; padding: 3px">
+      <div id="elementsdiv" style="font-size: 95%; overflow: auto; border: 1px solid gray; height: 450px; padding: 3px">
         <!-- New Elements included here by ajax -->
       </div>
     </div>

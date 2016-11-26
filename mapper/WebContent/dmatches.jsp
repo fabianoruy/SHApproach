@@ -5,7 +5,7 @@
 <table>
   <tr style="background-color: #808080">
     <c:forEach items="${initiative.diagonalContentMappings}" var="map">
-      <th style="width: 30%; font-size:120%">${map.base}</th>
+      <th style="width: 30%; font-size: 120%">${map.base}</th>
     </c:forEach>
   </tr>
   <c:forEach items="${typesMatrix}" var="elements" varStatus="loop">
@@ -25,7 +25,8 @@
                     <label title="${cell[1]}">[M]</label>
                   </c:if>
                   <c:if test="${cell[2] == 'FULLY'}">
-                    <select disabled><option></option><option>[W]</option></select>
+                    <select disabled><option></option>
+                      <option>[W]</option></select>
                   </c:if>
                   <c:if test="${cell[2] != 'FULLY'}">
                     <select class="covers" id="${cell[0].id}"
@@ -46,17 +47,40 @@
     </c:forEach>
   </c:forEach>
 </table>
-</uncovereddiv> <coveragelabel> <c:forEach items="${coverages}" var="stdcover">
+</uncovereddiv>
+
+<coveragelabel>
+  <c:forEach items="${coverages}" var="stdcover">
     &nbsp;&nbsp;&nbsp;(Coverage ${stdcover[0]}: ${stdcover[1]} + ${stdcover[2]})
-  </c:forEach> </coveragelabel> <elementsdiv>
-<table>
-  <c:forEach items="${initiative.integratedCM.elements}" var="element">
-    <tr>
-      <td><b>${element}</b> <br />(${element.basetypes[0]})</td>
-      <td style="font-size: 90%">${element.definition}</td>
-      <td><img src="images/favicon-remove.ico" title="Remove Element" width="16px" style="cursor: pointer"
-        onclick="showQuestion('Do you want to remove the element <b>${element}</b> together with all its matches?', function() {removeElement('${element.id}');})" /></td>
-    </tr>
+  </c:forEach>
+</coveragelabel>
+  
+<elementsdiv>
+<table style="border:0">
+  <c:forEach items="${icmelements}" var="elementline" varStatus="loopout">
+    <c:forEach items="${elementline[1]}" var="match" varStatus="loop">
+      <c:if test="${loopout.index%2 == 0}"><tr></c:if>
+      <c:if test="${loopout.index%2 == 1}"><tr style="background-color: #F0F0F0"></c:if>
+      <td style="width: 250px">${match.source.model}:&nbsp;${match.source}</td>
+      <td style="text-align: center">${match.coverage.abbreviation}</td>
+      <c:if test="${loop.index == 0}">
+        <c:set var="elem" value="${elementline[0]}" />
+        <c:set var="rows" value="${elementline[1].size()}" />
+        <td style="width: 150px" rowspan="${rows}"><b>${elem}</b> <br />(${elem.basetypes[0]})</td>
+        <td style="width: 400px" rowspan="${rows}" style="font-size: 90%">${elem.definition}</td>
+        <td rowspan="${rows}"><img src="images/favicon-remove.ico" title="Remove Element" width="16px"
+          style="cursor: pointer"
+          onclick="showQuestion('Do you want to remove the element <b>${elem}</b> together with all its matches?', function() {removeElement('${elem.id}');})" /></td>
+      </c:if>
+      </tr>
+    </c:forEach>
   </c:forEach>
 </table>
-</elementsdiv> <messagediv>${message}</messagediv> <questiontext>${question}</questiontext> <questiontype>${qtype}</questiontype> </data>
+</elementsdiv>
+
+<messagediv>${message}</messagediv>
+
+<questiontext>${question}</questiontext>
+<questiontype>${qtype}</questiontype>
+
+</data>

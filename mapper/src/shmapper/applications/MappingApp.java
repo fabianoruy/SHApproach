@@ -19,17 +19,19 @@ import shmapper.model.NotionPosition;
 import shmapper.model.SHInitiative;
 import shmapper.model.SHInitiative.InitiativeStatus;
 import shmapper.model.SimpleMatch;
+import shmapper.model.StandardModel;
+import shmapper.model.VerticalMapping;
 
 /** Responsible for providing the services for the mapping tasks. */
 public class MappingApp {
-	private SHInitiative initiative;
-	private Mapping mapping; // current mapping
-	private String message;
-	private String question;
-	private QuestionType questionType;
-	public static final String CHECKED = "<span style='color:green'><b>(\u2713)</b></span> ";
-	public static final String PROBLEM = "<span style='color:red'><b>(!)</b></span> ";
-	public static final String QUESTION = "<span style='color:blue'><b>(?)</b></span> ";
+	private SHInitiative		initiative;
+	private Mapping				mapping;															// current mapping
+	private String				message;
+	private String				question;
+	private QuestionType		questionType;
+	public static final String	CHECKED		= "<span style='color:green'><b>(\u2713)</b></span> ";
+	public static final String	PROBLEM		= "<span style='color:red'><b>(!)</b></span> ";
+	public static final String	QUESTION	= "<span style='color:blue'><b>(?)</b></span> ";
 
 	public static enum QuestionType {
 		Basetype, CompositeEquivalent, CompositeEquivalentPart
@@ -106,6 +108,7 @@ public class MappingApp {
 
 	/* Creates a new Composite Match (only [E] and [W] coverages). */
 	public CompositeMatch createCompositeMatch(String elemId, String coverName) {
+		// TODO: FIX IT: it is allowing to create a Composite Match when we already have partially covering from an ICM Element 
 		Element source = (Element) initiative.getNotionById(elemId);
 		Coverage cover = Coverage.valueOf(coverName);
 		List<SimpleMatch> smatches = mapping.getSimpleMatchesBySource(source);
@@ -148,10 +151,14 @@ public class MappingApp {
 	private boolean validateOntologyDisjointness(SimpleMatch match) {
 		// Validates if the element (source) is not already fully covered ([E] or [P]) by other matches (T1).
 		Element source = match.getSource();
+
+		// Verifying matches in the same Vertical Mapping AND in the correspondent Diagonal Mapping
+		DiagonalMapping dmapping = initiative.getDiagonalContentMapping((StandardModel) source.getModel());
 		List<Match> matches = mapping.getMatchesBySource(source);
-		// message = "";
+		matches.addAll(dmapping.getMatchesBySource(source));
 		for (Match omatch : matches) {
-			message += "The element <b>" + source + "</b> is already matched with other concept: (" + omatch + ").<br/>";
+			String target = ((omatch.getMapping() instanceof VerticalMapping) ? "concept" : "<b>ICM Element</b>") + ": (" + omatch + ")";
+			message += "The element <b>" + source + "</b> is already matched with other " + target + ".<br/>";
 			Coverage cover = match.getCoverage();
 			Coverage ocover = omatch.getCoverage();
 			// both coverages must be [W] or [I]
@@ -236,7 +243,7 @@ public class MappingApp {
 		Notion type = initiative.getNotionById(typeId);
 		IntegratedModel icm = ((DiagonalMapping) mapping).getTarget();
 		Element elem = new Element(name, definition, type, icm);
-		System.out.println("trying to create: " + elem + ": " + definition);
+		// System.out.println("trying to create: " + elem + ": " + definition);
 
 		// Creating Matches
 		List<Element> sources = new ArrayList<Element>();
@@ -294,7 +301,8 @@ public class MappingApp {
 		int count = 0;
 		next: for (Element source : sources) {
 			List<Notion> sourcebts = source.getAllBasetypes(); // Elements
-			System.out.println(source + "(" + source.getBasetypes() + ") X " + target + "(" + target.getBasetypes() + ")");
+			// System.out.println(source + "(" + source.getBasetypes() + ") X " + target + "(" + target.getBasetypes() +
+			// ")");
 			// Looking for BTs matches
 			for (Notion sbt : sourcebts) {
 				for (Notion tbt : targetbts) {
@@ -306,12 +314,10 @@ public class MappingApp {
 				}
 			}
 			count++;
-			question += ("<code>" + target + " (" + target.getBasetypes() + ") X " + source + " (" + source.getBasetypes() + ")</code><br/>")
-					.replaceAll("\\[|\\]", "");
+			question += ("<code>" + target + " (" + target.getBasetypes() + ") X " + source + " (" + source.getBasetypes() + ")</code><br/>").replaceAll("\\[|\\]", "");
 		}
 		if (count > 0) {
-			question = PROBLEM + "The new Element <b>" + target + "</b> has no corresponding basetypes with " + count + " of the selected Elements:<br/>"
-					+ question;
+			question = PROBLEM + "The new Element <b>" + target + "</b> has no corresponding basetypes with " + count + " of the selected Elements:<br/>" + question;
 			question += "<br/><b>Do you really want to create this Element with these related matches?</b>";
 			questionType = QuestionType.Basetype;
 			return false;

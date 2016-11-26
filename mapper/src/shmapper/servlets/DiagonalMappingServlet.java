@@ -1,6 +1,7 @@
 package shmapper.servlets;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -14,7 +15,6 @@ import com.google.gson.Gson;
 import shmapper.applications.MappingApp;
 import shmapper.model.DiagonalMapping;
 import shmapper.model.Element;
-import shmapper.model.Element.CoverateSituation;
 import shmapper.model.Mapping;
 import shmapper.model.Match;
 import shmapper.model.Notion.UFOType;
@@ -25,9 +25,9 @@ import shmapper.model.VerticalMapping;
 /* Servlet implementation class DiagonalMappingServlet */
 @WebServlet("/DiagonalMappingServlet")
 public class DiagonalMappingServlet extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-	private SHInitiative initiative;
-	private MappingApp mapp;
+	private static final long	serialVersionUID	= 1L;
+	private SHInitiative		initiative;
+	private MappingApp			mapp;
 
 	/* HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response). */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
@@ -110,7 +110,7 @@ public class DiagonalMappingServlet extends HttpServlet {
 								}
 							}
 							matches = initiative.getAllDiagonalMatches(elem);
-							strmatches += "\n";
+							strmatches += (strmatches.isEmpty() ? "" : "\n");
 							if (!matches.isEmpty()) {
 								strmatches += matches.size() + (matches.size() == 1 ? " match" : " matches") + " in ICM Mapping:\n";
 								for (Match match : matches) {
@@ -141,10 +141,30 @@ public class DiagonalMappingServlet extends HttpServlet {
 				coverages[i][2] = dmappings.get(i).getCoverage() + "%";
 			}
 
+			// ICM Elements and related Matches
+			List<Element> elements = initiative.getIntegratedCM().getElements();
+			Object[][] icmElements = new Object[elements.size()][2];
+			for (int i = 0; i < elements.size(); i++) {
+				List<Match> matches = new ArrayList<Match>();
+				for (DiagonalMapping dmap : dmappings) {
+					matches.addAll(dmap.getSimpleMatchesByTarget(elements.get(i)));
+				}
+				icmElements[i][0] = elements.get(i);
+				icmElements[i][1] = matches;
+			}
+			System.out.println(icmElements);
+			
+			for (Object[] objects : icmElements) {
+				for (Object object : objects) {
+					System.out.println(object);
+				}
+			}
+
 			// Setting attributes and calling the page
 			request.setAttribute("ufotypes", ufotypes);
 			request.setAttribute("typesMatrix", typesMatrix);
 			request.setAttribute("coverages", coverages);
+			request.setAttribute("icmelements", icmElements);
 			request.setAttribute("message", mapp.getMessage());
 			request.setAttribute("question", mapp.getQuestion());
 			request.setAttribute("qtype", mapp.getQuestionType());
