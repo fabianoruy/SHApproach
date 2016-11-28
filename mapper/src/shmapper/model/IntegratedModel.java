@@ -25,7 +25,19 @@ public class IntegratedModel extends Model {
 	public List<Concept> getConcepts() {
 		return concepts;
 	}
+	
+	/* Returns only the new IM elements, not provided by astah. */
+//	public List<Element> getNewElements() {
+//		List<Element> newelems = new ArrayList<Element>();
+//		for (Element elem : getElements()) {
+//			if(distinction criterion) { //TODO
+//				newelems.add(elem);
+//			}			
+//		}
+//		return newelems;
+//	}
 
+	/* Returns the IM Notions ordered by UFO Type. */
 	public List<Notion> getNotionsOrdered() {
 		List<Notion> notions = new ArrayList<Notion>();
 		notions.addAll(concepts);

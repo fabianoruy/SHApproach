@@ -16,7 +16,7 @@ public enum Coverage {
     }
     
     public String getText() {
-	return text;
+    	return text;
     }
     
     @Override
@@ -27,4 +27,12 @@ public enum Coverage {
     public String getAbbreviation() {
 		return "[" + this.name().charAt(0) + "]";
     }
+
+	public Coverage getReflex() {
+		if(this == Coverage.PARTIAL)
+			return Coverage.WIDER;
+		if(this == Coverage.WIDER)
+			return Coverage.PARTIAL;
+		return this;
+	}
 }

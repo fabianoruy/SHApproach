@@ -102,6 +102,19 @@ Nov.24/25
 + ICM Elements (create, remove, presentation, checks)
 
 Nov.26
+- QA VM (locally)
+- QA DM (locally)
+- fix problems
+- QA VM (server)
+- QA DM (server)
+- fix problems
+- [improve results]
+- Publish mapper4
+- Copy data from 3 to 4
+- Mail students
+
+
+Nov.27
 = Horizontal Mapping
 - Harmonization Results
 - Match validation (T2)

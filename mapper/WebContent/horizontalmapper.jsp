@@ -12,16 +12,16 @@
 <link rel="stylesheet" href="css/jquery-ui.css">
 
 <style>
-.elembox {
+.sourcebox {
   border-radius: 8px;
   border: 2px solid blue;
   padding: 8px;
   min-height: 140px;
 }
 
-.concbox {
+.targetbox {
   border-radius: 8px;
-  border: 2px solid green;
+  border: 2px solid #6600cc;
   padding: 8px;
   min-height: 140px;
 }
@@ -31,8 +31,8 @@
 <script src="js/maphilight.js"></script>
 
 <script>
-  var stdJson = JSON.parse('${stdJson}');
-  var ontoJson = JSON.parse('${ontoJson}');
+  var baseJson = JSON.parse('${baseJson}');
+  var targJson = JSON.parse('${targJson}');
   //console.log(json);
 
   $(document).ready(function() {
@@ -47,7 +47,7 @@
   function doUpdate() {
     $.ajax({
       type : 'POST',
-      url : 'VerticalMappingServlet',
+      url : 'HorizontalMappingServlet',
       data : {
         action : 'update',
       },
@@ -61,14 +61,15 @@
   function doMatch(forceBT) {
     $.ajax({
       type : 'POST',
-      url : 'VerticalMappingServlet',
+      url : 'HorizontalMappingServlet',
       data : {
         action : 'match',
-        elem : $('#elementidfield').val(),
-        conc : $('#conceptidfield').val(),
+        source : $('#sourceidfield').val(),
+        target : $('#targetidfield').val(),
         cover : $('#coveringfield').val(),
         comm : $('#commentsfield').val(),
-        force : forceBT // force Basetype
+        force : forceBT
+      // force Basetype
       },
       success : function(responseXml) {
         updateMapping(responseXml);
@@ -80,10 +81,10 @@
   function doCompositeMatch(cover) {
     $.ajax({
       type : 'POST',
-      url : 'VerticalMappingServlet',
+      url : 'HorizontalMappingServlet',
       data : {
         action : 'compositeMatch',
-        elem : $('#elementidfield').val(),
+        elem : $('#sourceidfield').val(),
         cover : cover
       },
       success : function(responseXml) {
@@ -96,7 +97,7 @@
   function removeMatch(matchId) {
     $.ajax({
       type : 'POST',
-      url : 'VerticalMappingServlet',
+      url : 'HorizontalMappingServlet',
       data : {
         action : 'removeMatch',
         matchId : matchId
@@ -133,67 +134,70 @@
     $('#messagediv').scrollTop(1E10);
     $('#coveringfield').prop("selectedIndex", 0);
     $('#commentsfield').val("");
-    $('#coveragediv').html($(responseXml).find('coveragetable').html());
-    $('#covernumber').text($(responseXml).find('coveragetext').html());
+    $('#basecoverdiv').html($(responseXml).find('basecovertable').html());
+    $('#targcoverdiv').html($(responseXml).find('targcovertable').html());
+    $('#basecovernumber').text($(responseXml).find('basecovertext').html());
+    $('#targcovernumber').text($(responseXml).find('targcovertext').html());
     $('.icon').remove();
-    $('#standarddiv').append($(responseXml).find('coverageicons').html());
+    $('#basediv').append($(responseXml).find('sourceicons').html());
+    $('#targdiv').append($(responseXml).find('targeticons').html());
   }
 
   /* Highlight the diagrams' elements/concepts and make then selectable. */
   $(function() {
     $('.map').maphilight();
-//     $('.elembox').mouseover(function(e) {
-//       console.log($('#elementidfield').val());
-//       var id = $('#elementidfield').val();
-//       $('.EVENT').mouseover();
-//     });
+    //     $('.elembox').mouseover(function(e) {
+    //       console.log($('#sourceidfield').val());
+    //       var id = $('#sourceidfield').val();
+    //       $('.EVENT').mouseover();
+    //     });
 
-    // Fills the Element field from the map click
-    $('#StandardMap').click(function(e) {
-      var name = stdJson[e.target.id].name;
-      var btype = stdJson[e.target.id].basetype;
-      var def = stdJson[e.target.id].definition;
-      $('#elementidfield').val(e.target.id);
-      $('#elementfield').text(name);
-      $('#ebasetypefield').text("(" + btype + ")");
-      $('#edefinitionfield').text(def);
+    // Fills the Source Element field from the map click
+    $('#BaseMap').click(function(e) {
+      var name = baseJson[e.target.id].name;
+      var btype = baseJson[e.target.id].basetype;
+      var def = baseJson[e.target.id].definition;
+      $('#sourceidfield').val(e.target.id);
+      $('#sourcefield').text(name);
+      $('#sourcebtfield').text("(" + btype + ")");
+      $('#sourcedeffield').text(def);
     });
 
-    // Fill the Concept field from the map click
-    $('#OntologyMap').click(function(e) {
-      var name = ontoJson[e.target.id].name;
-      var btype = ontoJson[e.target.id].basetype;
-      var def = ontoJson[e.target.id].definition;
-      $('#conceptidfield').val(e.target.id);
-      $('#conceptfield').text(name);
-      $('#cbasetypefield').text("(" + btype + ")");
-      $('#cdefinitionfield').text(def);
+    // Fill the Target Element field from the map click
+    $('#TargMap').click(function(e) {
+      var name = targJson[e.target.id].name;
+      var btype = targJson[e.target.id].basetype;
+      var def = targJson[e.target.id].definition;
+      $('#targetidfield').val(e.target.id);
+      $('#targetfield').text(name);
+      $('#targetbtfield').text("(" + btype + ")");
+      $('#targetdeffield').text(def);
     });
   });
 
-  /* Cleans the Ontology Concept when Not Covered is selected. */
+  /* Cleans the Target Element when Not Covered is selected. */
   function cleanOC() {
     if ($('#coveringfield :selected').val() == 'NOCOVERAGE') {
-      $('#conceptidfield').val('');
-      $('#conceptfield').val('');
+      $('#targetidfield').val('');
+      $('#targetfield').val('');
     }
   }
 
   /* Check if the fields are well filled. */
   function checkFields() {
     // getting values
-    var elem = $('#elementidfield').val();
-    var conc = $('#conceptidfield').val();
+    var source = $('#sourceidfield').val();
+    var target = $('#targetidfield').val();
     var relc = $('#coveringfield').val();
     var comm = $('#commentsfield').val();
 
     // verifying
-    if (elem == '' || (conc == '' && relc != 'NOCOVERAGE')) {
-      showMessage("Select an element from each diagram.");
+    if (source == '' || (target == '' && relc != 'NOCOVERAGE')) {
+      showMessage("Select an Element from each diagram.");
       return false;
     }
-    if (comm == '' && (relc == 'WIDER' || relc == 'INTERSECTION')) {
-      showMessage("WIDER and INTERSECTION matches require a comment explaining the non-covered part(s).");
+    if (comm == '' && (relc == 'PARTIAL' || relc == 'WIDER' || relc == 'INTERSECTION')) {
+      showMessage("PARTIAL, WIDER and INTERSECTION matches require a comment explaining the non-covered part(s).");
       return false;
     }
     return true;
@@ -205,8 +209,8 @@
     });
   }
 
-  function showCoverageStatus() {
-    $("#coveragediv").dialog({
+  function showCoverageStatus(standard) {
+    $("#basecoverdiv").dialog({
       width : 530,
       height : 700
     });
@@ -256,11 +260,11 @@
       width : 700,
       modal : true,
       buttons : {
-        "Yes, the element is EQUIVALENT to the sun of the concepts." : function() {
+        "Yes, the Source Element is EQUIVALENT to the sun of the Target Elements." : function() {
           $(this).dialog('close');
           compositeFunction('EQUIVALENT');
         },
-        "No, the element remains not fully covered." : function() {
+        "No, the Source Element remains not fully covered." : function() {
           $(this).dialog('close');
         }
       }
@@ -276,15 +280,15 @@
       width : 700,
       modal : true,
       buttons : {
-        "Yes, the element is EQUIVALENT to the sun of the concepts." : function() {
+        "Yes, the Source Element is EQUIVALENT to the sun of the Target Elements." : function() {
           $(this).dialog('close');
           compositeFunction('EQUIVALENT');
         },
-        "Yes, the element is PART OF the sun of the concepts." : function() {
+        "Yes, the Source Element is PART OF the sun of the Target Elements." : function() {
           $(this).dialog('close');
           compositeFunction('PARTIAL');
         },
-        "No, the element remains not fully covered." : function() {
+        "No, the Source Element remains not fully covered." : function() {
           $(this).dialog('close');
         }
       }
@@ -295,66 +299,69 @@
 
 <BODY onload="doUpdate()">
   <h3 align="center">Approach for Harmonizing SE Standards</h3>
-  <h1 align="center">(4) Vertical Mappings</h1>
+  <h1 align="center">(6) Horizontal Mappings</h1>
 
-  <h2><b>Content Vertical Mapping</b></h2>
+  <h2><b>Content Horizontal Mapping: ${mapping}</b></h2>
 
-  <h2>Map the Standards' Models to the Domain Ontologies</h2>
-  <p align="justify" style="width: 98%"><b>The standards' elements shall be mapped to the domain ontologies'
-      concepts (vertical mapping).</b> <br /> This tool supports the mapping by providing features for selecting the
-    desired elements and concepts and establishing different types of matches between them. Select an element from the
-    left-hand side model (the Standard Model) and select a concept from the right-hand side model (the SEON View). Then,
-    choose the suitable <a href=#nothing onclick="showCoverageInfo()">coverage relation</a> and add comments for the
-    match. Try to achieve a larger standard coverage by making as many suitable matches as possible.</p>
+  <h2>Map the Base ${mapping.base} Standard's Model to the Target ${mapping.target} Standard's Model</h2>
+  <p align="justify" style="width: 98%"><b>The base standards' elements shall be mapped to the target standard's
+      elements (horizontal mapping).</b> <br /> The Horizontal Mapping is supported by features for selecting the desired
+    elements and establishing different types of matches between them. Select an element from the left-hand side model
+    (the Base Standard Model) and another element from the right-hand side model (the Target Standard Model).
+    Then, choose the suitable <a href=#nothing onclick="showCoverageInfo()">coverage relation</a> and add comments for
+    the match. Try to achieve a larger standard coverage by making as many suitable matches as possible.</p>
 
   <!-- ##### Diagrams Blocks ##### -->
   <div>
     <div style="width: 49.5%; display: inline-block">
-      <b>Standard: ${standard.name}</b>
+      <b>Standard: ${mapping.base}</b>
     </div>
     <div style="width: 49%; display: inline-block">
-      <b>Ontology: ${ontology.name}</b>
+      <b>Standard: ${mapping.target}</b>
     </div>
   </div>
 
   <div style="width: 100%; height: 100%">
-    <div id="standarddiv" style="width: 49%; height: 600px; overflow: auto; display: inline-block; border: 3px solid blue; position: relative">
-      <IMG src="${standard.diagram.path}" width="${standard.diagram.width}" class="map" usemap="#Standard">
-      <MAP id="StandardMap" name="Standard">
-        <c:forEach var="entry" items="${stdCoords}">
+    <div id="basediv"
+      style="width: 49%; height: 600px; overflow: auto; display: inline-block; border: 3px solid blue; position: relative">
+      <IMG src="${mapping.base.diagram.path}" width="${mapping.base.diagram.width}" class="map" usemap="#Base">
+      <MAP id="BaseMap" name="Base">
+        <c:forEach var="entry" items="${baseCoords}">
           <area shape="rect" coords="${entry.value}" id="${entry.key.id}" class="${entry.key.indirectUfotype}">
         </c:forEach>
       </MAP>
-      <!-- diagram icons included here by ajax -->
+      <!-- diagram source icons included here by ajax -->
     </div>
 
-    <div style="width: 49%; height: 600px; overflow: auto; display: inline-block; border: 3px solid green">
-      <IMG src="${ontology.diagram.path}" width="${ontology.diagram.width}" class="map" usemap="#Ontology">
-      <MAP id="OntologyMap" name="Ontology">
-        <c:forEach var="entry" items="${ontoCoords}">
+    <div id="targdiv"
+      style="width: 49%; height: 600px; overflow: auto; display: inline-block; border: 3px solid #6600cc; position: relative"">
+      <IMG src="${mapping.target.diagram.path}" width="${mapping.target.diagram.width}" class="map" usemap="#Target">
+      <MAP id="TargMap" name="Target">
+        <c:forEach var="entry" items="${targCoords}">
           <area shape="rect" coords="${entry.value}" id="${entry.key.id}">
         </c:forEach>
       </MAP>
+      <!-- diagram target icons included here by ajax -->
     </div>
   </div>
   <!-- ***** Diagrams Blocks ***** -->
 
   <!-- ##### Match Blocks ##### -->
-  <h3>How do the Standard's Elements cover the Ontology's Concepts?</h3>
+  <h3>How do the ${mapping.base}'s Elements cover the ${mapping.target}'s Elements?</h3>
   <div style="display: inline-block; width: 1000px">
     <div style="width: 410px; float: left">
-      <label> <b>Standard Element</b>
+      <label> <b>Source Element</b>
       </label> <br />
-      <div class="elembox" title="Select an Element from the Standard model">
-        <input id="elementidfield" type="hidden" /> <span id="elementfield" style="font-weight: bold">(select an
-          element)</span> <br /> <span id="ebasetypefield"></span> <br /> <span id="edefinitionfield" style="font-size: 90%"></span>
+      <div class="sourcebox" title="Select an Element from the base model">
+        <input id="sourceidfield" type="hidden" /> <span id="sourcefield" style="font-weight: bold">(select an
+          element)</span> <br /> <span id="sourcebtfield"></span> <br /> <span id="sourcedeffield" style="font-size: 90%"></span>
       </div>
     </div>
 
     <div style="width: 140px; float: left; margin: 0 20px 0 20px">
       <div style="display: inline-block">
         <b>Coverage (<a href=#nothing onclick="showCoverageInfo()">?</a>)
-        </b> <br /> <select id="coveringfield" title="Which is the coverage of the Element on the Concept?"
+        </b> <br /> <select id="coveringfield" title="Which is the coverage of the Source Element on the Target Element?"
           onchange="cleanOC(this)">
           <option value="EQUIVALENT">[E] EQUIVALENT</option>
           <option value="PARTIAL">[P] PART OF</option>
@@ -370,11 +377,11 @@
     </div>
 
     <div style="width: 410px; float: left">
-      <label> <b>Ontology Concept</b>
+      <label> <b>Target Element</b>
       </label> <br />
-      <div class="concbox" title="Select a Concept from the Ontology model.">
-        <input id="conceptidfield" type="hidden" /> <span id="conceptfield" style="font-weight: bold">(select a
-          concept)</span> <br /> <span id="cbasetypefield"></span> <br /> <span id="cdefinitionfield" style="font-size: 90%"></span>
+      <div class="targetbox" title="Select an Element from the target model.">
+        <input id="targetidfield" type="hidden" /> <span id="targetfield" style="font-weight: bold">(select an
+          element) </span> <br /> <span id="targetbtfield"></span> <br /> <span id="targetdeffield" style="font-size: 90%"></span>
       </div>
     </div>
 
@@ -382,7 +389,7 @@
 
   <div style="width: 1000px; margin: 15px 0 0 0">
     <b>Covering Comments</b> <br />
-    <textarea id="commentsfield" title="Describe the non-covered portions of the Element." rows="3" cols="139"></textarea>
+    <textarea id="commentsfield" title="Describe the non-covered portions of the Element(s)." rows="3" cols="139"></textarea>
   </div>
 
   <div style="display: inline-block; width: 1000px; margin: 15px 0 0 0">
@@ -394,8 +401,11 @@
   </div>
 
   <div style="display: inline-block; width: 1000px; margin: 15px 0 0 0">
-    <strong>Matches Established. (<a href=#nothing onclick="showCoverageStatus()">Coverage: <span
-        id="covernumber">0%</span></a>)
+    <strong>Matches Established. (<a href=#nothing onclick="showCoverageStatus(${mapping.base})">${mapping.base}
+        Coverage: <span id="basecovernumber">0%</span>
+    </a>)&nbsp;&nbsp;&nbsp;(<a href=#nothing onclick="showCoverageStatus(${mapping.target})">${mapping.target} Coverage:
+        <span id="targcovernumber">0%</span>
+    </a>)
     </strong>
     <div id="matchingsdiv" style="font-size: 95%; overflow: auto; border: 1px solid gray; height: 400px; padding: 3px">
       <!-- Matches included here by ajax -->
@@ -411,7 +421,10 @@
   <!-- ***** Match Blocks ***** -->
 
   <!-- Information Dialog -->
-  <div id="coveragediv" title="Coverage Status"
+  <div id="basecoverdiv" title="${mapping.base} Coverage Status"
+    style="font-size: 95%; overflow: auto; border: 1px solid gray; width: 500px; height: 500px" hidden></div>
+
+  <div id="targcoverdiv" title="${mapping.target} Coverage Status"
     style="font-size: 95%; overflow: auto; border: 1px solid gray; width: 500px; height: 500px" hidden></div>
 
   <!-- Information Dialog -->
@@ -479,9 +492,9 @@
         </tr>
       </tbody>
     </table>
-    <p>An Element that is EQUIVALENT or PART OF any Concept is considered <b>fully covered</b> <img
-      src="images/favicon-full.ico">. <br /> An Element that is WIDER than or have INTERSECTION with any Concept
-      is considered <b>partially covered</b> <img src="images/favicon-part.ico">.
+    <p>A Base Element that is EQUIVALENT or PART OF any Target Element is considered <b>fully covered</b> <img
+      src="images/favicon-full.ico">. <br /> A Base Element that is WIDER than or have INTERSECTION with any
+      Target Element is considered <b>partially covered</b> <img src="images/favicon-part.ico">.
     </p>
   </div>
 
@@ -490,7 +503,6 @@
 
   <!-- Simple Message -->
   <div id="dialog-message" title="Message" hidden>
-    <!--     <p><span class="ui-icon ui-icon-circle-check" style="float: left; margin: 0 7px 50px 0;"></span> -->
     <p>
     <div id="messageText"></div>
     </p>
@@ -498,7 +510,6 @@
 
   <!-- Question Message -->
   <div id="dialog-question" title="Question" hidden>
-    <!--     <p><span class="ui-icon ui-icon-help" style="float: left; margin: 12px 12px 20px 0;"></span> -->
     <p>
     <div id="questionText"></div>
     </p>

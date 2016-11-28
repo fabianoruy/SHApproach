@@ -325,7 +325,7 @@ public class AstahParseApp {
 			for (Concept concept : initiative.getSeonView().getConcepts()) {
 				if (im.isStructural() == concept.isBasetype()) {
 					im.addConcept(concept);
-					System.out.println(concept + " included to " + im);
+					//System.out.println(concept + " included to " + im);
 				}
 			}
 		} catch (InvalidUsingException e) {

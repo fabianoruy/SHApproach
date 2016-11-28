@@ -167,22 +167,16 @@ public class SHInitiative extends SerializableObject {
 	public List<Match> getAllVerticalMatches(Element elem) {
 		// Accessing the vertical mapping
 		for (Mapping map : contentmaps) {
-			// try {
 			if (map instanceof VerticalMapping && map.getBase().equals(elem.getModel())) {
 				return map.getMatchesBySource(elem);
 			}
-			// } catch (Exception e) {
-			// System.out.println(map);
-			// System.out.println(elem);
-			// e.printStackTrace();
-			// }
 		}
 		return new ArrayList<Match>(); // empty list
 	}
 
 	/* Returns All matches of Diagonal mappings of the given source Element. */
 	public List<Match> getAllDiagonalMatches(Element elem) {
-		// Accessing the vertical mapping
+		// Accessing the diagonal mapping
 		for (Mapping map : contentmaps) {
 			if (map instanceof DiagonalMapping && map.getBase().equals(elem.getModel())) {
 				return map.getMatchesBySource(elem);
@@ -226,6 +220,7 @@ public class SHInitiative extends SerializableObject {
 		return null;
 	}
 
+	/* Returns the Mapping with the given ID. */
 	public Mapping getMappingById(String mapId) {
 		for (Mapping map : contentmaps) {
 			if (map.getId().equals(mapId))
@@ -265,6 +260,17 @@ public class SHInitiative extends SerializableObject {
 		for (Mapping dmap : contentmaps) {
 			if (dmap instanceof DiagonalMapping && base.equals(dmap.getBase()))
 				return (DiagonalMapping) dmap;
+		}
+		return null;
+	}
+
+	/* Returns the unique Horizontal Content Mapping for the given base and target. */
+	public HorizontalMapping getHorizontalContentMapping(StandardModel base, StandardModel target) {
+		// Selecting the unique Horizontal Mapping with the same base and target
+		for (Mapping hmap : contentmaps) {
+			if (hmap instanceof HorizontalMapping
+					&& ((base.equals(hmap.getBase()) && target.equals(hmap.getTarget())) || base.equals(hmap.getTarget()) && target.equals(hmap.getBase())))
+				return (HorizontalMapping) hmap;
 		}
 		return null;
 	}

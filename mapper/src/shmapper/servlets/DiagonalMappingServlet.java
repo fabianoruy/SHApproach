@@ -78,15 +78,17 @@ public class DiagonalMappingServlet extends HttpServlet {
 			List<VerticalMapping> vmappings = initiative.getVerticalContentMappings();
 			List<DiagonalMapping> dmappings = initiative.getDiagonalContentMappings();
 
-			int mcount = vmappings.size();
+			// Number of Base Standards
+			int bcount = vmappings.size();
+			// Copying UFOTypes
 			UFOType[] ufotypes = new UFOType[UFOType.values().length + 1];
 			for (int i = 0; i < UFOType.values().length; i++) {
 				ufotypes[i] = UFOType.values()[i];
 			}
 
-			Object[][][][] typesMatrix = new Object[ufotypes.length][][][];
+			Object[][][][] typesMatrix = new Object[ufotypes.length][][][]; // UFOType x BaseElems x Bases x Data
 			for (int t = 0; t < ufotypes.length; t++) {
-				// Determining the max row number for the type
+				// Determining the max row number for the type (Elements)
 				int ecount = 0;
 				for (Mapping vmap : vmappings) {
 					List<Element> elems = vmap.getNonFullyCoveredElementsByUfotype(ufotypes[t]);
@@ -94,8 +96,8 @@ public class DiagonalMappingServlet extends HttpServlet {
 						ecount = elems.size();
 					}
 				}
-				Object[][][] elements = new Object[ecount][mcount][3];
-				for (int i = 0; i < mcount; i++) {
+				Object[][][] elements = new Object[ecount][bcount][3]; // BaseElems x Bases x Data
+				for (int i = 0; i < bcount; i++) {
 					// Getting the non covered elements of each type
 					List<Element> elems = vmappings.get(i).getNonFullyCoveredElementsByUfotype(ufotypes[t]);
 					for (int j = 0; j < ecount; j++) {
@@ -133,12 +135,12 @@ public class DiagonalMappingServlet extends HttpServlet {
 			System.out.println("");
 
 			// Coverage numbers
-			String[][] coverages = new String[dmappings.size()][3];
+			Object[][] coverages = new Object[dmappings.size()][3];
 			for (int i = 0; i < coverages.length; i++) {
 				StandardModel std = dmappings.get(i).getBase();
-				coverages[i][0] = std.getName();
-				coverages[i][1] = initiative.getVerticalContentMapping(std).getCoverage() + "%";
-				coverages[i][2] = dmappings.get(i).getCoverage() + "%";
+				coverages[i][0] = std;
+				coverages[i][1] = initiative.getVerticalContentMapping(std).getCoverage();
+				coverages[i][2] = dmappings.get(i).getCoverage();
 			}
 
 			// ICM Elements and related Matches
@@ -152,8 +154,8 @@ public class DiagonalMappingServlet extends HttpServlet {
 				icmElements[i][0] = elements.get(i);
 				icmElements[i][1] = matches;
 			}
-			System.out.println(icmElements);
 			
+			System.out.println(icmElements);
 			for (Object[] objects : icmElements) {
 				for (Object object : objects) {
 					System.out.println(object);

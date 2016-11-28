@@ -13,26 +13,22 @@ import com.google.gson.JsonObject;
 
 import shmapper.applications.MappingApp;
 import shmapper.model.Diagram;
+import shmapper.model.HorizontalMapping;
 import shmapper.model.Notion;
 import shmapper.model.NotionPosition;
 import shmapper.model.SHInitiative;
-import shmapper.model.SeonView;
-import shmapper.model.StandardModel;
-import shmapper.model.VerticalMapping;
 
-/* Servlet implementation class VerticalMappingServlet */
-@WebServlet("/VerticalMappingServlet")
-public class VerticalMappingServlet extends HttpServlet {
+/* Servlet implementation class HorizontalMappingServlet */
+@WebServlet("/HorizontalMappingServlet")
+public class HorizontalMappingServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private SHInitiative initiative;
 	private MappingApp mapp;
 
-	/* HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response). */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
-		// System.out.println(">VerticalMappingServlet: " + request.getParameter("action"));
 		try {
 			if (request.getParameter("action").equals("startMapping")) {
-				System.out.println("\n# Vertical Mapping");
+				System.out.println("\n# Horizontal Mapping");
 				// Starting the mapping.
 				// Accessing the initiative and application from the Session
 				initiative = (SHInitiative) request.getSession().getAttribute("initiative");
@@ -40,24 +36,21 @@ public class VerticalMappingServlet extends HttpServlet {
 
 				// Getting the Mapping.
 				String mapId = request.getParameter("mapId");
-				VerticalMapping mapping = (VerticalMapping) initiative.getMappingById(mapId);
+				HorizontalMapping mapping = (HorizontalMapping) initiative.getMappingById(mapId);
 				mapp.setCurrentMapping(mapping);
-				StandardModel std = mapping.getBase();
-				SeonView seon = mapping.getTarget();
 
 				// Creating the JSON for notions data
-				JsonElement stdJson = createJSON(std.getDiagram());
-				JsonElement ontoJson = createJSON(seon.getDiagram());
+				JsonElement baseJson = createJSON(mapping.getBase().getDiagram());
+				JsonElement targJson = createJSON(mapping.getTarget().getDiagram());
 				
 				// Setting attributes and calling the page
-				request.setAttribute("stdJson", stdJson);
-				request.setAttribute("ontoJson", ontoJson);
-				request.setAttribute("standard", std);
-				request.setAttribute("ontology", seon);
-				request.setAttribute("stdCoords", mapp.createNotionsCoordsHash(std.getDiagram()));
-				request.setAttribute("ontoCoords", mapp.createNotionsCoordsHash(seon.getDiagram()));
+				request.setAttribute("baseJson", baseJson);
+				request.setAttribute("targJson", targJson);
+				request.setAttribute("mapping", mapping);
+				request.setAttribute("baseCoords", mapp.createNotionsCoordsHash(mapping.getBase().getDiagram()));
+				request.setAttribute("targCoords", mapp.createNotionsCoordsHash(mapping.getTarget().getDiagram()));
 
-				request.getRequestDispatcher("verticalmapper.jsp").forward(request, response);
+				request.getRequestDispatcher("horizontalmapper.jsp").forward(request, response);
 
 			} else if (request.getParameter("action").equals("update")) {
 				// Updating the page with the current mapping
@@ -65,20 +58,21 @@ public class VerticalMappingServlet extends HttpServlet {
 
 			} else if (request.getParameter("action").equals("match")) {
 				// Creating a new Simple Match
-				String elemId = request.getParameter("elem");
-				String concId = request.getParameter("conc");
+				String sourceId = request.getParameter("source");
+				String targetId = request.getParameter("target");
 				String cover = request.getParameter("cover");
 				String comm = request.getParameter("comm");
 				boolean force = Boolean.valueOf(request.getParameter("force"));
-				mapp.createSimpleMatch(elemId, concId, cover, comm, force);
+				mapp.createHSimpleMatch(sourceId, targetId, cover, comm, force);
 
 				updatePage(request, response);
 
 			} else if (request.getParameter("action").equals("compositeMatch")) {
 				// Creating a new Composite Match.
-				String elemId = request.getParameter("elem");
+				String sourceId = request.getParameter("source");
+				String targetId = request.getParameter("target");
 				String cover = request.getParameter("cover");
-				mapp.createCompositeMatch(elemId, cover);
+				mapp.createHCompositeMatch(sourceId, targetId, cover);
 
 				updatePage(request, response);
 
@@ -103,7 +97,7 @@ public class VerticalMappingServlet extends HttpServlet {
 			request.setAttribute("question", mapp.getQuestion());
 			request.setAttribute("qtype", mapp.getQuestionType());
 			request.setAttribute("mapping", mapp.getCurrentMapping());
-			request.getRequestDispatcher("vmatches.jsp").forward(request, response);
+			request.getRequestDispatcher("hmatches.jsp").forward(request, response);
 		}
 	}
 

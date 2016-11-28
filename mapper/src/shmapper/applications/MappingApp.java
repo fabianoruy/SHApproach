@@ -11,6 +11,7 @@ import shmapper.model.Coverage;
 import shmapper.model.DiagonalMapping;
 import shmapper.model.Diagram;
 import shmapper.model.Element;
+import shmapper.model.HorizontalMapping;
 import shmapper.model.IntegratedModel;
 import shmapper.model.Mapping;
 import shmapper.model.Match;
@@ -42,10 +43,10 @@ public class MappingApp {
 	}
 
 	/* Performs the creation of all content mappings. */
-	public void performContentMapping() {
+	public void createContentMappings() {
 		if (initiative.getStatus() == InitiativeStatus.STRUCTURED && initiative.getContentMappings().isEmpty()) {
 			this.initiative.createContentMappings();
-			System.out.println("\nCreated Content Mappings: " + initiative.getContentMappings());
+			System.out.println("\nContent Mappings Created (" + initiative.getContentMappings().size() + "): " + initiative.getContentMappings());
 		}
 	}
 
@@ -108,7 +109,8 @@ public class MappingApp {
 
 	/* Creates a new Composite Match (only [E] and [W] coverages). */
 	public CompositeMatch createCompositeMatch(String elemId, String coverName) {
-		// TODO: FIX IT: it is allowing to create a Composite Match when we already have partially covering from an ICM Element 
+		// TODO: FIX IT: it is allowing to create a Composite Match when we already have partially covered with an ICM
+		// Element
 		Element source = (Element) initiative.getNotionById(elemId);
 		Coverage cover = Coverage.valueOf(coverName);
 		List<SimpleMatch> smatches = mapping.getSimpleMatchesBySource(source);
@@ -141,7 +143,7 @@ public class MappingApp {
 		// Validates if the element (source) is not already matched with the same concept (target) (T0).
 		List<SimpleMatch> matches = mapping.getSimpleMatches(match.getSource(), match.getTarget());
 		if (!matches.isEmpty()) {
-			message += PROBLEM + "The element <b>" + match.getSource() + "</b> is already matched with the same concept: " + matches + ".";
+			message += PROBLEM + "The element <b>" + match.getSource() + "</b> is already matched with the same target: " + matches + ".";
 			return false;
 		}
 		return true;
@@ -323,6 +325,56 @@ public class MappingApp {
 			return false;
 		}
 		return true;
+	}
+
+	//////////////////////////// HORIZONTAL MAPPING ////////////////////////////
+
+	/* Creates a new (simple) Match in a Horizontal Mapping. */
+	public SimpleMatch createHSimpleMatch(String sourceId, String targetId, String coverName, String comm, boolean forceBT) {
+		Element source = (Element) initiative.getNotionById(sourceId);
+		Element target = (Element) initiative.getNotionById(targetId);
+		Coverage cover = Coverage.valueOf(coverName);
+
+		SimpleMatch match = new SimpleMatch(source, target, cover, comm);
+		SimpleMatch hctam = new SimpleMatch(target, source, cover.getReflex(), comm);
+		System.out.println("HMatchs created: " + match + " / " + hctam);
+		HorizontalMapping hmirror = ((HorizontalMapping) mapping).getMirror();
+		if (validateMatchUniqueness(match)) {
+			// if (validateOntologyDisjointness(match)) {
+			// if (forceBT || validateBasetypesCorrespondence(match)) {
+			// mapping.addMatch(match); // At this moment the match is registered
+			// hmirror.addMatch(hctam); // At this moment the match is registered
+			message = CHECKED + "Match <b>" + match + "</b> created!";
+			System.out.println("(" + mapping.getMatches().size() + "/" + hmirror.getMatches().size() + ") " + match);
+			// // for asking if a Composite Match also has to be created
+			// checkCompositeMatch(match);
+			// checkCompositeMatch(hctam);
+			return match;
+			// }
+			// }
+		}
+		return null;
+	}
+
+	/* Creates a new Composite Match (only [E] and [W] coverages) in a Horizontal Mapping. */
+	public CompositeMatch createHCompositeMatch(String sourceId, String targetId, String coverName) {
+		HorizontalMapping hmapping = null;
+		Element source = null;
+		if (sourceId != null) {
+			source = (Element) initiative.getNotionById(sourceId);
+			hmapping = (HorizontalMapping) mapping;
+		} else if (targetId != null) {
+			source = (Element) initiative.getNotionById(targetId);
+			hmapping = ((HorizontalMapping) mapping).getMirror();
+		}
+		Coverage cover = Coverage.valueOf(coverName);
+		List<SimpleMatch> smatches = hmapping.getSimpleMatchesBySource(source);
+
+		CompositeMatch compMatch = new CompositeMatch(source, cover, null, smatches);
+		// hmapping.addMatch(compMatch); // At this moment the match is registered
+		message = CHECKED + "Composite Match <b>" + compMatch + "</b> created!";
+		System.out.println("(" + mapping.getMatches().size() + "/" + ((HorizontalMapping) mapping).getMirror().getMatches().size() + ") " + compMatch);
+		return compMatch;
 	}
 
 }

@@ -30,7 +30,7 @@ public class StructuralMappingApp {
 
 	public StructuralMappingApp(SHInitiative initiative) {
 		this.initiative = initiative;
-		//System.out.println("# StructuralMappingApp");
+		// System.out.println("# StructuralMappingApp");
 	}
 
 	/* Performs the creation of all structural mappings and matches. */
@@ -40,7 +40,7 @@ public class StructuralMappingApp {
 		deduceHorizontalMappings();
 		finishStructuralMappings();
 		initiative.setStatus(InitiativeStatus.STRUCTURED);
-		System.out.println("\nCreated Structural Mappings: " + initiative.getStructuralMappings());
+		System.out.println("\nStructural Mappings Created (" + initiative.getStructuralMappings() + "): " + initiative.getStructuralMappings());
 	}
 
 	/* Creates the structural mappings with the predefined structural matches. */
@@ -118,7 +118,7 @@ public class StructuralMappingApp {
 					target = ((SeonView) currentMap.getTarget()).getConceptByName(tktarg);
 				} else if (tktype.equals("Diagonal")) {
 					target = ((IntegratedModel) currentMap.getTarget()).getElementByName(tktarg);
-					//System.out.println("Target: " + tktarg);
+					// System.out.println("Target: " + tktarg);
 				}
 				match = new SimpleMatch(source, target, Coverage.CORRESPONDENCE, null);
 				source.setUfotype(UFOType.valueOf(tkufo));

@@ -1,7 +1,8 @@
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 
-<data> <uncovereddiv>
+<data>
+<uncovereddiv>
 <table>
   <tr style="background-color: #808080">
     <c:forEach items="${initiative.diagonalContentMappings}" var="map">
@@ -51,21 +52,21 @@
 
 <coveragelabel>
   <c:forEach items="${coverages}" var="stdcover">
-    &nbsp;&nbsp;&nbsp;(Coverage ${stdcover[0]}: ${stdcover[1]} + ${stdcover[2]})
+    &nbsp;&nbsp;&nbsp;(Coverage ${stdcover[0]}: ${stdcover[1]}% + ${stdcover[2]}%)
   </c:forEach>
 </coveragelabel>
   
 <elementsdiv>
 <table style="border:0">
   <c:forEach items="${icmelements}" var="elementline" varStatus="loopout">
+    <c:set var="elem" value="${elementline[0]}" />
+    <c:set var="rows" value="${elementline[1].size()}" />
     <c:forEach items="${elementline[1]}" var="match" varStatus="loop">
       <c:if test="${loopout.index%2 == 0}"><tr></c:if>
       <c:if test="${loopout.index%2 == 1}"><tr style="background-color: #F0F0F0"></c:if>
       <td style="width: 250px">${match.source.model}:&nbsp;${match.source}</td>
       <td style="text-align: center">${match.coverage.abbreviation}</td>
       <c:if test="${loop.index == 0}">
-        <c:set var="elem" value="${elementline[0]}" />
-        <c:set var="rows" value="${elementline[1].size()}" />
         <td style="width: 150px" rowspan="${rows}"><b>${elem}</b> <br />(${elem.basetypes[0]})</td>
         <td style="width: 400px" rowspan="${rows}" style="font-size: 90%">${elem.definition}</td>
         <td rowspan="${rows}"><img src="images/favicon-remove.ico" title="Remove Element" width="16px"

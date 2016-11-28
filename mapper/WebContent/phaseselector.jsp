@@ -17,21 +17,21 @@
 
 <style>
 .done {
-  border-radius: 10px;
+  border-radius: 8px;
   border: 3px solid #73AD21;
   padding: 10px;
   width: 97%;
 }
 
 .open {
-  border-radius: 10px;
+  border-radius: 8px;
   border: 3px solid blue;
   padding: 10px;
   width: 97%;
 }
 
 .closed {
-  border-radius: 10px;
+  border-radius: 8px;
   border: 3px solid gray;
   background: #F0F0F0;
   padding: 10px;
@@ -39,8 +39,8 @@
 }
 
 .phasebutton {
-  width: 100px;
-  height: 25px;
+  width: 140px;
+  height: 30px;
 }
 </style>
 
@@ -123,15 +123,12 @@
       <div class="done">
         <div style="display: inline-block">
           <b>1) Initiative Info</b>
-          <ul>
-            <li><b>Domain: ${initiative.domain}</b></li>
+          <ul style="margin: 5px">
+            <li>Domain: ${initiative.domain}</li>
             <li>Status: ${initiative.status}</li>
-            <%--             <li>Purpose: ${initiative.purpose}</li> --%>
-            <%--             <li>Scope: ${initiative.scope}</li> --%>
-            <%--             <li>People: ${initiative.people}</li> --%>
           </ul>
         </div>
-        <div style="display: inline-block; float: right">
+        <div style="float: right">
           <form action="InitiativeStartServlet" method="POST">
             <input type="hidden" name="action" value="editInfo">
             <button class="phasebutton" id="infobutton">Edit Info</button>
@@ -151,16 +148,16 @@
           <div class="done">
             <div style="display: inline-block">
               <b>2) Astah Parsing</b>
-              <ul>
+              <ul style="margin: 5px">
                 <li>SEON View: ${initiative.domain}</li>
-                <li>Integrated Model: ${initiative.integratedCM}</li>
+                <%--                 <li>Integrated Model: ${initiative.integratedCM}</li> --%>
                 <li>Standard Models: ${initiative.standardCMs}</li>
                 <li>Elements and Concepts: ${initiative.allNotions.size()}</li>
               </ul>
             </div>
         </c:otherwise>
       </c:choose>
-      <div style="display: inline-block; float: right">
+      <div style="float: right">
         <form action="AstahParseServlet" method="POST">
           <input type="hidden" name="action" value="openPage">
           <button class="phasebutton" id="parsebutton">Parse Astah</button>
@@ -181,7 +178,7 @@
           <div style="display: inline-block">
             <b>3) Structural Mapping</b><br /> <br />
           </div>
-          <div style="display: inline-block; float: right">
+          <div style="float: right">
             <form action="PhaseSelectServlet" method="POST">
               <input type="hidden" name="action" value="doStructuralMapping">
               <button class="phasebutton" id="structuralbutton">Do Mapping</button>
@@ -194,7 +191,7 @@
           <div style="display: inline-block">
             <b>3) Structural Mapping</b><br />All Structural Mappings created <br />
           </div>
-          <div style="display: inline-block; float: right">
+          <div style="float: right">
             <button class="phasebutton" id="structuralbutton" disabled>Do Mapping</button>
           </div>
         </div>
@@ -210,14 +207,15 @@
         <div class="open">
       </c:otherwise>
     </c:choose>
-    <b>4) Vertical Mapping</b><br />
-    <p />
+    <b>4) Vertical Mapping</b><br /> <br />
     <c:forEach items="${initiative.verticalContentMappings}" var="map" varStatus="loop">
       <div class="open">
         <div style="display: inline-block">
-          <b>4.${loop.index+1}) ${map}</b><br /> Status: ${map.status}<br /> Coverage: ${map.coverage}%
+          <b>4.${loop.index+1}) ${map}</b><br />
+          <%--           Status: ${map.status}<br /> --%>
+          Coverage: ${map.coverage}%
         </div>
-        <div style="display: inline-block; float: right">
+        <div style="float: right">
           <form action="VerticalMappingServlet" method="POST">
             <input type="hidden" name="action" value="startMapping"> <input type="hidden" name="mapId"
               value="${map.id}">
@@ -239,18 +237,40 @@
     <c:otherwise>
       <!--       <div class="closed"> -->
       <div class="open">
-        <div style="display: inline-block">
-          <b>5) ICM Mapping</b><br /> <br />
-          <c:forEach items="${initiative.diagonalContentMappings}" var="map" varStatus="loop">
-            <b>Base: ${map.base}</b> Status: ${map.status} Coverage: +${map.coverage}%<br />
-          </c:forEach>
+        <div>
+          <div style="display: inline-block">
+            <b>5) ICM Mapping</b><br /> <br />
+          </div>
+          <div style="float: right">
+            <form action="DiagonalMappingServlet" method="POST">
+              <input type="hidden" name="action" value="startMapping">
+              <button class="phasebutton" id="dmappingbutton">Do Mapping</button>
+            </form>
+          </div>
         </div>
-        <div style="display: inline-block; float: right">
-          <form action="DiagonalMappingServlet" method="POST">
-            <input type="hidden" name="action" value="startMapping">
-            <button class="phasebutton" id="dmappingbutton">Do Mapping</button>
-          </form>
-        </div>
+        <c:forEach items="${initiative.diagonalContentMappings}" var="map" varStatus="loop">
+          <div class="open">
+            <div style="display: inline-block">
+              <c:set var="vcover" value="${initiative.getVerticalContentMapping(map.base).coverage}" />
+              <c:set var="tcover" value="${vcover+map.coverage}" />
+              <b>Standard: ${map.base}</b><br /> Coverage: (${vcover}% + ${map.coverage}%) = ${tcover}%
+            </div>
+            <!--             <div style="float: right"> -->
+            <%--               <c:choose> --%>
+            <%--                 <c:when test="${tcover == 100}"> --%>
+            <%--                   <button class="phasebutton" id="mappingbutton" title="Your ${map.base} Mapping is complete." disabled>Mapping Completed!</button> --%>
+            <%--                 </c:when> --%>
+            <%--                 <c:when test="${tcover >= 90}"> --%>
+            <!--                   <button class="phasebutton" id="mappingbutton" title="Use only if all the possible matches in Vertical and ICM mappings are done.">Complete Mapping</button> -->
+            <%--                 </c:when> --%>
+            <%--                 <c:otherwise> --%>
+            <!--                   <button class="phasebutton" id="mappingbutton" title="Use only if all the possible matches in Vertical and ICM mappings are done." disabled>Complete Mapping</button> -->
+            <%--                 </c:otherwise> --%>
+            <%--               </c:choose> --%>
+            <!--             </div> -->
+          </div>
+          <p />
+        </c:forEach>
       </div>
     </c:otherwise>
   </c:choose>
@@ -262,20 +282,25 @@
       <div class="closed">
     </c:when>
     <c:otherwise>
-      <div class="closed">
-        <!--      <div class="open"> -->
+      <!--       <div class="closed"> -->
+      <div class="open">
     </c:otherwise>
   </c:choose>
   <b>6) Horizontal Mapping</b>
   <br />
-  <p />
-  <c:forEach items="${initiative.horizontalContentMappings}" var="map" varStatus="loop">
-    <div class="closed">
+  <br />
+  <c:forEach items="${initiative.horizontalContentMappings}" var="hmap" varStatus="loop">
+    <div class="open">
       <div style="display: inline-block">
-        <b>6.${loop.index+1}) ${map}</b><br /> Status: ${map.status}<br /> Coverage: ${map.coverage}%
+        <b>6.${loop.index+1}) ${hmap}</b><br /> Coverage: ${hmap.coverage}% / ${hmap.targetCoverage}%
       </div>
-      <div style="display: inline-block; float: right">
-        <button class="phasebutton" disabled>Do Mapping</button>
+      <div style="float: right">
+        <form action="HorizontalMappingServlet" method="POST">
+          <input type="hidden" name="action" value="startMapping"> <input type="hidden" name="mapId"
+            value="${hmap.id}">
+          <button class="phasebutton" id="mappingbutton">Do Mapping</button>
+          <!--           <button class="phasebutton" id="mappingbutton" disabled>Do Mapping</button> -->
+        </form>
       </div>
     </div>
     <p />
@@ -294,7 +319,7 @@
         <div style="display: inline-block">
           <b>7) Harmonization Initiative Results</b><br /> <br />
         </div>
-        <div style="display: inline-block; float: right">
+        <div style="float: right">
           <form action="PhaseSelectServlet" method="POST">
             <input type="hidden" name="action" value="openResults">
             <button class="phasebutton" id="resultsbutton">See Results</button>
@@ -307,7 +332,7 @@
   <div style="text-align: center; margin: 15px 0 0 0">
     <form action="PhaseSelectServlet" method="POST">
       <input type="hidden" name="action" value="endSession">
-      <button style="width: 120px; height: 25px;" id="sessionbutton">Exit Application</button>
+      <button class="phasebutton" id="sessionbutton">Exit Application</button>
     </form>
   </div>
 

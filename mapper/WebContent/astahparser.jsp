@@ -148,7 +148,7 @@
   <div style="text-align: center; margin: 10px 0 0 0">
     <form action="PhaseSelectServlet" method="POST">
       <input type="hidden" name="action" value="openSelection">
-      <button id="menubutton">Back to Menu</button>
+      <button id="menubutton">SAVE and Return to Menu</button>
     </form>
   </div>
   <!-- ***** Reading Blocks ***** -->

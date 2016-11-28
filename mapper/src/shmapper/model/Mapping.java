@@ -39,16 +39,24 @@ public abstract class Mapping extends SerializableObject {
 		this.structural = structural;
 	}
 
-	/* Returns the coverage of the matchs over the Standard's Elements. */
+	/* Returns the coverage of the matchs over the Standard's Elements (base). */
 	public int getCoverage() {
 		// coverage (%): baseModel.elements.([E] + [P] + [W]/2 + [I]/2) / baseModel.elements;
 		int all = getBase().getElements().size();
 		int partially = getPartiallyCoveredElements().size();
 		int noncovered = getNonCoveredElements().size();
 		int fully = all - partially - noncovered;
-		double coverage = ((partially / 2.0 + fully) / all) * 100;
-		// System.out.println(this + ": All(" + all + "), Full(" + fully + "), Part(" + partially + "), Non(" +
-		// noncovered + "): Cover(" + coverage + "%)");
+		double coverage = ((partially * 0.35 + fully) / all) * 100;
+		if (fully == all) {
+			this.status = MappingStatus.FINISHED;
+			return 100;
+		} else if (coverage > 0.1) {
+			this.status = MappingStatus.STARTED;
+		} else {
+			this.status = MappingStatus.PLANNED;
+		}
+		// System.out.println(this + ": All(" + all + "), Full(" + fully + "), Part(" + partially + "), Non("
+		// +noncovered + "): Cover(" + coverage + "%)");
 		return (int) Math.round(coverage);
 	}
 
@@ -157,6 +165,17 @@ public abstract class Mapping extends SerializableObject {
 			}
 		}
 		return null;
+	}
+	
+	/** Returns the matchs of this mapping with the given UFOType .*/
+	public List<Match> getMatchesBySourceUfotype(UFOType type) {
+		List<Match> tmatches = new ArrayList<Match>();
+		for (Match match : matches) {
+			if(match.getSource().getIndirectUfotype() == type) {
+				tmatches.add(match);
+			}
+		}
+		return tmatches;
 	}
 
 	/* Returns the Current Coverage Situation of an Element in the context of THIS MAPPING. */
@@ -271,7 +290,7 @@ public abstract class Mapping extends SerializableObject {
 
 	@Override
 	public String toString() {
-		String str = getBase() + " <--> " + getTarget();
+		String str = getBase() + " \u21d4 " + getTarget();
 		// if (structural)
 		// str += " (" + getMatches().size() + ")";
 		return str;
