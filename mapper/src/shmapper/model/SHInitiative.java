@@ -109,9 +109,9 @@ public class SHInitiative extends SerializableObject {
 		this.description = description;
 	}
 
-	public String getAstahPath() {
-		return astahPath;
-	}
+//	public String getAstahPath() {
+//		return astahPath;
+//	}
 
 	public void setAstahPath(String path) {
 		this.astahPath = path;

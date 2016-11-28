@@ -61,7 +61,7 @@ public class DiagonalMappingServlet extends HttpServlet {
 			} else if (request.getParameter("action").equals("remove")) {
 				// Removing a Match
 				String elemId = request.getParameter("elemId");
-				System.out.println("Element to be removed with all matches: " + initiative.getNotionById(elemId));
+				//System.out.println("Element to be removed with all matches: " + initiative.getNotionById(elemId));
 				mapp.removeICMElement(elemId);
 
 				updatePage(request, response);
@@ -130,9 +130,9 @@ public class DiagonalMappingServlet extends HttpServlet {
 					}
 				}
 				typesMatrix[t] = elements;
-				System.out.print(ufotypes[t] + " (" + elements.length + ") ");
+				//System.out.print(ufotypes[t] + " (" + elements.length + ") ");
 			}
-			System.out.println("");
+			//System.out.println("");
 
 			// Coverage numbers
 			Object[][] coverages = new Object[dmappings.size()][3];
@@ -155,12 +155,12 @@ public class DiagonalMappingServlet extends HttpServlet {
 				icmElements[i][1] = matches;
 			}
 			
-			System.out.println(icmElements);
-			for (Object[] objects : icmElements) {
-				for (Object object : objects) {
-					System.out.println(object);
-				}
-			}
+//			System.out.println(icmElements);
+//			for (Object[] objects : icmElements) {
+//				for (Object object : objects) {
+//					System.out.println(object);
+//				}
+//			}
 
 			// Setting attributes and calling the page
 			request.setAttribute("ufotypes", ufotypes);

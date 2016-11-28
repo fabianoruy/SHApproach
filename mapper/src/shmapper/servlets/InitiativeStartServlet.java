@@ -30,6 +30,9 @@ public class InitiativeStartServlet extends HttpServlet {
 
 				// Initializing the Application
 				String mapperdir = request.getSession().getServletContext().getRealPath("/");
+				System.out.println("realpath: "+ mapperdir);
+				System.out.println("contextpath: "+ request.getSession().getServletContext().getContextPath());
+
 				this.startApp = new InitiativeStartApp(mapperdir);
 
 				// RECOVERING THE INITIATIVE

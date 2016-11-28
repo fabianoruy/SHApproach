@@ -38,6 +38,9 @@ public class Diagram extends SerializableObject {
 	}
 
 	public String getPath() {
+		if(path.contains("mapper")) {
+			path = path.substring(path.indexOf("initiative") - 1);
+		}
 		return path;
 	}
 

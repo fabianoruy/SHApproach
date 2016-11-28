@@ -156,7 +156,7 @@ public class PhaseSelectServlet extends HttpServlet {
 							HorizontalMapping hmap = initiative.getHorizontalContentMapping(base, target);
 							coverageIndex[i][j + 2] = hmap.getCoverage(); // base coverage
 							coverageIndex[j][i + 2] = hmap.getTargetCoverage(); // target coverage
-							System.out.printf("(%d,%d): %s X %s\n", i, j, base, target);
+							//System.out.printf("(%d,%d): %s X %s\n", i, j, base, target);
 						}
 					}
 				}

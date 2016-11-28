@@ -324,7 +324,7 @@
   <div style="width: 100%; height: 100%">
     <div id="basediv"
       style="width: 49%; height: 600px; overflow: auto; display: inline-block; border: 3px solid blue; position: relative">
-      <IMG src="${mapping.base.diagram.path}" width="${mapping.base.diagram.width}" class="map" usemap="#Base">
+      <IMG src="${pageContext.request.contextPath}${mapping.base.diagram.path}" width="${mapping.base.diagram.width}" class="map" usemap="#Base">
       <MAP id="BaseMap" name="Base">
         <c:forEach var="entry" items="${baseCoords}">
           <area shape="rect" coords="${entry.value}" id="${entry.key.id}" class="${entry.key.indirectUfotype}">
@@ -335,7 +335,7 @@
 
     <div id="targdiv"
       style="width: 49%; height: 600px; overflow: auto; display: inline-block; border: 3px solid #6600cc; position: relative"">
-      <IMG src="${mapping.target.diagram.path}" width="${mapping.target.diagram.width}" class="map" usemap="#Target">
+      <IMG src="${pageContext.request.contextPath}${mapping.target.diagram.path}" width="${mapping.target.diagram.width}" class="map" usemap="#Target">
       <MAP id="TargMap" name="Target">
         <c:forEach var="entry" items="${targCoords}">
           <area shape="rect" coords="${entry.value}" id="${entry.key.id}">

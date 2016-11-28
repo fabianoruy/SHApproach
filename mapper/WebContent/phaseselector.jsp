@@ -282,25 +282,25 @@
       <div class="closed">
     </c:when>
     <c:otherwise>
-      <!--       <div class="closed"> -->
-      <div class="open">
+      <div class="closed">
+        <!--       <div class="open"> -->
     </c:otherwise>
   </c:choose>
   <b>6) Horizontal Mapping</b>
   <br />
   <br />
   <c:forEach items="${initiative.horizontalContentMappings}" var="hmap" varStatus="loop">
-    <div class="open">
+<!--     <div class="open"> -->
+    <div class="closed">
       <div style="display: inline-block">
         <b>6.${loop.index+1}) ${hmap}</b><br /> Coverage: ${hmap.coverage}% / ${hmap.targetCoverage}%
       </div>
       <div style="float: right">
-        <form action="HorizontalMappingServlet" method="POST">
-          <input type="hidden" name="action" value="startMapping"> <input type="hidden" name="mapId"
-            value="${hmap.id}">
-          <button class="phasebutton" id="mappingbutton">Do Mapping</button>
-          <!--           <button class="phasebutton" id="mappingbutton" disabled>Do Mapping</button> -->
-        </form>
+<!--         <form action="HorizontalMappingServlet" method="POST"> -->
+<%--           <input type="hidden" name="action" value="startMapping"> <input type="hidden" name="mapId" value="${hmap.id}"> --%>
+          <!--           <button class="phasebutton" id="mappingbutton">Do Mapping</button> -->
+<!--           <button class="phasebutton" id="mappingbutton" disabled>Do Mapping</button> -->
+<!--         </form> -->
       </div>
     </div>
     <p />

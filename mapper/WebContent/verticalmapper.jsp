@@ -68,7 +68,8 @@
         conc : $('#conceptidfield').val(),
         cover : $('#coveringfield').val(),
         comm : $('#commentsfield').val(),
-        force : forceBT // force Basetype
+        force : forceBT
+      // force Basetype
       },
       success : function(responseXml) {
         updateMapping(responseXml);
@@ -142,11 +143,11 @@
   /* Highlight the diagrams' elements/concepts and make then selectable. */
   $(function() {
     $('.map').maphilight();
-//     $('.elembox').mouseover(function(e) {
-//       console.log($('#elementidfield').val());
-//       var id = $('#elementidfield').val();
-//       $('.EVENT').mouseover();
-//     });
+    //     $('.elembox').mouseover(function(e) {
+    //       console.log($('#elementidfield').val());
+    //       var id = $('#elementidfield').val();
+    //       $('.EVENT').mouseover();
+    //     });
 
     // Fills the Element field from the map click
     $('#StandardMap').click(function(e) {
@@ -318,8 +319,9 @@
   </div>
 
   <div style="width: 100%; height: 100%">
-    <div id="standarddiv" style="width: 49%; height: 600px; overflow: auto; display: inline-block; border: 3px solid blue; position: relative">
-      <IMG src="${standard.diagram.path}" width="${standard.diagram.width}" class="map" usemap="#Standard">
+    <div id="standarddiv"
+      style="width: 49%; height: 600px; overflow: auto; display: inline-block; border: 3px solid blue; position: relative">
+      <IMG src="${pageContext.request.contextPath}${standard.diagram.path}" width="${standard.diagram.width}" class="map" usemap="#Standard">
       <MAP id="StandardMap" name="Standard">
         <c:forEach var="entry" items="${stdCoords}">
           <area shape="rect" coords="${entry.value}" id="${entry.key.id}" class="${entry.key.indirectUfotype}">
@@ -329,7 +331,8 @@
     </div>
 
     <div style="width: 49%; height: 600px; overflow: auto; display: inline-block; border: 3px solid green">
-      <IMG src="${ontology.diagram.path}" width="${ontology.diagram.width}" class="map" usemap="#Ontology">
+      <IMG src="${pageContext.request.contextPath}${ontology.diagram.path}" width="${ontology.diagram.width}" class="map"
+        usemap="#Ontology">
       <MAP id="OntologyMap" name="Ontology">
         <c:forEach var="entry" items="${ontoCoords}">
           <area shape="rect" coords="${entry.value}" id="${entry.key.id}">

@@ -411,7 +411,7 @@ public class AstahParseApp {
 			Diagram diagram = new Diagram(type, diag);
 			// System.out.println("AstahPath: "+ astahPath);
 			String filename = astahPath.substring(astahPath.indexOf("uploaded_"), astahPath.indexOf(".asta"));
-			String initdir = astahPath.substring(astahPath.indexOf("mapper") - 1, astahPath.indexOf("uploaded_"));
+			String initdir = astahPath.substring(astahPath.indexOf("initiative") - 1, astahPath.indexOf("uploaded_"));
 			String path = initdir + "images/" + filename + File.separator + diag.getFullName(File.separator) + ".png";
 			diagram.setPath(path.replace("\\", "/"));
 

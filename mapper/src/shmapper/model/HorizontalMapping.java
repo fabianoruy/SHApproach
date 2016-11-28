@@ -18,8 +18,7 @@ public class HorizontalMapping extends Mapping {
 
 	/* Returns the coverage of the matchs over the Standard's Elements (target). */
 	public int getTargetCoverage() {
-		// TODO
-		return 0;
+		return getMirror().getCoverage();
 	}
 
 	public HorizontalMapping getMirror() {
@@ -27,6 +26,7 @@ public class HorizontalMapping extends Mapping {
 		if(mirror == null) {
 			this.mirror = new HorizontalMapping(target, super.getBase());
 		}
+		//System.out.println("Mirror: "+ mirror);
 		return mirror;
 	}
 
