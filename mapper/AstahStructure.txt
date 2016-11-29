@@ -111,7 +111,7 @@ Nov.26/27
 - [improve results]
 
 Nov.28
-- Publish mapper4
+- Publish (mapper4)
 / Horizontal Mapping (create, remove, presentation)
 
 Nov.29

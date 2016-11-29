@@ -20,9 +20,9 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import shmapper.applications.AstahParseApp;
-import shmapper.applications.ParserException;
 import shmapper.model.SHInitiative;
 import shmapper.model.SHInitiative.InitiativeStatus;
+import shmapper.util.ParserException;
 
 /** Servlet implementation class AstahParseServlet */
 @WebServlet("/AstahParseServlet")

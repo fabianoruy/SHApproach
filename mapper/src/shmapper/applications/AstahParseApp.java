@@ -37,6 +37,7 @@ import shmapper.model.Notion;
 import shmapper.model.NotionPosition;
 import shmapper.model.Ontology;
 import shmapper.model.Ontology.Level;
+import shmapper.util.ParserException;
 import shmapper.model.Package;
 import shmapper.model.Relation;
 import shmapper.model.SHInitiative;

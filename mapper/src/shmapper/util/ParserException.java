@@ -1,4 +1,4 @@
-package shmapper.applications;
+package shmapper.util;
 
 /* Represents the exceptions occurred during the parsing. */
 public class ParserException extends Exception {

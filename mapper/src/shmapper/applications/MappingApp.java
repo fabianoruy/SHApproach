@@ -335,6 +335,7 @@ public class MappingApp {
 		Element target = (Element) initiative.getNotionById(targetId);
 		Coverage cover = Coverage.valueOf(coverName);
 
+		// Creating the match and its mirror
 		SimpleMatch match = new SimpleMatch(source, target, cover, comm);
 		SimpleMatch hctam = new SimpleMatch(target, source, cover.getReflex(), comm);
 		HorizontalMapping mirror = ((HorizontalMapping) mapping).getMirror();
@@ -373,7 +374,7 @@ public class MappingApp {
 		System.out.println("(" + mapping.getMatches().size() + "/" + ((HorizontalMapping) mapping).getMirror().getMatches().size() + ") " + compMatch);
 		return compMatch;
 	}
-
+	
 	/** Checks if a given match (just created) can lead to a composite match. */
 	private void checkHCompositeMatch(Mapping map, SimpleMatch match) {
 		// Checks if the element has a set of only partial coverages ([W] or [I]) possibly leading to a Composite Match.

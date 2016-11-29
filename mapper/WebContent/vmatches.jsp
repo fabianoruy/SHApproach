@@ -63,8 +63,8 @@
       </c:forEach>
       <c:forEach items="${mapping.partiallyCoveredElements}" var="elem">
         <c:if test="${npos.notion eq elem}">
-          <c:set var="xpos" value="${npos.xpos + npos.width - 24 + 12}"/>
-          <img class="icon" src="images/favicon-part.ico" style="top:${npos.ypos - 12}px; left:${xpos}px; position:absolute"></img>
+          <c:set var="xpos" value="${npos.xpos + npos.width - 24 + 12+1}"/>
+          <img class="icon" src="images/favicon-part.ico" style="top:${npos.ypos - 12+1}px; left:${xpos}px; position:absolute"></img>
         </c:if>
       </c:forEach>
     </c:forEach>

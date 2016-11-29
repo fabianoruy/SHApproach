@@ -14,10 +14,10 @@ import shmapper.model.SHInitiative;
 /** Servlet implementation class AstahParseServlet */
 @WebServlet("/InitiativeStartServlet")
 public class InitiativeStartServlet extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-	private InitiativeStartApp startApp = null;
-	private SHInitiative initiative = null;
-	private String initdir = "";
+	private static final long	serialVersionUID	= 1L;
+	private InitiativeStartApp	startApp			= null;
+	private SHInitiative		initiative			= null;
+	private String				initdir				= "";
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
 		// System.out.println(">InitiativeStartServlet: " + request.getParameter("action"));
@@ -26,11 +26,11 @@ public class InitiativeStartServlet extends HttpServlet {
 				// Verifying the password and recovering the initiative (if exists)
 				String title = (String) request.getParameter("user");
 				String pword = (String) request.getParameter("pword");
-				//System.out.println("Login: " + title + ", " + pword);
+				// System.out.println("Login: " + title + ", " + pword);
 
 				// Initializing the Application
 				String mapperdir = request.getSession().getServletContext().getRealPath("/");
-				System.out.println("mapperdir: "+ mapperdir);
+				System.out.println("mapperdir: " + mapperdir);
 				this.startApp = new InitiativeStartApp(mapperdir);
 
 				// RECOVERING THE INITIATIVE
@@ -41,7 +41,7 @@ public class InitiativeStartServlet extends HttpServlet {
 
 					// Creating and setting the logfile and initiative directory to the session.
 					initdir = "initiative/" + title.toLowerCase().replaceAll("[^a-zA-Z0-9.-]", "") + File.separator;
-					System.out.println("initdir: "+ initdir);
+					System.out.println("initdir: " + initdir);
 					String logfile = startApp.createLogOutput();
 					request.getSession().setAttribute("initdir", initdir);
 					request.getSession().setAttribute("logfile", logfile);

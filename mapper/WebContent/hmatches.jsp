@@ -19,27 +19,37 @@
             {<span title="${match.comment}" style="cursor: pointer"><i>C</i></span>}
           </c:if>
         </td>
-        <td><img id="${match.id}" src="images/favicon-remove.ico" title="Remove Match" width="16px"
-          style="cursor: pointer" onclick="removeMatch('${match.id}')" /></td>
-        </tr>
+        <td><img src="images/favicon-remove.ico" title="Remove Match" width="16px" style="cursor: pointer"
+          onclick="removeMatch('${match.id}')" /></td>
+      </tr>
       </c:forEach>
     </table>
   </matchestable>
 
   <coverageicons>
-    <c:forEach items="${mapping.base.diagram.positions}" var="npos">
-      <c:forEach items="${mapping.fullyCoveredElements}" var="elem">
-        <c:if test="${npos.notion eq elem}">
-          <c:set var="xpos" value="${npos.xpos + npos.width - 24 + 12}" />
-          <img class="icon" src="images/favicon-full.ico" style="top:${npos.ypos - 12}px; left:${xpos}px; position:absolute"></img>
-        </c:if>
-      </c:forEach>
-      <c:forEach items="${mapping.partiallyCoveredElements}" var="elem">
-        <c:if test="${npos.notion eq elem}">
-          <c:set var="xpos" value="${npos.xpos + npos.width - 24 + 12}" />
-          <img class="icon" src="images/favicon-part.ico" style="top:${npos.ypos - 12}px; left:${xpos}px; position:absolute"></img>
-        </c:if>
-      </c:forEach>
+    <c:set var="hmap" value="${mapping}" />
+    <c:set var="tablename" value="baseicons" />
+    <c:forEach begin="1" end="2">
+      <${tablename}>
+        <c:forEach items="${hmap.base.diagram.positions}" var="npos">
+          <c:forEach items="${hmap.fullyCoveredElements}" var="elem">
+            <c:if test="${npos.notion eq elem}">
+              <c:set var="xpos" value="${npos.xpos + npos.width - 24 + 12}" />
+              <c:set var="ypos" value="${npos.ypos - 12}" />
+              <img class="icon" src="images/favicon-full.ico" style="top:${ypos}px; left:${xpos}px; position:absolute"></img>
+            </c:if>
+          </c:forEach>
+          <c:forEach items="${hmap.partiallyCoveredElements}" var="elem">
+            <c:if test="${npos.notion eq elem}">
+              <c:set var="xpos" value="${npos.xpos + npos.width - 24 + 12+1}" />
+              <c:set var="ypos" value="${npos.ypos - 12-1}" />
+              <img class="icon" src="images/favicon-part.ico" style="top:${ypos}px; left:${xpos}px; position:absolute"></img>
+            </c:if>
+          </c:forEach>
+        </c:forEach>
+      </${tablename}>
+      <c:set var="hmap" value="${mapping.mirror}" />
+      <c:set var="tablename" value="targicons" />
     </c:forEach>
   </coverageicons>
 
@@ -52,8 +62,8 @@
         <table>
           <c:forEach items="${hmap.nonCoveredElements}" var="elem">
             <tr>
-              <td>${" - "}&nbsp;</td>
-              <td>${elem}</td>
+              <td width="20px">&nbsp;-&nbsp;</td>
+              <td width="400px">${elem}</td>
               <td>${elem.indirectUfotype}</td>
               <td> </td>
             </tr>
@@ -63,7 +73,9 @@
               <td><img src="images/favicon-part.ico" width="16px" />&nbsp;</td>
               <td>${elem}</td>
               <td>${elem.indirectUfotype}</td>
-              <td>CM!</td>
+              <td><c:if test="${hmap.checkCompositeChance(elem)}">
+              Check Composite
+              </c:if></td>
             </tr>
           </c:forEach>
           <c:forEach items="${hmap.fullyCoveredElements}" var="elem">

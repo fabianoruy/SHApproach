@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,9 +111,9 @@ public class SHInitiative extends SerializableObject {
 		this.description = description;
 	}
 
-//	public String getAstahPath() {
-//		return astahPath;
-//	}
+	// public String getAstahPath() {
+	// return astahPath;
+	// }
 
 	public void setAstahPath(String path) {
 		this.astahPath = path;
@@ -428,8 +430,17 @@ public class SHInitiative extends SerializableObject {
 			out.writeObject(this);
 			out.close();
 			fileOut.close();
-		} catch (IOException e1) {
-			e1.printStackTrace();
+
+			// backup file
+			String data = new SimpleDateFormat("yyyy-MM-dd.HH-mm-ss").format(new Date());
+			String title = domain.toLowerCase().replaceAll("[^a-zA-Z0-9.-]", "");
+			fileOut = new FileOutputStream(datafile.substring(0, datafile.lastIndexOf("initdata"))+ title + "." + data + ".ser");
+			out = new ObjectOutputStream(fileOut);
+			out.writeObject(this);
+			out.close();
+			fileOut.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		System.out.println(".");
 	}

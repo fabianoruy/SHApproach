@@ -140,8 +140,8 @@
     $('#basecovernumber').text($(responseXml).find('basecovernumber').html());
     $('#targcovernumber').text($(responseXml).find('targcovernumber').html());
     $('.icon').remove();
-    $('#basediv').append($(responseXml).find('sourceicons').html());
-    $('#targdiv').append($(responseXml).find('targeticons').html());
+    $('#basediv').append($(responseXml).find('baseicons').html());
+    $('#targdiv').append($(responseXml).find('targicons').html());
   }
 
   /* Highlight the diagrams' elements/concepts and make then selectable. */
@@ -212,8 +212,8 @@
 
   function showCoverageStatus(divId) {
     $("#"+divId).dialog({
-      width : 530,
-      height : 700
+      width : 600,
+      height : 720
     });
   }
 
@@ -328,7 +328,7 @@
           <area shape="rect" coords="${entry.value}" id="${entry.key.id}" class="${entry.key.indirectUfotype}">
         </c:forEach>
       </MAP>
-      <!-- diagram source icons included here by ajax -->
+      <!-- diagram base icons included here by ajax -->
     </div>
 
     <div id="targdiv"
@@ -420,10 +420,10 @@
 
   <!-- Information Dialog -->
   <div id="basecoverdiv" title="Coverage Status"
-    style="font-size: 95%; overflow: auto; border: 1px solid gray; width: 500px; height: 500px" hidden></div>
+    style="font-size: 95%; overflow: auto; border: 1px solid gray" hidden></div>
 
   <div id="targcoverdiv" title="Coverage Status"
-    style="font-size: 95%; overflow: auto; border: 1px solid gray; width: 5000px; height: 500px" hidden></div>
+    style="font-size: 95%; overflow: auto; border: 1px solid gray" hidden></div>
 
   <!-- Information Dialog -->
   <div id="coverinfo" title="Coverage Relations" hidden>

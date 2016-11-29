@@ -1,4 +1,4 @@
-package shmapper.applications;
+package shmapper.util;
 
 /* Represents the exceptions occurred during the mapping process (for matches). */
 public class MatchException extends Exception {
