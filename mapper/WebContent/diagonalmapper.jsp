@@ -119,12 +119,6 @@ td, th {
      var question = $(responseXml).find('questiontext').html();
      var qtype = $(responseXml).find('questiontype').html();
      switch (qtype) {
-//         case 'CompositeEquivalent':
-//           showCompositeQuestionE(question, doCompositeMatch);
-//           break;
-//         case 'CompositeEquivalentPart':
-//           showCompositeQuestionEP(question, doCompositeMatch);
-//           break;
         case 'Basetype':
           showQuestion(question, function() {
             createElement(true); // true = basetype forced

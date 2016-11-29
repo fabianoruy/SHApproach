@@ -45,15 +45,15 @@
         In this version, you can:<br />
         - Parse your astah file<br />
         - Import Structural mappings<br/>
-        - Do Vertical mappings (simple and composite matches, disjoint and basetype validations)<br/>
+        - Do Vertical Mappings (simple and composite matches, disjoint and basetype validations)<br/>
+        - Do ICM Mappings<br />
         - Monitor mappings' coverage<br/>
         - See initiative results<br />
         - Save your progress
       </p>
       <p>
         In this version, you can't:<br />
-        - Do ICM mappings<br />
-        - Do Horizontal mappings
+        - Do Horizontal Mappings
       </p>
     </code>
   </div>

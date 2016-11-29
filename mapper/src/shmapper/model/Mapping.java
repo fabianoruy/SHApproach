@@ -7,7 +7,7 @@ import java.util.List;
 import shmapper.model.Element.CoverateSituation;
 import shmapper.model.Notion.UFOType;
 
-/* Represents an abstract Mapping between a Model and an Ontology (vertical) or another Model (horizontal). */
+/** Represents an abstract Mapping between a Model and an Ontology (vertical) or another Model (horizontal). */
 public abstract class Mapping extends SerializableObject {
 	private static final long	serialVersionUID	= 1581632337297022767L;
 	private StandardModel		base;
@@ -39,7 +39,7 @@ public abstract class Mapping extends SerializableObject {
 		this.structural = structural;
 	}
 
-	/* Returns the coverage of the matchs over the Standard's Elements (base). */
+	/** Returns the coverage of the matchs over the Standard's Elements (base). */
 	public int getCoverage() {
 		// coverage (%): baseModel.elements.([E] + [P] + [W]/2 + [I]/2) / baseModel.elements;
 		int all = getBase().getElements().size();
@@ -68,7 +68,7 @@ public abstract class Mapping extends SerializableObject {
 		return this.matches;
 	}
 
-	/* Returns the Match with the id parameter. */
+	/** Returns the Match with the id parameter. */
 	public Match getMatchById(String matchId) {
 		for (Match match : matches) {
 			if (match.getId().equals(matchId)) {
@@ -78,7 +78,7 @@ public abstract class Mapping extends SerializableObject {
 		return null;
 	}
 
-	/* Returns all the simple matches of the mapping. */
+	/** Returns all the simple matches of the mapping. */
 	public List<SimpleMatch> getSimpleMatches() {
 		List<SimpleMatch> smatches = new ArrayList<SimpleMatch>();
 		for (Match match : matches) {
@@ -89,7 +89,7 @@ public abstract class Mapping extends SerializableObject {
 		return smatches;
 	}
 
-	/* Returns all the composite matches of the mapping. */
+	/** Returns all the composite matches of the mapping. */
 	public List<CompositeMatch> getCompositeMatches() {
 		List<CompositeMatch> cmatches = new ArrayList<CompositeMatch>();
 		for (Match match : matches) {
@@ -100,7 +100,7 @@ public abstract class Mapping extends SerializableObject {
 		return cmatches;
 	}
 
-	/* Returns the matches (simple or composite) which elem is the source. */
+	/** Returns the matches (simple or composite) which elem is the source. */
 	public List<Match> getMatchesBySource(Element source) {
 		List<Match> smatches = new ArrayList<Match>();
 		for (Match match : matches) {
@@ -111,7 +111,7 @@ public abstract class Mapping extends SerializableObject {
 		return smatches;
 	}
 
-	/* Returns the simple matches which elem is the source. */
+	/** Returns the simple matches which elem is the source. */
 	public List<SimpleMatch> getSimpleMatchesBySource(Element source) {
 		List<SimpleMatch> smatches = new ArrayList<SimpleMatch>();
 		for (Match match : matches) {
@@ -122,7 +122,7 @@ public abstract class Mapping extends SerializableObject {
 		return smatches;
 	}
 
-	/* Returns the simple matches which elem is the target. */
+	/** Returns the simple matches which elem is the target. */
 	public List<SimpleMatch> getSimpleMatchesByTarget(Notion target) {
 		List<SimpleMatch> smatches = new ArrayList<SimpleMatch>();
 		for (Match match : matches) {
@@ -133,18 +133,17 @@ public abstract class Mapping extends SerializableObject {
 		return smatches;
 	}
 
-	/** Returns all (1) simple matches in the Mapping with the same source and target. */
-	public List<SimpleMatch> getSimpleMatches(Element source, Notion target) {
-		List<SimpleMatch> smatches = new ArrayList<SimpleMatch>();
+	/** Returns the unique simple matches in the Mapping with the same source and target. */
+	public SimpleMatch getSimpleMatch(Element source, Notion target) {
 		for (Match match : matches) {
 			if (match instanceof SimpleMatch && match.getSource().equals(source) && ((SimpleMatch) match).getTarget().equals(target)) {
-				smatches.add((SimpleMatch) match);
+				return (SimpleMatch) match;
 			}
 		}
-		return smatches;
+		return null;
 	}
 
-	/* Returns the single composite match, in this mapping, within elem is the source. */
+	/** Returns the single composite match, in this mapping, with the given source. */
 	public CompositeMatch getCompositeMatchBySource(Element elem) {
 		for (Match match : matches) {
 			if (match instanceof CompositeMatch && match.getSource().equals(elem)) {
@@ -154,18 +153,18 @@ public abstract class Mapping extends SerializableObject {
 		return null;
 	}
 
-	/* Returns the single composite match, in this mapping, for the simple match. */
-	public CompositeMatch getCompositeMatchByComponent(SimpleMatch match) {
-		for (CompositeMatch cmatch : getCompositeMatches()) {
-			for (SimpleMatch smatch : cmatch.getComponents()) {
-				// is the simple match part of a composite match?
-				if (match.equals(smatch)) {
-					return cmatch;
-				}
-			}
-		}
-		return null;
-	}
+//	/** Returns the single composite match, in this mapping, for the simple match. */
+//	public CompositeMatch getCompositeMatchByComponent(SimpleMatch match) {
+//		for (CompositeMatch cmatch : getCompositeMatches()) {
+//			for (SimpleMatch smatch : cmatch.getComponents()) {
+//				// is the simple match part of a composite match?
+//				if (match.equals(smatch)) {
+//					return cmatch;
+//				}
+//			}
+//		}
+//		return null;
+//	}
 	
 	/** Returns the matchs of this mapping with the given UFOType .*/
 	public List<Match> getMatchesBySourceUfotype(UFOType type) {
@@ -178,7 +177,7 @@ public abstract class Mapping extends SerializableObject {
 		return tmatches;
 	}
 
-	/* Returns the Current Coverage Situation of an Element in the context of THIS MAPPING. */
+	/** Returns the Current Coverage Situation of an Element in the context of THIS MAPPING. */
 	public CoverateSituation getCoverageSituation(Element elem) {
 		CoverateSituation situation = CoverateSituation.NONCOVERED;
 		for (Match match : matches) {
@@ -195,7 +194,7 @@ public abstract class Mapping extends SerializableObject {
 		return situation;
 	}
 
-	/* Returns the current non covered elements of the mapping. */
+	/** Returns the current non covered elements of the mapping. */
 	public List<Element> getNonCoveredElements() {
 		List<Element> elems = new LinkedList<Element>(base.getElements());
 		for (Match match : matches) {
@@ -204,7 +203,7 @@ public abstract class Mapping extends SerializableObject {
 		return elems;
 	}
 
-	/* Returns the current partially covered elements of the mapping. */
+	/** Returns the current partially covered elements of the mapping. */
 	public List<Element> getPartiallyCoveredElements() {
 		List<Element> elems = new LinkedList<Element>(base.getElements());
 		// removing non covered elements
@@ -219,7 +218,7 @@ public abstract class Mapping extends SerializableObject {
 		return elems;
 	}
 
-	/* Returns the current fully covered elements of the mapping. */
+	/** Returns the current fully covered elements of the mapping. */
 	public List<Element> getFullyCoveredElements() {
 		List<Element> elems = new ArrayList<Element>();
 		for (Match match : matches) {
@@ -232,7 +231,7 @@ public abstract class Mapping extends SerializableObject {
 		return elems;
 	}
 
-	/* Returns the current non/partially covered elements of the given type in the mapping. */
+	/** Returns the current non/partially covered elements of the given type in the mapping. */
 	public List<Element> getNonFullyCoveredElementsByUfotype(UFOType type) {
 		List<Element> elems = new LinkedList<Element>(base.getElementsByUfotype(type));
 		for (Match match : matches) {
@@ -245,12 +244,12 @@ public abstract class Mapping extends SerializableObject {
 		return elems;
 	}
 
-	/* Adds a match to the mapping. */
+	/** Adds a match to the mapping. */
 	public void addMatch(Match match) {
 		// Adds a simple match to the mapping.
 		if (match instanceof SimpleMatch) {
 			// If there's no simple match with the same source and target in the mapping
-			if (getSimpleMatches(match.getSource(), ((SimpleMatch) match).getTarget()).isEmpty()) {
+			if (getSimpleMatch(match.getSource(), ((SimpleMatch) match).getTarget()) == null) {
 				this.matches.add(match);
 			} else {
 				return;
@@ -269,7 +268,7 @@ public abstract class Mapping extends SerializableObject {
 		}
 	}
 
-	/* Removes a Match from the Mapping. */
+	/** Removes a Match from the Mapping. */
 	public void removeMatch(Match rmatch) {
 		matches.remove(rmatch);
 	}

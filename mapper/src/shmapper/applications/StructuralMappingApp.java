@@ -40,7 +40,7 @@ public class StructuralMappingApp {
 		deduceHorizontalMappings();
 		finishStructuralMappings();
 		initiative.setStatus(InitiativeStatus.STRUCTURED);
-		System.out.println("\nStructural Mappings Created (" + initiative.getStructuralMappings() + "): " + initiative.getStructuralMappings());
+		System.out.println("\nStructural Mappings Created (" + initiative.getStructuralMappings().size() + "): " + initiative.getStructuralMappings());
 	}
 
 	/* Creates the structural mappings with the predefined structural matches. */

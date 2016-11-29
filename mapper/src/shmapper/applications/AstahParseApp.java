@@ -112,7 +112,7 @@ public class AstahParseApp {
 		IPackage contentpack = getPackage(domainpack, "3.Content");
 
 		// Creating the Packages for the Initiative
-		initiative.setAstahPath(astahPath);
+		//initiative.setAstahPath(astahPath);
 
 		// Parsing the ontologies (SEON View)
 		parseOntologies(seonpack);

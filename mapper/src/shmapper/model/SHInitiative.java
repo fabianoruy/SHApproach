@@ -185,10 +185,10 @@ public class SHInitiative extends SerializableObject {
 		return new ArrayList<Match>(); // empty list
 	}
 
-	/* Returns all simple matches in the Initiative with the source and target. */
-	public List<SimpleMatch> getSimpleMatches(Element source, Notion target) {
+	/* Returns the unique simple match in the Initiative with the given source and target, if it exists. */
+	public SimpleMatch getSimpleMatch(Element source, Notion target) {
 		Mapping mapping = getMapping(source.getModel(), target.getPackage());
-		return mapping.getSimpleMatches(source, target);
+		return mapping.getSimpleMatch(source, target);
 	}
 
 	/* Returns the unique Mapping for the given base and target. */

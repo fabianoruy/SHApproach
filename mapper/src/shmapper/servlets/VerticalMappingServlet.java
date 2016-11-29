@@ -88,6 +88,16 @@ public class VerticalMappingServlet extends HttpServlet {
 				mapp.removeMatch(matchId);
 
 				updatePage(request, response);
+				
+			} else if (request.getParameter("action").equals("changeComment")) {
+				// Changing the Match Comment.
+				String matchId = request.getParameter("matchId");
+				String comment = request.getParameter("comment");
+				mapp.changeMatchComment(matchId, comment);
+				System.out.println("Change comment: "+ comment);
+
+				updatePage(request, response);
+
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

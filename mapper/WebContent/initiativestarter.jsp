@@ -23,7 +23,7 @@
   <div>
     <form action="InitiativeStartServlet" method="POST">
       <input type="hidden" name="action" value="accessMenu">
-      <div style="width: 60%; margin: auto; border: 1px solid gray; padding: 10px">
+      <div style="width: 680px; margin: auto; border: 1px solid gray; padding: 10px">
         <table>
           <tr>
             <td width="75px"><b>Domain</b></td>

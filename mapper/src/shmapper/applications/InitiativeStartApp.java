@@ -19,14 +19,14 @@ import shmapper.model.User;
 
 /** Responsible for manager the starting of an initiative. */
 public class InitiativeStartApp {
-	private String mapperdir;
-	private String initdir;
-	private SHInitiative initiative;
-	private static boolean readUsers = false;
+	private String			mapperdir;
+	private String			initdir;
+	private SHInitiative	initiative;
+	private static boolean	readUsers	= false;
 
 	public InitiativeStartApp(String mapperdir) {
 		this.mapperdir = mapperdir;
-		//createUsers(mapperdir); //only once!
+		// createUsers(mapperdir); //only once!
 		if (!readUsers) {
 			recoverUsers(mapperdir);
 		}
@@ -120,21 +120,28 @@ public class InitiativeStartApp {
 
 	/* Defines the output log file. */
 	public String createLogOutput() {
-		
+
 		String logfile = "log/SHLog." + new SimpleDateFormat("yyyy-MM-dd.HH-mm-ss").format(new Date()) + ".txt";
 		PrintStream ps;
 		new File(mapperdir + initdir + logfile).getParentFile().mkdirs();
-		System.out.println("# log: " + mapperdir +"\n"+ initdir +"\n"+ logfile + "\n");
+		System.out.println("# log: " + mapperdir + initdir + logfile + "\n");
 		try {
 			ps = new PrintStream(mapperdir + initdir + logfile);
-			System.setOut(ps);
-			System.setErr(ps);
+
+			String os = System.getProperty("os.name");
+			if (os.contains("Linux")) {
+				System.setOut(ps);
+				System.setErr(ps);
+			} else if (os.contains("Windows")) {
+				// System.setOut(ps);
+				// System.setErr(ps);
+			}
 			System.out.println("SH Approach log file - " + new java.util.Date());
 			System.out.println("----------------------------------------------------");
 
 			FileWriter fw = new FileWriter(mapperdir + "initiative/logindex.txt", true);
 			fw.write(mapperdir + initdir + logfile + "\n");
-		    fw.close();
+			fw.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

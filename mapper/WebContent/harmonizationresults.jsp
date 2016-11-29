@@ -215,6 +215,7 @@ td,th {
     <tr><td class='NONCOVERED'>Not Covered Element</td></tr>
   </table>
   <br />
+  Partially and Not Covered elements shall be justified.
   <table>
     <tr style="background-color: #999999">
       <c:forEach items="${initiative.standardCMs}" var="std" varStatus="sloop">
@@ -274,6 +275,7 @@ td,th {
     <tr><td class='NONCOVERED'>Not Covered Element</td></tr>
   </table>
   <br />
+  Partially and Not Covered elements shall be justified.<br/><br/>
   Not Available Yet
 
   <br />

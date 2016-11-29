@@ -84,7 +84,8 @@
       url : 'HorizontalMappingServlet',
       data : {
         action : 'compositeMatch',
-        elem : $('#sourceidfield').val(),
+        source : $('#sourceidfield').val(),
+        target : $('#targetidfield').val(),
         cover : cover
       },
       success : function(responseXml) {
@@ -117,8 +118,8 @@
     case 'CompositeEquivalent':
       showCompositeQuestionE(question, doCompositeMatch);
       break;
-    case 'CompositeEquivalentPart':
-      showCompositeQuestionEP(question, doCompositeMatch);
+    case 'CompositePartof':
+      showCompositeQuestionP(question, doCompositeMatch);
       break;
     case 'Basetype':
       showQuestion(question, function() {
@@ -136,8 +137,8 @@
     $('#commentsfield').val("");
     $('#basecoverdiv').html($(responseXml).find('basecovertable').html());
     $('#targcoverdiv').html($(responseXml).find('targcovertable').html());
-    $('#basecovernumber').text($(responseXml).find('basecovertext').html());
-    $('#targcovernumber').text($(responseXml).find('targcovertext').html());
+    $('#basecovernumber').text($(responseXml).find('basecovernumber').html());
+    $('#targcovernumber').text($(responseXml).find('targcovernumber').html());
     $('.icon').remove();
     $('#basediv').append($(responseXml).find('sourceicons').html());
     $('#targdiv').append($(responseXml).find('targeticons').html());
@@ -209,8 +210,8 @@
     });
   }
 
-  function showCoverageStatus(standard) {
-    $("#basecoverdiv").dialog({
+  function showCoverageStatus(divId) {
+    $("#"+divId).dialog({
       width : 530,
       height : 700
     });
@@ -272,7 +273,7 @@
   }
 
   /* Shows a question message dialog for Composite Matching (2 yes options). */
-  function showCompositeQuestionEP(text, compositeFunction) {
+  function showCompositeQuestionP(text, compositeFunction) {
     $('#compositeText').empty().append(text);
     $('#dialog-composite').dialog({
       resizable : false,
@@ -280,10 +281,6 @@
       width : 700,
       modal : true,
       buttons : {
-        "Yes, the Source Element is EQUIVALENT to the sun of the Target Elements." : function() {
-          $(this).dialog('close');
-          compositeFunction('EQUIVALENT');
-        },
         "Yes, the Source Element is PART OF the sun of the Target Elements." : function() {
           $(this).dialog('close');
           compositeFunction('PARTIAL');
@@ -307,9 +304,9 @@
   <p align="justify" style="width: 98%"><b>The base standards' elements shall be mapped to the target standard's
       elements (horizontal mapping).</b> <br /> The Horizontal Mapping is supported by features for selecting the desired
     elements and establishing different types of matches between them. Select an element from the left-hand side model
-    (the Base Standard Model) and another element from the right-hand side model (the Target Standard Model).
-    Then, choose the suitable <a href=#nothing onclick="showCoverageInfo()">coverage relation</a> and add comments for
-    the match. Try to achieve a larger standard coverage by making as many suitable matches as possible.</p>
+    (the Base Standard Model) and another element from the right-hand side model (the Target Standard Model). Then,
+    choose the suitable <a href=#nothing onclick="showCoverageInfo()">coverage relation</a> and add comments for the
+    match. Try to achieve a larger standard coverage by making as many suitable matches as possible.</p>
 
   <!-- ##### Diagrams Blocks ##### -->
   <div>
@@ -324,7 +321,8 @@
   <div style="width: 100%; height: 100%">
     <div id="basediv"
       style="width: 49%; height: 600px; overflow: auto; display: inline-block; border: 3px solid blue; position: relative">
-      <IMG src="${pageContext.request.contextPath}${mapping.base.diagram.path}" width="${mapping.base.diagram.width}" class="map" usemap="#Base">
+      <IMG src="${pageContext.request.contextPath}${mapping.base.diagram.path}" width="${mapping.base.diagram.width}"
+        class="map" usemap="#Base">
       <MAP id="BaseMap" name="Base">
         <c:forEach var="entry" items="${baseCoords}">
           <area shape="rect" coords="${entry.value}" id="${entry.key.id}" class="${entry.key.indirectUfotype}">
@@ -334,8 +332,9 @@
     </div>
 
     <div id="targdiv"
-      style="width: 49%; height: 600px; overflow: auto; display: inline-block; border: 3px solid #6600cc; position: relative"">
-      <IMG src="${pageContext.request.contextPath}${mapping.target.diagram.path}" width="${mapping.target.diagram.width}" class="map" usemap="#Target">
+      style="width: 49%; height: 600px; overflow: auto; display: inline-block; border: 3px solid #6600cc; position: relative">
+      <IMG src="${pageContext.request.contextPath}${mapping.target.diagram.path}"
+        width="${mapping.target.diagram.width}" class="map" usemap="#Target">
       <MAP id="TargMap" name="Target">
         <c:forEach var="entry" items="${targCoords}">
           <area shape="rect" coords="${entry.value}" id="${entry.key.id}">
@@ -401,11 +400,10 @@
   </div>
 
   <div style="display: inline-block; width: 1000px; margin: 15px 0 0 0">
-    <strong>Matches Established. (<a href=#nothing onclick="showCoverageStatus(${mapping.base})">${mapping.base}
-        Coverage: <span id="basecovernumber">0%</span>
-    </a>)&nbsp;&nbsp;&nbsp;(<a href=#nothing onclick="showCoverageStatus(${mapping.target})">${mapping.target} Coverage:
-        <span id="targcovernumber">0%</span>
-    </a>)
+    <strong>Matches Established.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Coverage:&nbsp;&nbsp;&nbsp;
+      <a href=#nothing onclick="showCoverageStatus('basecoverdiv')">${mapping.base}: <span id="basecovernumber">0</span>%</a>
+        &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+      <a href=#nothing onclick="showCoverageStatus('targcoverdiv')">${mapping.target}: <span id="targcovernumber">0</span>%</a>)
     </strong>
     <div id="matchingsdiv" style="font-size: 95%; overflow: auto; border: 1px solid gray; height: 400px; padding: 3px">
       <!-- Matches included here by ajax -->
@@ -421,11 +419,11 @@
   <!-- ***** Match Blocks ***** -->
 
   <!-- Information Dialog -->
-  <div id="basecoverdiv" title="${mapping.base} Coverage Status"
+  <div id="basecoverdiv" title="Coverage Status"
     style="font-size: 95%; overflow: auto; border: 1px solid gray; width: 500px; height: 500px" hidden></div>
 
-  <div id="targcoverdiv" title="${mapping.target} Coverage Status"
-    style="font-size: 95%; overflow: auto; border: 1px solid gray; width: 500px; height: 500px" hidden></div>
+  <div id="targcoverdiv" title="Coverage Status"
+    style="font-size: 95%; overflow: auto; border: 1px solid gray; width: 5000px; height: 500px" hidden></div>
 
   <!-- Information Dialog -->
   <div id="coverinfo" title="Coverage Relations" hidden>

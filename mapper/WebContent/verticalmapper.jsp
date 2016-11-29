@@ -108,6 +108,42 @@
     });
   }
 
+  /* Shows a question message dialog. */
+  function editComment(matchId, comment) {
+    $('#commentsText').val(comment);
+    $('#dialog-form').dialog({
+      resizable : false,
+      height : "auto",
+      width : 700,
+      modal : true,
+      buttons : {
+        Save : function() {
+          $(this).dialog('close');
+          changeComment(matchId, $('#commentsText').val());
+        },
+        Cancel : function() {
+          $(this).dialog('close');
+        }
+      }
+    });
+  }
+
+  /* Calls (the servlet via ajax) for changing a Match comment. */
+  function changeComment(matchId, comment) {
+    $.ajax({
+      type : 'POST',
+      url : 'VerticalMappingServlet',
+      data : {
+        action : 'changeComment',
+        matchId : matchId,
+        comment : comment
+      },
+      success : function(responseXml) {
+        updateMapping(responseXml);
+      }
+    });
+  }
+
   /* Updates the page with the current information. */
   function updateMapping(responseXml) {
     //console.log(responseXml);
@@ -117,8 +153,8 @@
     case 'CompositeEquivalent':
       showCompositeQuestionE(question, doCompositeMatch);
       break;
-    case 'CompositeEquivalentPart':
-      showCompositeQuestionEP(question, doCompositeMatch);
+    case 'CompositePartof':
+      showCompositeQuestionP(question, doCompositeMatch);
       break;
     case 'Basetype':
       showQuestion(question, function() {
@@ -269,7 +305,7 @@
   }
 
   /* Shows a question message dialog for Composite Matching (2 yes options). */
-  function showCompositeQuestionEP(text, compositeFunction) {
+  function showCompositeQuestionP(text, compositeFunction) {
     $('#compositeText').empty().append(text);
     $('#dialog-composite').dialog({
       resizable : false,
@@ -277,10 +313,6 @@
       width : 700,
       modal : true,
       buttons : {
-        "Yes, the element is EQUIVALENT to the sun of the concepts." : function() {
-          $(this).dialog('close');
-          compositeFunction('EQUIVALENT');
-        },
         "Yes, the element is PART OF the sun of the concepts." : function() {
           $(this).dialog('close');
           compositeFunction('PARTIAL');
@@ -321,7 +353,8 @@
   <div style="width: 100%; height: 100%">
     <div id="standarddiv"
       style="width: 49%; height: 600px; overflow: auto; display: inline-block; border: 3px solid blue; position: relative">
-      <IMG src="${pageContext.request.contextPath}${standard.diagram.path}" width="${standard.diagram.width}" class="map" usemap="#Standard">
+      <IMG src="${pageContext.request.contextPath}${standard.diagram.path}" width="${standard.diagram.width}"
+        class="map" usemap="#Standard">
       <MAP id="StandardMap" name="Standard">
         <c:forEach var="entry" items="${stdCoords}">
           <area shape="rect" coords="${entry.value}" id="${entry.key.id}" class="${entry.key.indirectUfotype}">
@@ -331,8 +364,8 @@
     </div>
 
     <div style="width: 49%; height: 600px; overflow: auto; display: inline-block; border: 3px solid green">
-      <IMG src="${pageContext.request.contextPath}${ontology.diagram.path}" width="${ontology.diagram.width}" class="map"
-        usemap="#Ontology">
+      <IMG src="${pageContext.request.contextPath}${ontology.diagram.path}" width="${ontology.diagram.width}"
+        class="map" usemap="#Ontology">
       <MAP id="OntologyMap" name="Ontology">
         <c:forEach var="entry" items="${ontoCoords}">
           <area shape="rect" coords="${entry.value}" id="${entry.key.id}">
@@ -497,6 +530,17 @@
     <p>
     <div id="messageText"></div>
     </p>
+  </div>
+
+  <!-- Comment Editing -->
+  <div id="dialog-form" title="Inform the new Match Comment." hidden>
+    <form>
+      <div style="width: 500px; margin: 15px 0 0 0">
+        <b>Covering Comments</b> <br />
+        <textarea id="commentsText" rows="4" cols="80"></textarea>
+      </div>
+      <input type="submit" tabindex="-1" style="position: absolute; top: -1000px">
+    </form>
   </div>
 
   <!-- Question Message -->

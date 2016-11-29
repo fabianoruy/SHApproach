@@ -30,9 +30,7 @@ public class InitiativeStartServlet extends HttpServlet {
 
 				// Initializing the Application
 				String mapperdir = request.getSession().getServletContext().getRealPath("/");
-				System.out.println("realpath: "+ mapperdir);
-				System.out.println("contextpath: "+ request.getSession().getServletContext().getContextPath());
-
+				System.out.println("mapperdir: "+ mapperdir);
 				this.startApp = new InitiativeStartApp(mapperdir);
 
 				// RECOVERING THE INITIATIVE
@@ -43,6 +41,7 @@ public class InitiativeStartServlet extends HttpServlet {
 
 					// Creating and setting the logfile and initiative directory to the session.
 					initdir = "initiative/" + title.toLowerCase().replaceAll("[^a-zA-Z0-9.-]", "") + File.separator;
+					System.out.println("initdir: "+ initdir);
 					String logfile = startApp.createLogOutput();
 					request.getSession().setAttribute("initdir", initdir);
 					request.getSession().setAttribute("logfile", logfile);

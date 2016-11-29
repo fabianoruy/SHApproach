@@ -79,7 +79,7 @@ public class HorizontalMappingServlet extends HttpServlet {
 			} else if (request.getParameter("action").equals("removeMatch")) {
 				// Removing a Match
 				String matchId = request.getParameter("matchId");
-				mapp.removeMatch(matchId);
+				mapp.removeHMatch(matchId);
 
 				updatePage(request, response);
 			}

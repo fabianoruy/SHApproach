@@ -26,6 +26,10 @@ public abstract class Match extends SerializableObject {
 		return comment;
 	}
 
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+	
 	public Mapping getMapping() {
 		return mapping;
 	}

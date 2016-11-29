@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.change_vision.jude.api.inf.model.IClass;
 
-/* Represents a Notion (Element or Concept). */
+/** Represents a Notion (Element or Concept). */
 public abstract class Notion extends SerializableObject {
 	private static final long	serialVersionUID	= -6465796034657397883L;
 	private String				name;
@@ -19,7 +19,7 @@ public abstract class Notion extends SerializableObject {
 		EVENT, OBJECT, AGENT, MOMENT, SITUATION;
 	}
 
-	/* General constructor. */
+	/** General constructor. */
 	public Notion(IClass astahClass) {
 		super.setId(astahClass.getId());
 		this.name = astahClass.getName();
@@ -31,7 +31,7 @@ public abstract class Notion extends SerializableObject {
 		this.relations = new ArrayList<Relation>();
 	}
 
-	/* Protected constructor for new ICM Elements (no astahClass). */
+	/** Protected constructor for new ICM Elements (no astahClass). */
 	protected Notion(String name, String def, Notion type) {
 		this.name = name;
 		this.definition = def;
@@ -68,7 +68,7 @@ public abstract class Notion extends SerializableObject {
 		this.generalizations.add(notion);
 	}
 
-	/* Returns the UFO type of this Notion, or of the closer ancestral. */
+	/** Returns the UFO type of this Notion, or of the closer ancestral. */
 	public UFOType getIndirectUfotype() {
 		if (ufotype != null)
 			return ufotype;
@@ -78,7 +78,7 @@ public abstract class Notion extends SerializableObject {
 		return null;
 	}
 
-	/* Returns the basetypes (first found in each branch) of this Notion. */
+	/** Returns the basetypes (first found in each branch) of this Notion. */
 	public List<Notion> getBasetypes() {
 		ArrayList<Notion> basetypes = new ArrayList<Notion>();
 		for (Notion general : getGeneralizations()) {
@@ -96,7 +96,7 @@ public abstract class Notion extends SerializableObject {
 		return basetypes;
 	}
 
-	/* Returns the basetypes (all found in each branch) of this Notion. */
+	/** Returns the basetypes (all found in each branch) of this Notion. */
 	public List<Notion> getAllBasetypes() {
 		ArrayList<Notion> basetypes = new ArrayList<Notion>();
 		for (Notion general : getGeneralizations()) {

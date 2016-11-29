@@ -10,11 +10,15 @@
           <td width="400px"><b>${match.source}</b></td>
           <td width="180px">${match.coverage.text}</td>
           <td width="400px"><b>${match.target}</b></td>
-          <td><c:if test="${not empty match.comment}">
-            {<span title="${match.comment}" style="cursor:pointer"><i>C</i></span>}
-          </c:if></td>
           <td>
-            <img id="${match.id}" src="images/favicon-remove.ico" title="Remove Match" width="16px" style="cursor:pointer" onclick="removeMatch('${match.id}')"/>
+          <c:if test="${empty match.comment}">
+            {<span title="${match.comment}" style="cursor:pointer" onclick="editComment('${match.id}', '${match.comment}')"><i>C</i></span>}
+          </c:if>
+          <c:if test="${not empty match.comment}">
+            {<span title="${match.comment}" style="cursor:pointer" onclick="editComment('${match.id}', '${match.comment}')"><i><b>C</b></i></span>}
+          </c:if>
+          <td>
+            <img src="images/favicon-remove.ico" title="Remove Match" width="16px" style="cursor:pointer" onclick="removeMatch('${match.id}')"/>
           </td>
         </tr>
       </c:forEach>
@@ -27,7 +31,7 @@
       <c:forEach items="${mapping.nonCoveredElements}" var="elem">
         <tr>
           <td>${" - "}&nbsp;</td>
-          <td> ${elem}
+          <td> ${elem}</td>
           <td>${elem.indirectUfotype}</td>
         </tr>
       </c:forEach>
