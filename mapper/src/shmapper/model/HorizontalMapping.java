@@ -5,10 +5,12 @@ public class HorizontalMapping extends Mapping {
 	private static final long	serialVersionUID	= -1747666812598375016L;
 	private StandardModel		target;
 	private HorizontalMapping	mirror;
+	private boolean				deduced;
 
 	public HorizontalMapping(StandardModel base, StandardModel target) {
 		super(base);
 		this.target = target;
+		this.deduced = false;
 	}
 
 	@Override
@@ -41,6 +43,14 @@ public class HorizontalMapping extends Mapping {
 		if (this.getSimpleMatchesBySource(source).size() > 1)
 			return true;
 		return false;
+	}
+
+	public boolean isDeduced() {
+		return deduced;
+	}
+
+	public void setDeduced(boolean deduced) {
+		this.deduced = deduced;
 	}
 
 }

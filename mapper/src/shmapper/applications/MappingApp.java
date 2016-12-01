@@ -127,18 +127,20 @@ public class MappingApp {
 	/** Removes a match from the mapping. */
 	public void removeMatch(String matchId) {
 		Match match = mapping.getMatchById(matchId);
-		if (match instanceof SimpleMatch) {
-			// If there is a Composite Match related
-			// CompositeMatch cmatch = mapping.getCompositeMatchByComponent((SimpleMatch) match);
-			CompositeMatch cmatch = mapping.getCompositeMatchBySource(match.getSource());
-			if (cmatch != null) {
-				message = PROBLEM + "This match has an associated Composite Match (" + cmatch + ")!<br/>Remove it before.";
-				return;
+		if (match != null) {
+			if (match instanceof SimpleMatch) {
+				// If there is a Composite Match related
+				// CompositeMatch cmatch = mapping.getCompositeMatchByComponent((SimpleMatch) match);
+				CompositeMatch cmatch = mapping.getCompositeMatchBySource(match.getSource());
+				if (cmatch != null) {
+					message = PROBLEM + "This match has an associated Composite Match (" + cmatch + ")!<br/>Remove it before.";
+					return;
+				}
 			}
+			mapping.removeMatch(match); // At this moment the match is excluded
+			message = CHECKED + "Match <b>" + match + "</b> has been <b>removed</b> from the mapping.";
+			main.log.println("Excluded: " + match);
 		}
-		mapping.removeMatch(match); // At this moment the match is excluded
-		message = CHECKED + "Match <b>" + match + "</b> has been <b>removed</b> from the mapping.";
-		main.log.println("Excluded: " + match);
 	}
 
 	/** Replaces the comment of a given match. */
@@ -290,19 +292,20 @@ public class MappingApp {
 	/** Removes an ICM Element with all existing (diagonal) Matches. */
 	public void removeICMElement(String elemId) {
 		Element elem = (Element) initiative.getNotionById(elemId);
-
-		// Finding and removing the element matches from the proper mappings
-		for (DiagonalMapping dmap : initiative.getDiagonalContentMappings()) {
-			for (Match match : dmap.getSimpleMatchesByTarget(elem)) {
-				dmap.removeMatch(match); // At this moment a match is excluded
+		if (elem != null) {
+			// Finding and removing the element matches from the proper mappings
+			for (DiagonalMapping dmap : initiative.getDiagonalContentMappings()) {
+				for (Match match : dmap.getSimpleMatchesByTarget(elem)) {
+					dmap.removeMatch(match); // At this moment a match is excluded
+				}
 			}
-		}
-		IntegratedModel icm = initiative.getIntegratedCM();
-		icm.removeElement(elem);
-		initiative.removeNotion(elem);
+			IntegratedModel icm = initiative.getIntegratedCM();
+			icm.removeElement(elem);
+			initiative.removeNotion(elem);
 
-		message = CHECKED + "Element <b>" + elem + "</b> has been <b>removed</b> from the ICM, together with all its matches.";
-		main.log.println("Excluded: " + elem);
+			message = CHECKED + "Element <b>" + elem + "</b> has been <b>removed</b> from the ICM, together with all its matches.";
+			main.log.println("Excluded: " + elem);
+		}
 	}
 
 	/** Validates the Correspondences between basetypes of the sources and new element target using the structural
@@ -414,6 +417,8 @@ public class MappingApp {
 			mirror = ((HorizontalMapping) mapping);
 			hmap = mirror.getMirror();
 			match = hmap.getMatchById(matchId);
+			if (match == null)
+				return;
 		}
 		// System.out.println("Match to be excluded: " + match + " (" + matchId + ")");
 		Element source = match.getSource();
@@ -437,6 +442,9 @@ public class MappingApp {
 		hmap.removeMatch(match); // At this moment the match is excluded
 		message = CHECKED + "Match <b>" + match + "</b> has been <b>removed</b> from the mapping.";
 		main.log.println("(" + mapping.getMatches().size() + "/" + ((HorizontalMapping) mapping).getMirror().getMatches().size() + ") Excluded: " + match);
+		if (mapping.getMatches().isEmpty()) {
+			((HorizontalMapping) mapping).setDeduced(false);
+		}
 	}
 
 	/** Deduces the Horizontal Mappings Matches from the Vertical and Diagonal Mappings Matches. */
@@ -444,14 +452,20 @@ public class MappingApp {
 		HorizontalMapping hmap = (HorizontalMapping) initiative.getMappingById(mappingId);
 
 		int vmcount = deduceMatchesFromVerticalMappings(hmap);
+		main.log.println(vmcount + " matches deduced from Vertical Mappings");
+		main.log.println(hmap.getBase() + ": " + hmap.getCoverage() + "%;  " + hmap.getTarget() + ": " + hmap.getTargetCoverage() + "%.");
 		int dmcount = deduceMatchesFromDiagonalMappings(hmap);
+		main.log.println(dmcount + " matches deduced from ICM Mappings");
+		main.log.println(hmap.getBase() + ": " + hmap.getCoverage() + "%;  " + hmap.getTarget() + ": " + hmap.getTargetCoverage() + "%.");
 		int total = vmcount + dmcount;
 
 		String results = "<b>Deduction Results:</b><br/><br/>";
-		results += "<b style='color:blue'>" + total + " matches</b> have been created from the previous mappings with the <b>SEON View</b> and the <b>ICM</b>.<br/>";
+		results += "A total of <b style='color:blue'>" + (total / 2)
+				+ " matches</b> have been created from the previous mappings with the <b>SEON View</b> and the <b>ICM</b>.<br/>";
 		results += "It represents a coverage of <b style='color:blue'>" + hmap.getCoverage() + "% for " + hmap.getBase() + "</b> and <b style='color:blue'>"
 				+ hmap.getTargetCoverage() + "% for " + hmap.getTarget() + "</b>.<br/>";
-		results += "<br/><b>Please, check if these matches are correct</b><br/>(here in the main, and in the mirror mapping).<br/>";
+		results += "<br/><b>Please, check if these matches are correct</b><br/>(in the main and mirror mapping).<br/>";
+		hmap.setDeduced(true);
 		return results;
 	}
 
@@ -474,23 +488,31 @@ public class MappingApp {
 				// Use the matches targets to get the source element in the Target VM
 				for (SimpleMatch tvmatch : vmapTarg.getSimpleMatchesByTarget(concept)) {
 					Element target = tvmatch.getSource();
+					String bcomment = null, tcomment = null;
 					// Calculating the coverage
-					Coverage cover = sumCoverage(bvmatch.getCoverage(), tvmatch.getCoverage());
+					Coverage bcover = bvmatch.getCoverage();
+					Coverage tcover = tvmatch.getCoverage();
+					Coverage cover = sumCoverage(bcover, tcover);
 					if (cover != null) {
 						// Create new match: source from Base VM, target form Target VM
-						SimpleMatch match = new SimpleMatch(source, target, cover, null);
+						if (tcover == Coverage.EQUIVALENT && (bcover == Coverage.WIDER || bcover == Coverage.INTERSECTION))
+							bcomment = bvmatch.getComment();
+						SimpleMatch match = new SimpleMatch(source, target, cover, bcomment);
 						match.setDeduced(true);
 						hmapping.addMatch(match);
+
 						// And the corresponding mirror
-						SimpleMatch hctam = new SimpleMatch(target, source, cover.getReflex(), null);
+						if (bcover == Coverage.EQUIVALENT && (tcover == Coverage.WIDER || tcover == Coverage.INTERSECTION))
+							tcomment = tvmatch.getComment();
+						SimpleMatch hctam = new SimpleMatch(target, source, cover.getReflex(), tcomment);
 						hctam.setDeduced(true);
 						hmapping.getMirror().addMatch(hctam);
+
 						mcount += 2;
 					}
 				}
 			}
 		}
-		main.log.println(mcount + " matches deduced from Vertical Mappings");
 		return mcount;
 	}
 
@@ -529,7 +551,6 @@ public class MappingApp {
 				}
 			}
 		}
-		main.log.println(mcount + " matches deduced from ICM Mappings");
 		return mcount;
 	}
 

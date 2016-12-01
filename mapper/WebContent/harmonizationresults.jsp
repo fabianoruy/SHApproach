@@ -95,7 +95,7 @@ td,th {
     <tr>
       <th style="background-color: #e6e6e6">HORIZONTAL</th>
       <c:forEach items="${initiative.horizontalContentMappings}" var="map">
-        <td style="text-align: center"><a href="#${map.id}"><b>${map}</b></a><br />(${map.matches.size()} matches)</td>
+        <td style="text-align: center"><a href="#${map.id}"><b>${map.base} &#8660; ${map.target}</b></a><br />(${map.matches.size()} matches)</td>
       </c:forEach>
     </tr>
   </table>
@@ -108,6 +108,7 @@ td,th {
       <th style="width: 200px">BASE x TARGET</th>
       <th style="width: 200px"><a href="#vcoverage">SEON View + ICM</a></th>
       <c:forEach items="${coverageIndex}" var="base">
+<%--         <th style="width: 200px"><a href="#hcover${base[0].id}">${base[0]}</a></th> --%>
         <th style="width: 200px"><a href="#hcoverage">${base[0]}</a></th>
       </c:forEach>
     </tr>
@@ -260,9 +261,9 @@ td,th {
   <hr size="5" noshade/>
   <br />
   <h2><b>Content Horizontal Mappings</b></h2>
-  <c:forEach items="${hmapsMatrix}" var="htable" varStatus="mloop">
+  <c:forEach items="${hmapsMatrix}" var="table" varStatus="mloop">
     <c:set var="hmap" value="${initiative.horizontalContentMappings[mloop.index]}" />
-    <h3 id="${hmap.id}"><b>${hmap}</b> (Coverage: ${hmap.coverage}% / ${hmap.mirror.coverage}%)</h3>
+    <h3 id="${hmap.id}"><b>${hmap.base} &#8660; ${hmap.target}</b> (Coverage: ${hmap.coverage}% / ${hmap.mirror.coverage}%)</h3>
     <div style="width: 70%">
       <table>
         <tr style="background-color: #999999">
@@ -270,29 +271,29 @@ td,th {
           <th style="width: 400px">Match</th>
           <th style="width: 450px">${hmap.target}&nbsp;Element</th>
         </tr>
-        <c:forEach items="${htable}" var="htypes" varStatus="tloop">
+        <c:forEach items="${table}" var="types" varStatus="tloop">
           <tr style="background-color: #c8c8c8">
             <td colspan="100%">
               <c:if test="${not empty ufotypes[tloop.index]}">${ufotypes[tloop.index]}S</c:if>
               <c:if test="${empty ufotypes[tloop.index]}">Type not defined</c:if>
             </td>
           </tr>
-          <c:forEach items="${htypes}" var="hmatch">
+          <c:forEach items="${types}" var="match">
             <tr style="font-size: 90%">
-              <td title="${hmatch.source.definition}">${hmatch.source}</td>
-              <td>${hmatch.coverage}
-                <c:if test="${hmatch.deduced}">
-                  <br /> (<span title="Deduced Match">D</span>)
+              <td title="${match.source.definition}">${match.source}</td>
+              <td>${match.coverage}&nbsp;
+                <c:if test="${match.deduced}">
+                  (<span title="Deduced Match">D</span>)
                 </c:if>
-                <c:if test="${not empty hmatch.comment}">
-                  <br />{<i>${hmatch.comment}</i>}
+                <c:if test="${not empty match.comment}">
+                  <br />{<i>${match.comment}</i>}
                 </c:if>
               </td>
-              <c:if test="${hmatch['class'].simpleName eq 'SimpleMatch'}">
-                <td title="${hmatch.target.definition}">${hmatch.target}</td>
+              <c:if test="${match['class'].simpleName eq 'SimpleMatch'}">
+                <td title="${match.target.definition}">${match.target}</td>
               </c:if>
-              <c:if test="${hmatch['class'].simpleName eq 'CompositeMatch'}">
-                <td>${hmatch.target}</td>
+              <c:if test="${match['class'].simpleName eq 'CompositeMatch'}">
+                <td>${match.target}</td>
               </c:if>
             </tr>
           </c:forEach>
@@ -302,22 +303,21 @@ td,th {
     <br />
   </c:forEach>
   
-  <br />
-  <hr/>
-  <br />
-  <h2 id="hcoverage"><b>Coverage: Standards' Elements by Other Standards - Horizontal Mappings</b></h2>
-  <table style="font-size: 80%">
-    <tr><td class='FULLY'>Fully Covered Element</td></tr>
-    <tr><td class='PARTIALLY'>Partially Covered Element</td></tr>
-    <tr><td class='NONCOVERED'>Not Covered Element</td></tr>
-  </table>
-  <br />
-  Partially and Not Covered elements shall be justified.<br/><br/>
-  Not Available Yet
+<!--   <br /> -->
+<!--   <hr/> -->
+<!--   <br /> -->
+<!--   <h2 id="hcoverage"><b>Coverage: Standards' Elements by Other Standards - Horizontal Mappings</b></h2> -->
+<!--   <table style="font-size: 80%"> -->
+<!--     <tr><td class='FULLY'>Fully Covered Element</td></tr> -->
+<!--     <tr><td class='PARTIALLY'>Partially Covered Element</td></tr> -->
+<!--     <tr><td class='NONCOVERED'>Not Covered Element</td></tr> -->
+<!--   </table> -->
+<!--   <br /> -->
+<!--   Not Available Yet -->
 
   <br />
   <br />
-  <div style="text-align: center; width: 70%; margin: 10px 0 0 0">
+  <div style="text-align: center; width: 100%; margin: 10px 0 0 0">
     <form action="PhaseSelectServlet" method="POST">
       <input type="hidden" name="action" value="openSelection">
       <button id="finishbutton">Return to Menu</button>

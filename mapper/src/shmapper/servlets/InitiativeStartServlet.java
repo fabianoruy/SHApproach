@@ -79,7 +79,8 @@ public class InitiativeStartServlet extends HttpServlet {
 					main.getInitiative().setPurpose(purpose);
 					main.getInitiative().setScope(scope);
 					main.getInitiative().setPeople(people);
-					main.getInitiative().saveInitiative();
+					// main.getInitiative().saveInitiative();
+					// main.log.println(".");
 					// Accessing Menu
 					request.getRequestDispatcher("phaseselector.jsp").forward(request, response);
 				}

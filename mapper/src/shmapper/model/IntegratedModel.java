@@ -7,6 +7,8 @@ import java.util.List;
 
 import com.change_vision.jude.api.inf.model.IPackage;
 
+import shmapper.model.Notion.UFOType;
+
 /* Represents the Integrated Content Model (ICM) of an Initiative. */
 public class IntegratedModel extends Model {
 	private static final long serialVersionUID = 8909961454762309968L;
@@ -44,7 +46,11 @@ public class IntegratedModel extends Model {
 		notions.addAll(getElements());
 		Collections.sort(notions, new Comparator<Notion>() {
 			public int compare(Notion notion, Notion other) {
-				int result = notion.getIndirectUfotype().toString().compareTo(other.getIndirectUfotype().toString());
+				UFOType ntype = notion.getIndirectUfotype();
+				UFOType otype = other.getIndirectUfotype();
+				if(ntype == null) return -1;
+				if(otype == null) return 1;
+				int result = ntype.toString().compareTo(otype.toString());
 				if (result == 0)
 					return notion.getName().compareToIgnoreCase(other.getName());
 				return result;

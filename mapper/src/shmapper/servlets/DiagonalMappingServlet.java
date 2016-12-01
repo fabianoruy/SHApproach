@@ -40,7 +40,7 @@ public class DiagonalMappingServlet extends HttpServlet {
 
 			if (request.getParameter("action").equals("startMapping")) {
 				// Starting the mapping.
-				main.log.println("\n# Diagonal Mapping");
+				main.log.println("\n# ICM Mapping");
 
 				// Accessing the initiative and application from the Session
 				// mapper.setCurrentMapping(initiative.getDiagonalContentMappings().get(0)); // Setting a diagonal
@@ -82,7 +82,7 @@ public class DiagonalMappingServlet extends HttpServlet {
 				updatePage(request, response);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace(main.log);
 		}
 	}
 

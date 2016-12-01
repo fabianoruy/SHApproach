@@ -42,7 +42,7 @@ public class StructuralMappingApp {
 		deduceHorizontalMappings();
 		finishStructuralMappings();
 		initiative.setStatus(InitiativeStatus.STRUCTURED);
-		System.out.println("Structural Mappings Created (" + initiative.getStructuralMappings().size() + "): " + initiative.getStructuralMappings());
+		main.log.println("Structural Mappings Created (" + initiative.getStructuralMappings().size() + "): " + initiative.getStructuralMappings());
 	}
 
 	/* Creates the structural mappings with the predefined structural matches. */
@@ -71,14 +71,14 @@ public class StructuralMappingApp {
 	/* Populates the structural mappings with the predefined structural matches (vertical and diagonal). */
 	private void populateStructuralMappings(String smapfile) {
 		// READING THE STRUCTURAL MAPPINGS FROM THE FILE and POPULATING THEM WITH THE DEFINED MATCHES
-		System.out.println("\nReading file: " + smapfile);
+		main.log.println("\nReading file: " + smapfile);
 		String structmaps = null;
 		try {
 			// Reading the file to a String
 			new File(smapfile.substring(0, smapfile.lastIndexOf(File.separator))).mkdirs();
 			structmaps = FileUtils.readFileToString(new File(smapfile), StandardCharsets.UTF_8);
 		} catch (IOException e) {
-			e.printStackTrace();
+			e.printStackTrace(main.log);
 		}
 
 		StringTokenizer tkzr = new StringTokenizer(structmaps.substring(1), "\n\r\t");

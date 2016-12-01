@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.catalina.Manager;
 import org.apache.commons.io.FileUtils;
 
 import com.change_vision.jude.api.inf.AstahAPI;
@@ -260,7 +259,7 @@ public class AstahParseApp {
 						astahClassMap.put(node.getId(), (IClass) node);
 						// addResult(" . " + concept + "\n");
 					} else {
-						System.out.println("Discarded Concept: " + node.getName());
+						main.log.println("Discarded Concept: " + node.getName());
 					}
 				}
 				// Recursivelly parsing packages
@@ -269,7 +268,7 @@ public class AstahParseApp {
 				}
 			}
 		} catch (InvalidUsingException e) {
-			e.printStackTrace();
+			e.printStackTrace(main.log);
 		}
 	}
 
@@ -285,7 +284,7 @@ public class AstahParseApp {
 						initiative.addNotion(element);
 						astahClassMap.put(node.getId(), (IClass) node);
 					} else {
-						System.out.println("Discarded Element: " + node.getName());
+						main.log.println("Discarded Element: " + node.getName());
 					}
 				}
 				// Recursivelly parsing packages
@@ -294,7 +293,7 @@ public class AstahParseApp {
 				}
 			}
 		} catch (InvalidUsingException e) {
-			e.printStackTrace();
+			e.printStackTrace(main.log);
 		}
 	}
 
@@ -315,7 +314,7 @@ public class AstahParseApp {
 							astahClassMap.put(node.getId(), (IClass) node);
 							ecount++;
 						} else {
-							System.out.println("Discarded Element: " + node.getName());
+							main.log.println("Discarded Element: " + node.getName());
 						}
 					}
 				}
@@ -331,7 +330,7 @@ public class AstahParseApp {
 				}
 			}
 		} catch (InvalidUsingException e) {
-			e.printStackTrace();
+			e.printStackTrace(main.log);
 		}
 	}
 
@@ -428,9 +427,9 @@ public class AstahParseApp {
 					}
 				}
 			} catch (InvalidUsingException e) {
-				e.printStackTrace();
+				e.printStackTrace(main.log);
 			}
-			System.out.println("   . " + diagram + " (diagram)");
+			main.log.println("   . " + diagram + " (diagram)");
 			return diagram; // only one diagram per package, in this case.
 		}
 		throw new ParserException("Diagram not found in package " + pack.getName() + ".\n");
@@ -445,24 +444,24 @@ public class AstahParseApp {
 			File dir = new File(targetPath);
 			// if (!dir.exists()) dir.mkdirs();
 			// TODO: remove
-			System.out.print("\nWho am I? ");
-			System.out.flush();
+			main.log.print("\nWho am I? ");
+			main.log.flush();
 			Process process = Runtime.getRuntime().exec("whoami");
 			BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
 			String s = null;
 			while ((s = input.readLine()) != null) {
-				System.out.println(s);
+				main.log.println(s);
 			}
 			input.close();
 
 			// Exporting images from the Astah file (using command line).
-			System.out.println("\n* Exporting images from Astah");
+			main.log.println("\n* Exporting images from Astah");
 			String command = astahCommandPath; // command for exporting
 			command += " -image cl"; // selecting only Class diagrams
 			command += " -f " + astahFile; // defining input astah file
 			command += " -o " + targetPath; // defining output directory
-			System.out.println("$ " + command);
-			System.out.flush();
+			main.log.println("$ " + command);
+			main.log.flush();
 
 			long start = System.currentTimeMillis();
 			process = Runtime.getRuntime().exec(command); // Executing command
@@ -470,17 +469,17 @@ public class AstahParseApp {
 			// TODO: remove
 			input = new BufferedReader(new InputStreamReader(process.getInputStream()));
 			while ((s = input.readLine()) != null) {
-				System.out.println(s);
+				main.log.println(s);
 			}
 			input.close();
 			BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()));
 			while ((s = error.readLine()) != null) {
-				System.out.println(s);
+				main.log.println(s);
 			}
 			error.close();
 
 			process.waitFor();
-			System.out.print("[ -] Time: " + (System.currentTimeMillis() - start) + " - ");
+			main.log.print("[ -] Time: " + (System.currentTimeMillis() - start) + " - ");
 
 			// TODO: test images exporting in other machines/conditions.
 			// Waiting for all files being copied.
@@ -492,7 +491,7 @@ public class AstahParseApp {
 				files = FileUtils.listFiles(dir, new String[] { "png" }, true).size();
 				diff = files - before;
 				before = files;
-				System.out.print("[" + files + "] Time: " + (System.currentTimeMillis() - start) + " - ");
+				main.log.print("[" + files + "] Time: " + (System.currentTimeMillis() - start) + " - ");
 			}
 
 			// Counting the identified diagrams' paths
@@ -504,7 +503,7 @@ public class AstahParseApp {
 			}
 			addResult(dcount + " diagrams imported.\n");
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace(main.log);
 			throw new ParserException("Failed during astah images importing/copying.");
 		}
 	}
@@ -516,19 +515,19 @@ public class AstahParseApp {
 	// if (!dir.exists()) dir.mkdirs();
 	// try {
 	// // TODO: remove
-	// System.out.println("Who am I?");
+	// main.log.println("Who am I?");
 	// ProcessBuilder pb = new ProcessBuilder("whoami");
 	// pb.redirectOutput(Redirect.INHERIT);
 	// pb.redirectError(Redirect.INHERIT);
 	// Process p = pb.start();
 	//
 	// // Exporting images from the Astah file (using command line).
-	// System.out.println("\n# Exporting images from Astah");
+	// main.log.println("\n# Exporting images from Astah");
 	// String command = astahCommandPath; // command for exporting
 	// command += " -image cl"; // selecting only Class diagrams
 	// command += " -f " + astahFile; // defining input astah file
 	// command += " -o " + targetPath; // defining output directory
-	// System.out.println("$ " + command);
+	// main.log.println("$ " + command);
 	//
 	// long start = System.currentTimeMillis();
 	// // process = Runtime.getRuntime().exec(command); // Executing command
@@ -539,7 +538,7 @@ public class AstahParseApp {
 	// p.waitFor();
 	//
 	// // process.waitFor();
-	// System.out.print("[ -] Time: " + (System.currentTimeMillis() - start) + " - ");
+	// main.log.print("[ -] Time: " + (System.currentTimeMillis() - start) + " - ");
 	//
 	// // TODO: test images exporting in other machines/conditions.
 	// // Waiting for all files being copied.
@@ -551,7 +550,7 @@ public class AstahParseApp {
 	// files = FileUtils.listFiles(dir, new String[] { "png" }, true).size();
 	// diff = files - before;
 	// before = files;
-	// System.out.print("[" + files + "] Time: " + (System.currentTimeMillis() - start) + " - ");
+	// main.log.print("[" + files + "] Time: " + (System.currentTimeMillis() - start) + " - ");
 	// }
 	//
 	// // Counting the identified diagrams' paths
@@ -570,15 +569,15 @@ public class AstahParseApp {
 
 	/* Waits for a period (millis) a number of times (times). */
 	private void waitFor(int times, long millis) {
-		System.out.print("Waiting (" + times + "*" + millis + ") ");
+		main.log.print("Waiting (" + times + "*" + millis + ") ");
 		try {
 			for (int i = 0; i < times; i++) {
 				Thread.sleep(millis); // 1000 milliseconds is one second.
-				System.out.print(".");
+				main.log.print(".");
 			}
-			System.out.println("");
+			main.log.println("");
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			e.printStackTrace(main.log);
 		}
 	}
 
@@ -586,7 +585,7 @@ public class AstahParseApp {
 
 	/* Adds a result to be returned to the page. */
 	private void addResult(String result) {
-		System.out.print(result);
+		main.log.print(result);
 		this.parsingResults.append(result.replaceAll("\n", "<br/>"));
 	}
 

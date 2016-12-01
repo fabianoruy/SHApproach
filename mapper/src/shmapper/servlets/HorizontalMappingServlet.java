@@ -26,9 +26,10 @@ public class HorizontalMappingServlet extends HttpServlet {
 	private MappingApp			mapper;
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
+		ManagerApp main = null;
 		try {
 			// Accessing the main app from the Session
-			ManagerApp main = (ManagerApp) request.getSession().getAttribute("main");
+			main = (ManagerApp) request.getSession().getAttribute("main");
 			SHInitiative initiative = main.getInitiative();
 			mapper = main.getMapper();
 			request.setAttribute("initiative", main.getInitiative());
@@ -112,7 +113,7 @@ public class HorizontalMappingServlet extends HttpServlet {
 				updatePage(request, response);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace(main.log);
 		}
 	}
 
@@ -124,7 +125,7 @@ public class HorizontalMappingServlet extends HttpServlet {
 			request.setAttribute("question", mapper.getQuestion());
 			request.setAttribute("qtype", mapper.getQuestionType());
 			request.setAttribute("mapping", mapper.getCurrentMapping());
-			if (mapper.getCurrentMapping().getMatches().isEmpty() && ((HorizontalMapping) mapper.getCurrentMapping()).getMirror().getMatches().isEmpty()) {
+			if (!((HorizontalMapping) mapper.getCurrentMapping()).isDeduced()) {
 				request.setAttribute("deductionresults", "ready");
 			}
 			request.getRequestDispatcher("hmatches.jsp").forward(request, response);

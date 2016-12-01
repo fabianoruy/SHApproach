@@ -23,7 +23,7 @@ public class ManagerApp {
 	private StructuralMappingApp	smapApp;
 	private MappingApp				mapApp;
 	private SHInitiative			initiative;
-	private String					astahpath;
+	// private String astahpath;
 	private String					mapperpath;
 	private String					initpath;
 	private String					logpath;
@@ -38,7 +38,7 @@ public class ManagerApp {
 		this.initpath = "initiative/" + title + File.separator;
 
 		// Creating log
-		this.logpath = createLogOutput();
+		this.logpath = this.createLogOutput();
 		log.println("\n### STARTING APPLICATION ###");
 		log.println("mapperpath: " + mapperpath);
 		log.println("initpath: " + initpath);
@@ -132,10 +132,12 @@ public class ManagerApp {
 		try {
 			PrintStream ps = new PrintStream(logfile);
 			String os = System.getProperty("os.name");
-			if (os.contains("Linux"))
+			if (os.contains("Linux")) {
 				this.log = ps;
-			else if (os.contains("Windows"))
-				this.log = System.out;
+			} else if (os.contains("Windows")) {
+//				this.log = System.out;
+				this.log = ps;
+			}
 
 			this.log.println("SH Approach log file - " + new java.util.Date());
 			this.log.println("----------------------------------------------------");
@@ -145,7 +147,7 @@ public class ManagerApp {
 			fw.write(logfile + "\n");
 			fw.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			e.printStackTrace(log);
 		}
 		return initpath + "log/" + logname;
 	}

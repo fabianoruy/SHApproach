@@ -76,9 +76,10 @@ public class PhaseSelectServlet extends HttpServlet {
 
 			// Saving Initiative
 			initiative.saveInitiative();
+			main.log.println(".");
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace(main.log);
 		}
 	}
 
@@ -200,7 +201,7 @@ public class PhaseSelectServlet extends HttpServlet {
 		request.setAttribute("ufotypes", ufotypes);
 		request.setAttribute("vmapsMatrix", vmapsMatrix);
 		request.setAttribute("dmapsMatrix", dmapsMatrix);
-		request.setAttribute("hmapsMatrix", vmapsMatrix);
+		request.setAttribute("hmapsMatrix", hmapsMatrix);
 		request.setAttribute("coverageIndex", coverageIndex);
 		request.setAttribute("coverageMatrix", coverageMatrix);
 	}

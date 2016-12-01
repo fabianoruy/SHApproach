@@ -124,13 +124,17 @@ Nov.30
 + HM Dedutions (simple matches)
 / Harmonization Results (HM)
 
-Dec.01
-- Harmonization Results (HM)
-- HM Dedutions (composite)
-- Publish!
+Dec.01 (mapper5)
++ Harmonization Results (HM)
++ HM Dedutions (comments, mechanism)
 
+----------------------------------------------------
 Future
+- Results per Standard
+- Ontology index
+- Justification for uncovered 
 - Match validation (T2)
+- UI improvements
 
 
 

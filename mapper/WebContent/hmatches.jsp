@@ -17,13 +17,21 @@
         <c:if test="${match.deduced}">
           <td title="Deduced Match">D</td>
         </c:if>
+        <c:if test="${not match.deduced}">
+          <td></td>
+        </c:if>
         <td>
-          <c:if test="${empty match.comment}">
-            {<span style="cursor:pointer" onclick="editComment('${match.id}', '${match.comment}')"><i>C</i></span>}
-          </c:if>
-          <c:if test="${not empty match.comment}">
-            {<span title="${match.comment}" style="cursor:pointer" onclick="editComment('${match.id}', '${match.comment}')"><i><b>C</b></i></span>}
-          </c:if>
+          <c:choose>
+            <c:when test="${not empty match.comment}">
+              {<span title="${match.comment}" style="cursor:pointer" onclick="editComment('${match.id}', '${match.comment}')"><i><b>C</b></i></span>}
+            </c:when>
+            <c:when test="${(empty match.comment) && (match.coverage == 'EQUIVALENT' || match.coverage == 'PARTIAL')}">
+              {<span style="cursor:pointer" onclick="editComment('${match.id}', '')"><i>C</i></span>}
+            </c:when>
+            <c:when test="${(empty match.comment) && (match.coverage == 'WIDER' || match.coverage == 'INTERSECTION')}">
+              {<span style="cursor:pointer; color:red" title="add comment!" onclick="editComment('${match.id}', '')"><i>C</i></span>}
+            </c:when>
+          </c:choose>
         </td>
         <td><img src="images/favicon-remove.ico" title="Remove Match" width="16px" style="cursor: pointer"
           onclick="removeMatch('${match.id}')" /></td>
@@ -47,14 +55,21 @@
         <c:if test="${match.deduced}">
           <td title="Deduced Match">D</td>
         </c:if>
-        
+        <c:if test="${not match.deduced}">
+          <td></td>
+        </c:if>
         <td>
-          <c:if test="${empty match.comment}">
-            {<span style="cursor:pointer" onclick="editComment('${match.id}', '${match.comment}')"><i>C</i></span>}
-          </c:if>
-          <c:if test="${not empty match.comment}">
-            {<span title="${match.comment}" style="cursor:pointer" onclick="editComment('${match.id}', '${match.comment}')"><i><b>C</b></i></span>}
-          </c:if>
+          <c:choose>
+            <c:when test="${not empty match.comment}">
+              {<span title="${match.comment}" style="cursor:pointer" onclick="editComment('${match.id}', '${match.comment}')"><i><b>C</b></i></span>}
+            </c:when>
+            <c:when test="${(empty match.comment) && (match.coverage == 'EQUIVALENT' || match.coverage == 'PARTIAL')}">
+              {<span style="cursor:pointer" onclick="editComment('${match.id}', '')"><i>C</i></span>}
+            </c:when>
+            <c:when test="${(empty match.comment) && (match.coverage == 'WIDER' || match.coverage == 'INTERSECTION')}">
+              {<span style="cursor:pointer; color:red" title="add comment!" onclick="editComment('${match.id}', '')"><i>C</i></span>}
+            </c:when>
+          </c:choose>
         </td>
         <td><img src="images/favicon-remove.ico" title="Remove Match" width="16px" style="cursor: pointer"
           onclick="removeMatch('${match.id}')" /></td>

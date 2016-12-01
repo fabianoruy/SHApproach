@@ -1,6 +1,7 @@
 package shmapper.model;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -44,7 +45,7 @@ public class SHInitiative extends SerializableObject {
 
 	/* Resets all the initiative's packages, mappings and notions. */
 	public void resetInitiative() {
-		System.out.println("* INITIATIVE RESET");
+		// System.out.println("* INITIATIVE RESET");
 		this.packages = new ArrayList<Package>();
 		this.structmaps = new ArrayList<Mapping>();
 		this.contentmaps = new ArrayList<Mapping>();
@@ -422,27 +423,23 @@ public class SHInitiative extends SerializableObject {
 	}
 
 	/* Saves this initiative. */
-	public void saveInitiative() {
-		try {
-			new File(datafile).getParentFile().mkdirs();
-			FileOutputStream fileOut = new FileOutputStream(datafile);
-			ObjectOutputStream out = new ObjectOutputStream(fileOut);
-			out.writeObject(this);
-			out.close();
-			fileOut.close();
+	public void saveInitiative() throws IOException {
+		new File(datafile).getParentFile().mkdirs();
+		FileOutputStream fileOut = new FileOutputStream(datafile);
+		ObjectOutputStream out = new ObjectOutputStream(fileOut);
+		out.writeObject(this);
+		out.close();
+		fileOut.close();
 
-			// backup file
-			String data = new SimpleDateFormat("yyyy-MM-dd.HH-mm-ss").format(new Date());
-			String title = domain.toLowerCase().replaceAll("[^a-zA-Z0-9.-]", "");
-			fileOut = new FileOutputStream(datafile.substring(0, datafile.lastIndexOf("initdata"))+ title + "." + data + ".ser");
-			out = new ObjectOutputStream(fileOut);
-			out.writeObject(this);
-			out.close();
-			fileOut.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		System.out.println(".");
+		// backup file
+		String data = new SimpleDateFormat("yyyy-MM-dd.HH-mm-ss").format(new Date());
+		String title = domain.toLowerCase().replaceAll("[^a-zA-Z0-9.-]", "");
+		fileOut = new FileOutputStream(datafile.substring(0, datafile.lastIndexOf("initdata")) + title + "." + data + ".ser");
+		out = new ObjectOutputStream(fileOut);
+		out.writeObject(this);
+		out.close();
+		fileOut.close();
+		// System.out.println(".");
 	}
 
 	public String getDatafile() {

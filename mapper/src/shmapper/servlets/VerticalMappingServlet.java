@@ -28,9 +28,10 @@ public class VerticalMappingServlet extends HttpServlet {
 
 	/* HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response). */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
+		ManagerApp main = null;
 		try {
 			// Accessing the main app from the Session
-			ManagerApp main = (ManagerApp) request.getSession().getAttribute("main");
+			main = (ManagerApp) request.getSession().getAttribute("main");
 			request.setAttribute("initiative", main.getInitiative());
 			mapper = main.getMapper();
 
@@ -100,7 +101,7 @@ public class VerticalMappingServlet extends HttpServlet {
 
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace(main.log);
 		}
 	}
 

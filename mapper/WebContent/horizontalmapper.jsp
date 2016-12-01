@@ -171,6 +171,7 @@
 
   /* Calls (the servlet via ajax) for removing a Match. */
   function removeMatch(matchId) {
+    console.log(matchId);
     $.ajax({
       type : 'POST',
       url : 'HorizontalMappingServlet',

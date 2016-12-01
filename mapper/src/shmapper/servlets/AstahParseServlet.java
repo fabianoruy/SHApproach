@@ -65,10 +65,15 @@ public class AstahParseServlet extends HttpServlet {
 			main.log.println("!" + e.getMessage());
 			main.log.println("Please, fix your astah file and try again.");
 
-			// e.printStackTrace();
 			main.log.println("(!) Parse has failed! Cleaning data.");
+			main.log.println("* INITIATIVE RESET");
 			main.getInitiative().resetInitiative();
-			main.getInitiative().saveInitiative();
+			try {
+				main.getInitiative().saveInitiative();
+				main.log.println(".");
+			} catch (IOException e1) {
+				e1.printStackTrace(main.log);
+			}
 		} finally {
 			try {
 				response.getWriter().print(results);
@@ -79,7 +84,7 @@ public class AstahParseServlet extends HttpServlet {
 				}
 				response.flushBuffer();
 			} catch (IOException e) {
-				e.printStackTrace();
+				e.printStackTrace(main.log);
 			}
 		}
 	}
@@ -103,6 +108,7 @@ public class AstahParseServlet extends HttpServlet {
 		results = "File <i>" + fname + "</i> uploaded for the initiative.<br/>";
 
 		// RESETING the initiative (removing all packages and mappings, if exists)
+		main.log.println("* INITIATIVE RESET");
 		main.getInitiative().resetInitiative();
 
 		// Initializing the Application and PARSING the Models
@@ -122,6 +128,7 @@ public class AstahParseServlet extends HttpServlet {
 			}
 			main.getInitiative().setStatus(InitiativeStatus.PARSED);
 			main.getInitiative().saveInitiative();
+			main.log.println(".");
 		}
 	}
 

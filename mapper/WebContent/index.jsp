@@ -40,21 +40,27 @@
   </div>
 
   <div>
+    <br/>
     <code>
       <p>
-        In this version, you can:<br />
-        - Parse your astah file<br />
-        - Import Structural mappings<br/>
-        - Do Vertical Mappings (simple and composite matches, disjoint and basetype validations)<br/>
-        - Do ICM Mappings<br />
-        - Monitor mappings' coverage<br/>
-        - See initiative results<br />
-        - Save your progress
+        <b>In this version, you can:</b><br />
+        . Parse your astah file<br />
+        . Import and process Structural Mappings<br/>
+        . Do Vertical Mappings (simple and composite matches, disjoint and basetype validations)<br/>
+        . Do ICM Mappings<br />
+        + Do Horizontal Mappings<br />
+        + Deduce matches in Horizontal Mappings <br/>
+        . Monitor mappings' coverage<br/>
+        + See initiative results<br />
+        . Save progress
       </p>
       <p>
-        In this version, you can't:<br />
-        - Do Horizontal Mappings
+        <b>In this version, you can't:</b><br />
+        - Justify decisions on uncovered elements
       </p>
+      <br/>
+      <br/>
+      <p><b> Version 0.5 - 2016-12-01</b></p>
     </code>
   </div>
 </BODY>
