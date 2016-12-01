@@ -6,12 +6,14 @@ public abstract class Match extends SerializableObject {
 	private Element				source;
 	private Coverage			coverage;
 	private String				comment;
+	private boolean deduced;
 	private Mapping				mapping;
 
 	public Match(Element elem, Coverage cover, String comm) {
 		this.source = elem;
 		this.coverage = cover;
 		this.comment = comm;
+		this.deduced = false;
 	}
 
 	public Element getSource() {
@@ -30,6 +32,14 @@ public abstract class Match extends SerializableObject {
 		this.comment = comment;
 	}
 	
+	public boolean isDeduced() {
+		return deduced;
+	}
+	
+	public void setDeduced(boolean deduced) {
+		this.deduced = deduced;
+	}
+
 	public Mapping getMapping() {
 		return mapping;
 	}
@@ -37,5 +47,6 @@ public abstract class Match extends SerializableObject {
 	public void setMapping(Mapping mapping) {
 		this.mapping = mapping;
 	}
+
 
 }

@@ -68,9 +68,11 @@
       <td style="text-align: center">${match.coverage.abbreviation}</td>
       <c:if test="${loop.index == 0}">
         <td style="width: 150px" rowspan="${rows}"><b>${elem}</b> <br />(${elem.basetypes[0]})</td>
-        <td style="width: 400px" rowspan="${rows}" style="font-size: 90%">${elem.definition}</td>
-        <td rowspan="${rows}"><img src="images/favicon-remove.ico" title="Remove Element" width="16px"
-          style="cursor: pointer"
+        <td style="width: 400px" rowspan="${rows}" style="font-size: 90%">
+          <span style="cursor:pointer" onclick="editDefinition('${elem.id}', '${elem.definition}')"> ${elem.definition}</span>
+        </td>
+        <td rowspan="${rows}">
+          <img src="images/favicon-remove.ico" title="Remove Element" width="16px" style="cursor: pointer"
           onclick="showQuestion('Do you want to remove the element <b>${elem}</b> together with all its matches?', function() {removeElement('${elem.id}');})" /></td>
       </c:if>
       </tr>

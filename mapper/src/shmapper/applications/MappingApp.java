@@ -25,6 +25,7 @@ import shmapper.model.VerticalMapping;
 
 /** Responsible for providing the services for the mapping tasks. */
 public class MappingApp {
+	private ManagerApp			main;
 	private SHInitiative		initiative;
 	private Mapping				mapping;															// current mapping
 	private String				message;
@@ -38,7 +39,8 @@ public class MappingApp {
 		Basetype, CompositeEquivalent, CompositePartof
 	}
 
-	public MappingApp(SHInitiative initiative) {
+	public MappingApp(ManagerApp main, SHInitiative initiative) {
+		this.main = main;
 		this.initiative = initiative;
 	}
 
@@ -46,7 +48,7 @@ public class MappingApp {
 	public void createContentMappings() {
 		if (initiative.getStatus() == InitiativeStatus.STRUCTURED && initiative.getContentMappings().isEmpty()) {
 			this.initiative.createContentMappings();
-			System.out.println("\nContent Mappings Created (" + initiative.getContentMappings().size() + "): " + initiative.getContentMappings());
+			main.log.println("\nContent Mappings Created (" + initiative.getContentMappings().size() + "): " + initiative.getContentMappings());
 		}
 	}
 
@@ -55,7 +57,7 @@ public class MappingApp {
 		message = "";
 		question = "";
 		questionType = null;
-		System.out.println("* Current Mapping: " + this.mapping);
+		main.log.println("* Current Mapping: " + this.mapping);
 	}
 
 	public Mapping getCurrentMapping() {
@@ -94,12 +96,12 @@ public class MappingApp {
 				if (forceBT || validateBasetypesCorrespondence(match)) {
 					mapping.addMatch(match); // At this moment the match is registered
 					message = CHECKED + "Match <b>" + match + "</b> created!";
-					System.out.println("(" + mapping.getMatches().size() + ") " + match);
+					main.log.println("(" + mapping.getMatches().size() + ") " + match);
 					if (initiative.getStatus() == InitiativeStatus.STRUCTURED) {
 						initiative.setStatus(InitiativeStatus.CONTENTED);
 					}
 					// for asking if a Composite Match also has to be created
-					checkCompositeMatch(mapping, match);
+					checkCompositeMatch(match);
 					return match;
 				}
 			}
@@ -118,7 +120,7 @@ public class MappingApp {
 		CompositeMatch compMatch = new CompositeMatch(source, cover, null, smatches);
 		mapping.addMatch(compMatch); // At this moment the match is registered
 		message = CHECKED + "Composite Match <b>" + compMatch + "</b> created!";
-		System.out.println("(" + mapping.getMatches().size() + ") " + compMatch);
+		main.log.println("(" + mapping.getMatches().size() + ") " + compMatch);
 		return compMatch;
 	}
 
@@ -130,18 +132,22 @@ public class MappingApp {
 			// CompositeMatch cmatch = mapping.getCompositeMatchByComponent((SimpleMatch) match);
 			CompositeMatch cmatch = mapping.getCompositeMatchBySource(match.getSource());
 			if (cmatch != null) {
-				message = PROBLEM + "This match has an associated Composite Match (" + cmatch + ")! Remove it before.";
+				message = PROBLEM + "This match has an associated Composite Match (" + cmatch + ")!<br/>Remove it before.";
 				return;
 			}
 		}
 		mapping.removeMatch(match); // At this moment the match is excluded
 		message = CHECKED + "Match <b>" + match + "</b> has been <b>removed</b> from the mapping.";
-		System.out.println("Excluded: " + match);
+		main.log.println("Excluded: " + match);
 	}
 
 	/** Replaces the comment of a given match. */
 	public void changeMatchComment(String matchId, String comment) {
 		Match match = mapping.getMatchById(matchId);
+		if (match == null && mapping instanceof HorizontalMapping) {
+			match = ((HorizontalMapping) mapping).getMirror().getMatchById(matchId);
+			// if it has a mirror, not changing the mirror for now.
+		}
 		match.setComment(comment);
 	}
 
@@ -200,13 +206,13 @@ public class MappingApp {
 		return false;
 	}
 
-	/** Checks if a given match (just created) can lead to a composite match. */
-	private void checkCompositeMatch(Mapping map, SimpleMatch match) {
+	/** Checks if a given match (only vertical, just created) can lead to a composite match. */
+	private void checkCompositeMatch(SimpleMatch match) {
 		// Checks if the element has a set of only partial coverages ([W] or [I]) possibly leading to a Composite Match.
 		Coverage cover = match.getCoverage();
 		Element source = match.getSource();
 		if (cover == Coverage.WIDER || cover == Coverage.INTERSECTION) {
-			List<SimpleMatch> repMatches = map.getSimpleMatchesBySource(source);
+			List<SimpleMatch> repMatches = mapping.getSimpleMatchesBySource(source);
 			if (repMatches.size() > 1) {
 				question = message + "<br/><br/>";
 				question += "The element <b>" + source + "</b> has now " + repMatches.size() + " matches with different targets.<br/>";
@@ -246,7 +252,7 @@ public class MappingApp {
 	public Element createICMElement(String name, String definition, String typeId, String[][] selectedElems, boolean forceBT) {
 		// Creating new Element
 		Notion type = initiative.getNotionById(typeId);
-		IntegratedModel icm = ((DiagonalMapping) mapping).getTarget();
+		IntegratedModel icm = initiative.getIntegratedCM();
 		Element elem = new Element(name, definition, type, icm);
 		// System.out.println("trying to create: " + elem + ": " + definition);
 
@@ -256,7 +262,7 @@ public class MappingApp {
 			sources.add((Element) initiative.getNotionById(elems[0]));
 		}
 		if (forceBT || validateBasetypesCorrespondences(sources, elem)) {
-			System.out.println("\nNew ICM Element: " + elem + " " + elem.getBasetypes());
+			main.log.println("\nNew ICM Element: " + elem + " " + elem.getBasetypes());
 			Element target = elem;
 			int mcount = 0;
 			for (String[] elems : selectedElems) {
@@ -264,7 +270,7 @@ public class MappingApp {
 				Coverage cover = Coverage.valueOf(elems[1]);
 				SimpleMatch match = new SimpleMatch(source, target, cover, null);
 
-				System.out.println("Match: " + match);
+				main.log.println("Match: " + match);
 				// Putting the match in the proper mapping
 				for (DiagonalMapping dmap : initiative.getDiagonalContentMappings()) {
 					if (source.getModel().equals(dmap.getBase())) {
@@ -291,12 +297,12 @@ public class MappingApp {
 				dmap.removeMatch(match); // At this moment a match is excluded
 			}
 		}
-		IntegratedModel icm = ((DiagonalMapping) mapping).getTarget();
+		IntegratedModel icm = initiative.getIntegratedCM();
 		icm.removeElement(elem);
 		initiative.removeNotion(elem);
 
 		message = CHECKED + "Element <b>" + elem + "</b> has been <b>removed</b> from the ICM, together with all its matches.";
-		System.out.println("Excluded: " + elem);
+		main.log.println("Excluded: " + elem);
 	}
 
 	/** Validates the Correspondences between basetypes of the sources and new element target using the structural
@@ -327,6 +333,12 @@ public class MappingApp {
 		return true;
 	}
 
+	/** Replaces the definition of a given element. */
+	public void changeElementDefinition(String elemId, String definition) {
+		Notion elem = initiative.getNotionById(elemId);
+		elem.setDefinition(definition);
+	}
+
 	//////////////////////////// HORIZONTAL MAPPING ////////////////////////////
 
 	/** Creates a new (simple) Match in a Horizontal Mapping. */
@@ -342,10 +354,12 @@ public class MappingApp {
 		if (validateMatchUniqueness(match)) {
 			if (forceBT || validateBasetypesCorrespondence(match)) {
 				mapping.addMatch(match); // At this moment the match is registered
+				main.log.println("(" + mapping.getMatches().size() + "/" + mirror.getMatches().size() + ") " + match);
+
 				mirror.addMatch(hctam); // At this moment the match is registered
+				main.log.println("(" + mapping.getMatches().size() + "/" + mirror.getMatches().size() + ") " + hctam);
+
 				message = CHECKED + "Match <b>" + match + "</b> created!";
-//				System.out.println("HMatchs created: " + match + " / " + hctam);
-				System.out.println("(" + mapping.getMatches().size() + "/" + mirror.getMatches().size() + ") " + match);
 				return match;
 			}
 		}
@@ -353,83 +367,183 @@ public class MappingApp {
 	}
 
 	/** Creates a new Composite Match (only [E] and [W] coverages) in a Horizontal Mapping. */
-	public CompositeMatch createHCompositeMatch(String sourceId, String targetId, String coverName) {
-		System.out.printf("Creating HCMatch: %s, %s, %s\n", sourceId, targetId, coverName);
-		HorizontalMapping hmapping = null;
-		Element source = null;
-		Coverage cover = null;
-		if (sourceId != null) {// change this check
-			source = (Element) initiative.getNotionById(sourceId);
-			hmapping = (HorizontalMapping) mapping;
-			cover = Coverage.valueOf(coverName);
-		} else if (targetId != null) { // change this check
-			source = (Element) initiative.getNotionById(targetId);
-			hmapping = ((HorizontalMapping) mapping).getMirror();
-			cover = Coverage.valueOf(coverName).getReflex();
-		}
-		List<SimpleMatch> smatches = hmapping.getSimpleMatchesBySource(source); // TODO: only partials
+	public CompositeMatch createHCompositeMatch(String sourceId, String coverName) {
+		Element source = (Element) initiative.getNotionById(sourceId);
+		HorizontalMapping hmap = mapping.getBase().equals(source.getModel()) ? (HorizontalMapping) mapping : ((HorizontalMapping) mapping).getMirror();
+		Coverage cover = Coverage.valueOf(coverName);
+		// System.out.printf("Creating HCMatch: %s, %s\n", source, cover);
+
+		List<SimpleMatch> smatches = hmap.getSimpleMatchesBySource(source);
 		CompositeMatch compMatch = new CompositeMatch(source, cover, null, smatches);
-		hmapping.addMatch(compMatch); // At this moment the match is registered
+		hmap.addMatch(compMatch); // At this moment the match is registered
 		message = CHECKED + "Composite Match <b>" + compMatch + "</b> created!";
-		System.out.println("(" + mapping.getMatches().size() + "/" + ((HorizontalMapping) mapping).getMirror().getMatches().size() + ") " + compMatch);
+		main.log.println("(" + mapping.getMatches().size() + "/" + ((HorizontalMapping) mapping).getMirror().getMatches().size() + ") " + compMatch);
 		return compMatch;
 	}
-	
-	/** Checks if a given match (just created) can lead to a composite match. */
-	private void checkHCompositeMatch(Mapping map, SimpleMatch match) {
+
+	/** Checks if a given element can lead to a composite match (in a horizontal mapping). */
+	public void checkHCompositeMatch(String hmapId, String sourceId) {
+		HorizontalMapping hmap = mapping.getId().equals(hmapId) ? (HorizontalMapping) mapping : ((HorizontalMapping) mapping).getMirror();
+		Element source = (Element) initiative.getNotionById(sourceId);
 		// Checks if the element has a set of only partial coverages ([W] or [I]) possibly leading to a Composite Match.
-		Coverage cover = match.getCoverage();
-		Element source = match.getSource();
-		if (cover == Coverage.WIDER || cover == Coverage.INTERSECTION) {
-			for (Match omatch : map.getMatchesBySource(source)) {
-				if (omatch.getCoverage() == Coverage.EQUIVALENT || omatch.getCoverage() == Coverage.PARTIAL) {
-					return;
+		if (hmap.isCompositeAble(source)) {
+			List<SimpleMatch> matches = hmap.getSimpleMatchesBySource(source);
+			question += "The element <b>" + source + "</b> has now " + matches.size() + " matches with different targets in this mapping.<br/>";
+			question += "<code>";
+			// if all matches are [W], only the EQUIVALENT and NO options are available.
+			questionType = QuestionType.CompositeEquivalent;
+			for (SimpleMatch match : matches) {
+				question += "* <b>" + match + "</b><br/>";
+				if (match.getCoverage() == Coverage.INTERSECTION) {
+					// if there is an [I], only the PART OF and NO options are available.
+					questionType = QuestionType.CompositePartof;
 				}
 			}
-			List<SimpleMatch> repMatches = map.getSimpleMatchesBySource(source);
-			if (repMatches.size() > 1) {
-				question = message + "<br/><br/>";
-				question += "The element <b>" + source + "</b> has now " + repMatches.size() + " matches with different targets.<br/>";
-				question += "<code>";
-				// if all matches are [W], only the EQUIVALENT and NO options are available.
-				questionType = QuestionType.CompositeEquivalent;
-				for (SimpleMatch omatch : repMatches) {
-					question += "* <b>" + omatch + "</b><br/>";
-					if (omatch.getCoverage() == Coverage.INTERSECTION) {
-						// if there is an [I], only the PART OF and NO options are available.
-						questionType = QuestionType.CompositePartof;
-					}
-				}
-				question += "</code><br/>";
-				question += QUESTION + "Is the element <b>" + source + "</b> <b><i>fully covered<i></b> by these " + repMatches.size() + " targets together?";
-			}
+			question += "</code><br/>";
+			question += QUESTION + "Is the element <b>" + source + "</b> <b><i>fully covered<i></b> by these " + matches.size() + " targets together?";
 		}
 	}
 
 	/** Removes a match from the horizontal mapping (including the mirror match). */
 	public void removeHMatch(String matchId) {
-		HorizontalMapping mirror = ((HorizontalMapping) mapping).getMirror();
-		Match match = mapping.getMatchById(matchId);
-		System.out.println("Match to be excluded: " + match + " (" + matchId + ")");
+		HorizontalMapping hmap = ((HorizontalMapping) mapping);
+		HorizontalMapping mirror = hmap.getMirror();
+		Match match = hmap.getMatchById(matchId);
+		if (match == null) {
+			// it is from the mirror: change sides
+			mirror = ((HorizontalMapping) mapping);
+			hmap = mirror.getMirror();
+			match = hmap.getMatchById(matchId);
+		}
+		// System.out.println("Match to be excluded: " + match + " (" + matchId + ")");
 		Element source = match.getSource();
-		Element target = (Element) ((SimpleMatch) match).getTarget();
+		// Verifying if there is an associated composite match
 		if (match instanceof SimpleMatch) {
-			// If there is a Composite Match related
-			CompositeMatch cmatch = mapping.getCompositeMatchBySource(source);
+			CompositeMatch cmatch = hmap.getCompositeMatchBySource(source);
 			if (cmatch != null) {
-				message = PROBLEM + "This match has an associated Composite Match (" + cmatch + ")! Remove it before.";
+				message = PROBLEM + "This match has an associated Composite Match (" + cmatch + ")!<br/>Remove it before.";
 				return;
 			}
+			Element target = (Element) ((SimpleMatch) match).getTarget();
 			CompositeMatch chctam = mirror.getCompositeMatchBySource(target);
 			if (chctam != null) {
-				message = PROBLEM + "This match has an associated Composite Match (" + chctam + ")! Remove it before.";
+				message = PROBLEM + "This match has an associated Composite Match (" + chctam + ") in the mirror Mapping!<br/>Remove it before.";
 				return;
 			}
+			Match mmatch = mirror.getSimpleMatch(target, source);
+			mirror.removeMatch(mmatch); // At this moment the mirror match is excluded
+			main.log.println("(" + mapping.getMatches().size() + "/" + ((HorizontalMapping) mapping).getMirror().getMatches().size() + ") Excluded: " + mmatch);
 		}
-		mapping.removeMatch(match); // At this moment the match is excluded
-		mirror.removeMatch(mirror.getSimpleMatch(target, source)); // At this moment the mirror match is excluded
+		hmap.removeMatch(match); // At this moment the match is excluded
 		message = CHECKED + "Match <b>" + match + "</b> has been <b>removed</b> from the mapping.";
-		System.out.println("(" + mapping.getMatches().size() + "/" + mirror.getMatches().size() + ") Excluded:" + match);
+		main.log.println("(" + mapping.getMatches().size() + "/" + ((HorizontalMapping) mapping).getMirror().getMatches().size() + ") Excluded: " + match);
+	}
+
+	/** Deduces the Horizontal Mappings Matches from the Vertical and Diagonal Mappings Matches. */
+	public String deduceMatches(String mappingId) {
+		HorizontalMapping hmap = (HorizontalMapping) initiative.getMappingById(mappingId);
+
+		int vmcount = deduceMatchesFromVerticalMappings(hmap);
+		int dmcount = deduceMatchesFromDiagonalMappings(hmap);
+		int total = vmcount + dmcount;
+
+		String results = "<b>Deduction Results:</b><br/><br/>";
+		results += "<b style='color:blue'>" + total + " matches</b> have been created from the previous mappings with the <b>SEON View</b> and the <b>ICM</b>.<br/>";
+		results += "It represents a coverage of <b style='color:blue'>" + hmap.getCoverage() + "% for " + hmap.getBase() + "</b> and <b style='color:blue'>"
+				+ hmap.getTargetCoverage() + "% for " + hmap.getTarget() + "</b>.<br/>";
+		results += "<br/><b>Please, check if these matches are correct</b><br/>(here in the main, and in the mirror mapping).<br/>";
+		return results;
+	}
+
+	/** Deduces the HMs Matches from the given Base and Target Standards, using the Vertical Mappings Matches. */
+	private int deduceMatchesFromVerticalMappings(HorizontalMapping hmapping) {
+		StandardModel stdBase = hmapping.getBase();
+		StandardModel stdTarget = hmapping.getTarget();
+
+		// Identifying the Base VM (with the HM base as base)
+		VerticalMapping vmapBase = initiative.getVerticalContentMapping(stdBase);
+		// Identifying the Target VM (with the HM target as base)
+		VerticalMapping vmapTarg = initiative.getVerticalContentMapping(stdTarget);
+
+		int mcount = 0;
+		// For each element from the HM Base
+		for (Element source : stdBase.getElements()) {
+			for (SimpleMatch bvmatch : vmapBase.getSimpleMatchesBySource(source)) {
+				// Get all EQUIVALENT matches in the Base VM
+				Notion concept = bvmatch.getTarget();
+				// Use the matches targets to get the source element in the Target VM
+				for (SimpleMatch tvmatch : vmapTarg.getSimpleMatchesByTarget(concept)) {
+					Element target = tvmatch.getSource();
+					// Calculating the coverage
+					Coverage cover = sumCoverage(bvmatch.getCoverage(), tvmatch.getCoverage());
+					if (cover != null) {
+						// Create new match: source from Base VM, target form Target VM
+						SimpleMatch match = new SimpleMatch(source, target, cover, null);
+						match.setDeduced(true);
+						hmapping.addMatch(match);
+						// And the corresponding mirror
+						SimpleMatch hctam = new SimpleMatch(target, source, cover.getReflex(), null);
+						hctam.setDeduced(true);
+						hmapping.getMirror().addMatch(hctam);
+						mcount += 2;
+					}
+				}
+			}
+		}
+		main.log.println(mcount + " matches deduced from Vertical Mappings");
+		return mcount;
+	}
+
+	/** Deduces the HMs Matches from the given Base and Target Standards, using the Diagonal Mappings Matches. */
+	private int deduceMatchesFromDiagonalMappings(HorizontalMapping hmapping) {
+		StandardModel stdBase = hmapping.getBase();
+		StandardModel stdTarget = hmapping.getTarget();
+
+		// Identifying the Base VM (with the HM base as base)
+		DiagonalMapping dmapBase = initiative.getDiagonalContentMapping(stdBase);
+		// Identifying the Target VM (with the HM target as base)
+		DiagonalMapping dmapTarg = initiative.getDiagonalContentMapping(stdTarget);
+
+		int mcount = 0;
+		// For each element from the HM Base
+		for (Element source : stdBase.getElements()) {
+			for (SimpleMatch bdmatch : dmapBase.getSimpleMatchesBySource(source)) {
+				// Get all EQUIVALENT matches in the Base DM
+				Notion concept = bdmatch.getTarget();
+				// Use the matches targets to get the source element in the Target DM
+				for (SimpleMatch tdmatch : dmapTarg.getSimpleMatchesByTarget(concept)) {
+					Element target = tdmatch.getSource();
+					// Calculating the coverage
+					Coverage cover = sumCoverage(bdmatch.getCoverage(), tdmatch.getCoverage());
+					if (cover != null) {
+						// Create new match: source from Base VM, target form Target VM
+						SimpleMatch match = new SimpleMatch(source, target, cover, null);
+						match.setDeduced(true);
+						hmapping.addMatch(match);
+						// And the corresponding mirror
+						SimpleMatch hctam = new SimpleMatch(target, source, cover.getReflex(), null);
+						hctam.setDeduced(true);
+						hmapping.getMirror().addMatch(hctam);
+						mcount += 2;
+					}
+				}
+			}
+		}
+		main.log.println(mcount + " matches deduced from ICM Mappings");
+		return mcount;
+	}
+
+	/** Returns the 'sum' of two coverages, considering Table 2 (T2 - Deductions). */
+	private Coverage sumCoverage(Coverage coverA, Coverage coverB) {
+		if (coverA == Coverage.EQUIVALENT) // E+E=E; E+P=W; E+W=P; E+I=I;
+			return coverB.getReflex();
+		if (coverB == Coverage.EQUIVALENT) // P+E=P; W+E=W; I+E=I;
+			return coverA;
+		if (coverA == Coverage.PARTIAL && coverB == Coverage.WIDER) // P+W=P;
+			return coverA;
+		if (coverA == Coverage.WIDER && coverB == Coverage.PARTIAL) // W+P=W
+			return coverA;
+		return null; // Other: no conclusion
 	}
 
 }

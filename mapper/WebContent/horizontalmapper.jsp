@@ -41,6 +41,11 @@
         doMatch(false);
       }
     });
+
+    $('#deducebutton').click(function() {
+      doDeduction('${mapping.id}');
+    });
+
   });
 
   /* Calls (the servlet via ajax) for updating the page with the current Mapping. */
@@ -53,6 +58,23 @@
       },
       success : function(responseXml) {
         updateMapping(responseXml);
+      }
+    });
+  }
+
+  /* Calls (the servlet via ajax) for deducing the horizontal matches. */
+  function doDeduction(mappingId) {
+    $.ajax({
+      type : 'POST',
+      url : 'HorizontalMappingServlet',
+      data : {
+        action : 'deduce',
+        mapping : mappingId
+      },
+      success : function(responseXml) {
+        updateMapping(responseXml);
+        showMessage($(responseXml).find('deduceresults').html());
+        //$('#matchbutton').prop('disabled', false);
       }
     });
   }
@@ -84,9 +106,62 @@
       url : 'HorizontalMappingServlet',
       data : {
         action : 'compositeMatch',
-        source : $('#sourceidfield').val(),
-        target : $('#targetidfield').val(),
+        source : elemSavedId,
         cover : cover
+      },
+      success : function(responseXml) {
+        updateMapping(responseXml);
+      }
+    });
+  }
+
+  var elemSavedId = null;
+  /* Calls (the servlet via ajax) for checking a Composite Match. */
+  function checkComposite(mapId, elemId) {
+    elemSavedId = elemId;
+    $.ajax({
+      type : 'POST',
+      url : 'HorizontalMappingServlet',
+      data : {
+        action : 'checkCompositeMatch',
+        mapping : mapId,
+        source : elemId
+      },
+      success : function(responseXml) {
+        updateMapping(responseXml);
+      }
+    });
+  }
+
+  /* Shows a question message dialog. */
+  function editComment(matchId, comment) {
+    $('#commentsText').val(comment);
+    $('#dialog-form').dialog({
+      resizable : false,
+      height : "auto",
+      width : 700,
+      modal : true,
+      buttons : {
+        Save : function() {
+          $(this).dialog('close');
+          changeComment(matchId, $('#commentsText').val());
+        },
+        Cancel : function() {
+          $(this).dialog('close');
+        }
+      }
+    });
+  }
+
+  /* Calls (the servlet via ajax) for changing a Match comment. */
+  function changeComment(matchId, comment) {
+    $.ajax({
+      type : 'POST',
+      url : 'HorizontalMappingServlet',
+      data : {
+        action : 'changeComment',
+        matchId : matchId,
+        comment : comment
       },
       success : function(responseXml) {
         updateMapping(responseXml);
@@ -131,6 +206,7 @@
       break;
     }
     $('#matchingsdiv').html($(responseXml).find('matchestable').html());
+    $('#mirrormappingdiv').html($(responseXml).find('mirrormatchestable').html());
     $('#messagediv').html($(responseXml).find('messagetext').html());
     $('#messagediv').scrollTop(1E10);
     $('#coveringfield').prop("selectedIndex", 0);
@@ -142,6 +218,14 @@
     $('.icon').remove();
     $('#basediv').append($(responseXml).find('baseicons').html());
     $('#targdiv').append($(responseXml).find('targicons').html());
+
+    if ($(responseXml).find('deduceresults').html() == 'ready') {
+      $('#matchbutton').prop('disabled', true);
+      $('#deducebutton').prop('hidden', false);
+    } else {
+      $('#matchbutton').prop('disabled', false);
+      $('#deducebutton').prop('hidden', true);
+    }
   }
 
   /* Highlight the diagrams' elements/concepts and make then selectable. */
@@ -206,12 +290,19 @@
 
   function showCoverageInfo() {
     $("#coverinfo").dialog({
-      width : 1000
+      width : 1000,
+    });
+  }
+
+  function showMirrorMapping() {
+    $("#mirrormappingdiv").dialog({
+      width : 1000,
+      height : 455
     });
   }
 
   function showCoverageStatus(divId) {
-    $("#"+divId).dialog({
+    $("#" + divId).dialog({
       width : 600,
       height : 720
     });
@@ -252,7 +343,7 @@
     });
   }
 
-  /* Shows a question message dialog for Composite Matching (1 yes option). */
+  /* Shows a question message dialog for Composite Matching (EQUIVALENT). */
   function showCompositeQuestionE(text, compositeFunction) {
     $('#compositeText').empty().append(text);
     $('#dialog-composite').dialog({
@@ -272,7 +363,7 @@
     });
   }
 
-  /* Shows a question message dialog for Composite Matching (2 yes options). */
+  /* Shows a question message dialog for Composite Matching (PART OF). */
   function showCompositeQuestionP(text, compositeFunction) {
     $('#compositeText').empty().append(text);
     $('#dialog-composite').dialog({
@@ -371,7 +462,10 @@
       </div>
       <div style="display: inline-block; width: 140px; height: 138px; position: relative">
         <button id="matchbutton"
-          style="width: 80px; height: 30px; font-weight: bold; position: absolute; top: 25px; right: 30px;">MATCH!</button>
+          style="width: 80px; height: 30px; font-weight: bold; position: absolute; top: 25px; right: 30px" disabled>MATCH!</button>
+        <button id="deducebutton"
+          style="width: 130px; height: 60px; font-weight: bold; position: absolute; top: 80px; right: 5px" hidden>Deduce
+          Matches from previous Mappings</button>
       </div>
     </div>
 
@@ -400,11 +494,28 @@
   </div>
 
   <div style="display: inline-block; width: 1000px; margin: 15px 0 0 0">
-    <strong>Matches Established.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Coverage:&nbsp;&nbsp;&nbsp;
-      <a href=#nothing onclick="showCoverageStatus('basecoverdiv')">${mapping.base}: <span id="basecovernumber">0</span>%</a>
-        &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-      <a href=#nothing onclick="showCoverageStatus('targcoverdiv')">${mapping.target}: <span id="targcovernumber">0</span>%</a>)
-    </strong>
+    <div style="display: inline-block; width: 1000px">
+      <div style="float: left; width: 350px">
+        <strong>Matches Established (${mapping})</strong>
+      </div>
+      <div style="float: left; text-align: center; width: 340px">
+        <strong>(Coverage:&nbsp;&nbsp; <a href=#nothing onclick="showCoverageStatus('basecoverdiv')">${mapping.base}:
+            <span id="basecovernumber">0</span>%
+        </a> &nbsp;&nbsp;|&nbsp;&nbsp; <a href=#nothing onclick="showCoverageStatus('targcoverdiv')">${mapping.target}:
+            <span id="targcovernumber">0</span>%
+        </a>)
+        </strong>
+      </div>
+      <div style="float: right; text-align: right; width: 300px">
+        <strong>Mirror Mapping (<a href=#nothing onclick="showMirrorMapping()">${mapping.mirror}</a>)
+        </strong>
+      </div>
+    </div>
+    <!--     <strong>Matches Established.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Coverage:&nbsp;&nbsp;&nbsp; -->
+    <%--       <a href=#nothing onclick="showCoverageStatus('basecoverdiv')">${mapping.base}: <span id="basecovernumber">0</span>%</a> --%>
+    <!--         &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; -->
+    <%--       <a href=#nothing onclick="showCoverageStatus('targcoverdiv')">${mapping.target}: <span id="targcovernumber">0</span>%</a>) --%>
+    <!--     </strong> -->
     <div id="matchingsdiv" style="font-size: 95%; overflow: auto; border: 1px solid gray; height: 400px; padding: 3px">
       <!-- Matches included here by ajax -->
     </div>
@@ -419,11 +530,14 @@
   <!-- ***** Match Blocks ***** -->
 
   <!-- Information Dialog -->
-  <div id="basecoverdiv" title="Coverage Status"
-    style="font-size: 95%; overflow: auto; border: 1px solid gray" hidden></div>
+  <div id="basecoverdiv" title="Coverage Status" style="font-size: 95%; overflow: auto; border: 1px solid gray" hidden></div>
 
-  <div id="targcoverdiv" title="Coverage Status"
-    style="font-size: 95%; overflow: auto; border: 1px solid gray" hidden></div>
+  <div id="targcoverdiv" title="Coverage Status" style="font-size: 95%; overflow: auto; border: 1px solid gray" hidden></div>
+
+  <div id="mirrormappingdiv" title="${mapping.mirror}: Matches Established"
+    style="font-size: 95%; overflow: auto; border: 1px solid gray; height: 440px; padding: 3px" hidden>
+    <!-- Matches included here by ajax -->
+  </div>
 
   <!-- Information Dialog -->
   <div id="coverinfo" title="Coverage Relations" hidden>
@@ -501,23 +615,28 @@
 
   <!-- Simple Message -->
   <div id="dialog-message" title="Message" hidden>
-    <p>
     <div id="messageText"></div>
-    </p>
+  </div>
+
+  <!-- Comment Editing -->
+  <div id="dialog-form" title="Inform the new Match Comment." hidden>
+    <form>
+      <div style="width: 500px; margin: 15px 0 0 0">
+        <b>Covering Comments</b> <br />
+        <textarea id="commentsText" rows="4" cols="80"></textarea>
+      </div>
+      <input type="submit" tabindex="-1" style="position: absolute; top: -1000px">
+    </form>
   </div>
 
   <!-- Question Message -->
   <div id="dialog-question" title="Question" hidden>
-    <p>
     <div id="questionText"></div>
-    </p>
   </div>
 
   <!-- Composite Match Question Message -->
   <div id="dialog-composite" title="Is it a Composite Match?" hidden>
-    <p>
     <div id="compositeText"></div>
-    </p>
   </div>
 
   <!-- ***** Dialog Boxes ***** -->

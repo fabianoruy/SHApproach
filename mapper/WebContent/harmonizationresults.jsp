@@ -215,7 +215,7 @@ td,th {
     <tr><td class='NONCOVERED'>Not Covered Element</td></tr>
   </table>
   <br />
-  Partially and Not Covered elements shall be justified.
+  <b style="font-size:90%; color:red">Partially and Not Covered elements shall be justified.</b>
   <table>
     <tr style="background-color: #999999">
       <c:forEach items="${initiative.standardCMs}" var="std" varStatus="sloop">
@@ -260,9 +260,46 @@ td,th {
   <hr size="5" noshade/>
   <br />
   <h2><b>Content Horizontal Mappings</b></h2>
-  <c:forEach items="${initiative.horizontalContentMappings}" var="map">
-    <h3 id="${map.id}"><b>${map}</b> (Coverage: ${map.coverage}%)</h3>
-    Not Available Yet
+  <c:forEach items="${hmapsMatrix}" var="htable" varStatus="mloop">
+    <c:set var="hmap" value="${initiative.horizontalContentMappings[mloop.index]}" />
+    <h3 id="${hmap.id}"><b>${hmap}</b> (Coverage: ${hmap.coverage}% / ${hmap.mirror.coverage}%)</h3>
+    <div style="width: 70%">
+      <table>
+        <tr style="background-color: #999999">
+          <th style="width: 450px">${hmap.base}&nbsp;Element</th>
+          <th style="width: 400px">Match</th>
+          <th style="width: 450px">${hmap.target}&nbsp;Element</th>
+        </tr>
+        <c:forEach items="${htable}" var="htypes" varStatus="tloop">
+          <tr style="background-color: #c8c8c8">
+            <td colspan="100%">
+              <c:if test="${not empty ufotypes[tloop.index]}">${ufotypes[tloop.index]}S</c:if>
+              <c:if test="${empty ufotypes[tloop.index]}">Type not defined</c:if>
+            </td>
+          </tr>
+          <c:forEach items="${htypes}" var="hmatch">
+            <tr style="font-size: 90%">
+              <td title="${hmatch.source.definition}">${hmatch.source}</td>
+              <td>${hmatch.coverage}
+                <c:if test="${hmatch.deduced}">
+                  <br /> (<span title="Deduced Match">D</span>)
+                </c:if>
+                <c:if test="${not empty hmatch.comment}">
+                  <br />{<i>${hmatch.comment}</i>}
+                </c:if>
+              </td>
+              <c:if test="${hmatch['class'].simpleName eq 'SimpleMatch'}">
+                <td title="${hmatch.target.definition}">${hmatch.target}</td>
+              </c:if>
+              <c:if test="${hmatch['class'].simpleName eq 'CompositeMatch'}">
+                <td>${hmatch.target}</td>
+              </c:if>
+            </tr>
+          </c:forEach>
+        </c:forEach>
+      </table>
+    </div>
+    <br />
   </c:forEach>
   
   <br />

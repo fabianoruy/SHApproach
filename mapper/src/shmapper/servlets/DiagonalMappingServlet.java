@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.google.gson.Gson;
 
+import shmapper.applications.ManagerApp;
 import shmapper.applications.MappingApp;
 import shmapper.model.DiagonalMapping;
 import shmapper.model.Element;
@@ -26,20 +27,25 @@ import shmapper.model.VerticalMapping;
 @WebServlet("/DiagonalMappingServlet")
 public class DiagonalMappingServlet extends HttpServlet {
 	private static final long	serialVersionUID	= 1L;
-	private SHInitiative		initiative;
-	private MappingApp			mapp;
+	ManagerApp					main;
+	private MappingApp			mapper;
 
 	/* HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response). */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
 		try {
+			// Accessing the main app from the Session
+			main = (ManagerApp) request.getSession().getAttribute("main");
+			request.setAttribute("initiative", main.getInitiative());
+			mapper = main.getMapper();
+
 			if (request.getParameter("action").equals("startMapping")) {
 				// Starting the mapping.
-				System.out.println("\n# Diagonal Mapping");
+				main.log.println("\n# Diagonal Mapping");
 
 				// Accessing the initiative and application from the Session
-				initiative = (SHInitiative) request.getSession().getAttribute("initiative");
-				mapp = (MappingApp) request.getSession().getAttribute("mappingapp");
-				mapp.setCurrentMapping(initiative.getDiagonalContentMappings().get(0)); // Setting a diagonal mapping
+				// mapper.setCurrentMapping(initiative.getDiagonalContentMappings().get(0)); // Setting a diagonal
+				// mapping
+				mapper.setCurrentMapping(null); // Setting a diagonal mapping
 
 				request.getRequestDispatcher("diagonalmapper.jsp").forward(request, response);
 
@@ -54,15 +60,24 @@ public class DiagonalMappingServlet extends HttpServlet {
 				String definition = request.getParameter("def");
 				String[][] selectedElems = new Gson().fromJson(request.getParameter("elems"), String[][].class);
 				boolean force = Boolean.valueOf(request.getParameter("force"));
-				mapp.createICMElement(name, definition, typeId, selectedElems, force);
+				mapper.createICMElement(name, definition, typeId, selectedElems, force);
 
 				updatePage(request, response);
 
 			} else if (request.getParameter("action").equals("remove")) {
 				// Removing a Match
 				String elemId = request.getParameter("elemId");
-				//System.out.println("Element to be removed with all matches: " + initiative.getNotionById(elemId));
-				mapp.removeICMElement(elemId);
+				// System.out.println("Element to be removed with all matches: " + initiative.getNotionById(elemId));
+				mapper.removeICMElement(elemId);
+
+				updatePage(request, response);
+				
+			} else if (request.getParameter("action").equals("changeDefinition")) {
+				// Changing the Element definition.
+				String elemId = request.getParameter("elemId");
+				String definition = request.getParameter("definition");
+				mapper.changeElementDefinition(elemId, definition);
+				System.out.println("Change definition: " + definition);
 
 				updatePage(request, response);
 			}
@@ -73,8 +88,9 @@ public class DiagonalMappingServlet extends HttpServlet {
 
 	/* Updates the verticalmapper page via ajax. */
 	private void updatePage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		SHInitiative initiative = main.getInitiative();
 		// Setting attributes and calling the page
-		if (mapp != null) {
+		if (mapper != null) {
 			List<VerticalMapping> vmappings = initiative.getVerticalContentMappings();
 			List<DiagonalMapping> dmappings = initiative.getDiagonalContentMappings();
 
@@ -130,9 +146,9 @@ public class DiagonalMappingServlet extends HttpServlet {
 					}
 				}
 				typesMatrix[t] = elements;
-				//System.out.print(ufotypes[t] + " (" + elements.length + ") ");
+				// System.out.print(ufotypes[t] + " (" + elements.length + ") ");
 			}
-			//System.out.println("");
+			// System.out.println("");
 
 			// Coverage numbers
 			Object[][] coverages = new Object[dmappings.size()][3];
@@ -154,22 +170,22 @@ public class DiagonalMappingServlet extends HttpServlet {
 				icmElements[i][0] = elements.get(i);
 				icmElements[i][1] = matches;
 			}
-			
-//			System.out.println(icmElements);
-//			for (Object[] objects : icmElements) {
-//				for (Object object : objects) {
-//					System.out.println(object);
-//				}
-//			}
+
+			// System.out.println(icmElements);
+			// for (Object[] objects : icmElements) {
+			// for (Object object : objects) {
+			// System.out.println(object);
+			// }
+			// }
 
 			// Setting attributes and calling the page
 			request.setAttribute("ufotypes", ufotypes);
 			request.setAttribute("typesMatrix", typesMatrix);
 			request.setAttribute("coverages", coverages);
 			request.setAttribute("icmelements", icmElements);
-			request.setAttribute("message", mapp.getMessage());
-			request.setAttribute("question", mapp.getQuestion());
-			request.setAttribute("qtype", mapp.getQuestionType());
+			request.setAttribute("message", mapper.getMessage());
+			request.setAttribute("question", mapper.getQuestion());
+			request.setAttribute("qtype", mapper.getQuestionType());
 			request.getRequestDispatcher("dmatches.jsp").forward(request, response);
 		}
 	}

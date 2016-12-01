@@ -41,11 +41,13 @@
                   $('#menubutton').prop('disabled', true);
                 },
                 success : function(servletResponse) {
+                  console.log("Success Parsing");
                   $('#astahparsingdiv').append(servletResponse);
                   $('#scrolldiv').scrollTop(1E10);
                   importImages();
                 },
                 error : function(xhr) {
+                  console.log("Error Parsing");
                   $('#astahparsingdiv').append(xhr.responseText);
                   $('#scrolldiv').scrollTop(1E10);
                   $('#menubutton').prop('disabled', false);
@@ -71,11 +73,13 @@
         $('#scrolldiv').scrollTop(1E10);
       },
       success : function(servletResponse) {
+        console.log("Success Importing");
         $('#astahparsingdiv').append(servletResponse);
         $('#menubutton').prop('disabled', false);
         $('#scrolldiv').scrollTop(1E10);
       },
       error : function(xhr) {
+        console.log("Error Importing");
         $('#astahparsingdiv').append(xhr.responseText);
         $('#menubutton').prop('disabled', false);
         $('#scrolldiv').scrollTop(1E10);
@@ -143,7 +147,7 @@
     <div id="astahparsingdiv" style="font-size: 90%"></div>
   </div>
 
-  <a id="logfile" href="${logfile}" target="_blank"><code>log file</code></a>
+  <a id="logfile" href="${pageContext.request.contextPath}/${main.logpath}" target="_blank"><code>log file</code></a>
 
   <div style="text-align: center; margin: 10px 0 0 0">
     <form action="PhaseSelectServlet" method="POST">

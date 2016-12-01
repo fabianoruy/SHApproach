@@ -97,21 +97,58 @@ td, th {
     });
   }
 
-    /* Calls (the servlet via ajax) for removing an Element. */
-    function removeElement(elemId) {
-      console.log("AJAX");
-      $.ajax({
-        type : 'POST',
-        url : 'DiagonalMappingServlet',
-        data : {
-          action : 'remove',
-          elemId : elemId
+  /* Calls (the servlet via ajax) for removing an Element. */
+  function removeElement(elemId) {
+    console.log("AJAX");
+    $.ajax({
+      type : 'POST',
+      url : 'DiagonalMappingServlet',
+      data : {
+        action : 'remove',
+        elemId : elemId
+      },
+      success : function(responseXml) {
+        updateMapping(responseXml);
+      }
+    });
+  }
+  
+  /* Shows a form for editing Element definition. */
+  function editDefinition(elemId, definition) {
+    $('#definitionText').val(definition);
+    $('#dialog-form').dialog({
+      resizable : false,
+      height : "auto",
+      width : 700,
+      modal : true,
+      buttons : {
+        Save : function() {
+          $(this).dialog('close');
+          changeDefinition(elemId, $('#definitionText').val());
         },
-        success : function(responseXml) {
-          updateMapping(responseXml);
+        Cancel : function() {
+          $(this).dialog('close');
         }
-      });
-    }
+      }
+    });
+  }
+
+  /* Calls (the servlet via ajax) for changing an Element definition. */
+  function changeDefinition(elemId, definition) {
+    $.ajax({
+      type : 'POST',
+      url : 'DiagonalMappingServlet',
+      data : {
+        action : 'changeDefinition',
+        elemId : elemId,
+        definition : definition
+      },
+      success : function(responseXml) {
+        updateMapping(responseXml);
+      }
+    });
+  }
+
 
   /* Updates the page with the current information. */
   function updateMapping(responseXml) {
@@ -310,7 +347,7 @@ td, th {
   <!-- ##### Dialog Boxes ##### -->
   <!-- Information Dialog -->
   <div id="seonview" title="Original SEON View" hidden>
-    <IMG src="${initiative.seonView.diagram.path}" width="${initiative.seonView.diagram.width}">
+    <IMG src="${pageContext.request.contextPath}${initiative.seonView.diagram.path}" width="${initiative.seonView.diagram.width}">
   </div>
 
   <!-- Simple Message -->
@@ -318,6 +355,17 @@ td, th {
     <!--     <p> -->
     <div id="messageText"></div>
     <!--     </p> -->
+  </div>
+  
+  <!-- Definition Editing -->
+  <div id="dialog-form" title="Inform the new Element Definition." hidden>
+    <form>
+      <div style="width: 500px; margin: 15px 0 0 0">
+        <b>Element Definition</b> <br />
+        <textarea id="definitionText" rows="4" cols="80"></textarea>
+      </div>
+      <input type="submit" tabindex="-1" style="position: absolute; top: -1000px">
+    </form>
   </div>
 
   <!-- Question Message -->

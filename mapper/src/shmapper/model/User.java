@@ -7,7 +7,7 @@ public class User extends SerializableObject {
 	private static final long		serialVersionUID	= 7348481957757176169L;
 	private String					login;
 	private String					password;
-	private transient SHInitiative	initiative;
+//	private transient SHInitiative	initiative;
 	private static List<User>		users;
 
 	public User(String login, String pword) {
@@ -30,13 +30,13 @@ public class User extends SerializableObject {
 		return login;
 	}
 
-	public SHInitiative getInitiative() {
-		return initiative;
-	}
+//	public SHInitiative getInitiative() {
+//		return initiative;
+//	}
 
-	public void setInitiative(SHInitiative initiative) {
-		this.initiative = initiative;
-	}
+//	public void setInitiative(SHInitiative initiative) {
+//		this.initiative = initiative;
+//	}
 
 	@Override
 	public String toString() {

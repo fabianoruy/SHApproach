@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import shmapper.applications.ManagerApp;
 import shmapper.applications.MappingApp;
 import shmapper.model.Diagram;
 import shmapper.model.HorizontalMapping;
@@ -21,34 +22,36 @@ import shmapper.model.SHInitiative;
 /* Servlet implementation class HorizontalMappingServlet */
 @WebServlet("/HorizontalMappingServlet")
 public class HorizontalMappingServlet extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-	private SHInitiative initiative;
-	private MappingApp mapp;
+	private static final long	serialVersionUID	= 1L;
+	private MappingApp			mapper;
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
 		try {
-			if (request.getParameter("action").equals("startMapping")) {
-				System.out.println("\n# Horizontal Mapping");
-				// Starting the mapping.
-				// Accessing the initiative and application from the Session
-				initiative = (SHInitiative) request.getSession().getAttribute("initiative");
-				mapp = (MappingApp) request.getSession().getAttribute("mappingapp");
+			// Accessing the main app from the Session
+			ManagerApp main = (ManagerApp) request.getSession().getAttribute("main");
+			SHInitiative initiative = main.getInitiative();
+			mapper = main.getMapper();
+			request.setAttribute("initiative", main.getInitiative());
 
-				// Getting the Mapping.
+			if (request.getParameter("action").equals("startMapping")) {
+				// Starting the mapping.
+				main.log.println("\n# Horizontal Mapping");
+
+				// Getting the Selected Mapping.
 				String mapId = request.getParameter("mapId");
 				HorizontalMapping mapping = (HorizontalMapping) initiative.getMappingById(mapId);
-				mapp.setCurrentMapping(mapping);
+				mapper.setCurrentMapping(mapping);
 
 				// Creating the JSON for notions data
 				JsonElement baseJson = createJSON(mapping.getBase().getDiagram());
 				JsonElement targJson = createJSON(mapping.getTarget().getDiagram());
-				
+
 				// Setting attributes and calling the page
 				request.setAttribute("baseJson", baseJson);
 				request.setAttribute("targJson", targJson);
 				request.setAttribute("mapping", mapping);
-				request.setAttribute("baseCoords", mapp.createNotionsCoordsHash(mapping.getBase().getDiagram()));
-				request.setAttribute("targCoords", mapp.createNotionsCoordsHash(mapping.getTarget().getDiagram()));
+				request.setAttribute("baseCoords", mapper.createNotionsCoordsHash(mapping.getBase().getDiagram()));
+				request.setAttribute("targCoords", mapper.createNotionsCoordsHash(mapping.getTarget().getDiagram()));
 
 				request.getRequestDispatcher("horizontalmapper.jsp").forward(request, response);
 
@@ -63,24 +66,49 @@ public class HorizontalMappingServlet extends HttpServlet {
 				String cover = request.getParameter("cover");
 				String comm = request.getParameter("comm");
 				boolean force = Boolean.valueOf(request.getParameter("force"));
-				mapp.createHSimpleMatch(sourceId, targetId, cover, comm, force);
+				mapper.createHSimpleMatch(sourceId, targetId, cover, comm, force);
+
+				updatePage(request, response);
+
+			} else if (request.getParameter("action").equals("checkCompositeMatch")) {
+				// Checking for a new Composite Match.
+				String hmapId = request.getParameter("mapping");
+				String sourceId = request.getParameter("source");
+				mapper.checkHCompositeMatch(hmapId, sourceId);
 
 				updatePage(request, response);
 
 			} else if (request.getParameter("action").equals("compositeMatch")) {
 				// Creating a new Composite Match.
 				String sourceId = request.getParameter("source");
-				String targetId = request.getParameter("target");
 				String cover = request.getParameter("cover");
-				mapp.createHCompositeMatch(sourceId, targetId, cover);
+				mapper.createHCompositeMatch(sourceId, cover);
 
 				updatePage(request, response);
 
 			} else if (request.getParameter("action").equals("removeMatch")) {
 				// Removing a Match
 				String matchId = request.getParameter("matchId");
-				mapp.removeHMatch(matchId);
+				mapper.removeHMatch(matchId);
 
+				updatePage(request, response);
+
+			} else if (request.getParameter("action").equals("changeComment")) {
+				// Changing the Match Comment.
+				String matchId = request.getParameter("matchId");
+				String comment = request.getParameter("comment");
+				mapper.changeMatchComment(matchId, comment);
+				System.out.println("Change comment: " + comment);
+
+				updatePage(request, response);
+
+			} else if (request.getParameter("action").equals("deduce")) {
+				// Deducing the matches form previous mappings
+				main.log.println("# Deducing Horizontal Matches ...");
+				String mappingId = request.getParameter("mapping");
+				String results = mapper.deduceMatches(mappingId);
+
+				request.setAttribute("deductionresults", results);
 				updatePage(request, response);
 			}
 		} catch (Exception e) {
@@ -89,14 +117,16 @@ public class HorizontalMappingServlet extends HttpServlet {
 	}
 
 	/* Updates the verticalmapper page via ajax. */
-	private void updatePage(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	private void updatePage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// Setting attributes and calling the page
-		if (mapp != null) {
-			request.setAttribute("message", mapp.getMessage());
-			request.setAttribute("question", mapp.getQuestion());
-			request.setAttribute("qtype", mapp.getQuestionType());
-			request.setAttribute("mapping", mapp.getCurrentMapping());
+		if (mapper != null) {
+			request.setAttribute("message", mapper.getMessage());
+			request.setAttribute("question", mapper.getQuestion());
+			request.setAttribute("qtype", mapper.getQuestionType());
+			request.setAttribute("mapping", mapper.getCurrentMapping());
+			if (mapper.getCurrentMapping().getMatches().isEmpty() && ((HorizontalMapping) mapper.getCurrentMapping()).getMirror().getMatches().isEmpty()) {
+				request.setAttribute("deductionresults", "ready");
+			}
 			request.getRequestDispatcher("hmatches.jsp").forward(request, response);
 		}
 	}
@@ -114,8 +144,7 @@ public class HorizontalMappingServlet extends HttpServlet {
 	private JsonObject createJSON(Notion notion) {
 		JsonObject jobj = new JsonObject();
 		jobj.addProperty("name", notion.getName().replace("'", ""));
-		String definition = notion.getDefinition().replaceAll("@Ex.", "Ex.").replaceAll("(\\r\\n|\\n\\r|\\r|\\n)", " ")
-				.replace("'", "").replace("\"", "");
+		String definition = notion.getDefinition().replaceAll("@Ex.", "Ex.").replaceAll("(\\r\\n|\\n\\r|\\r|\\n)", " ").replace("'", "").replace("\"", "");
 		jobj.addProperty("definition", definition);
 		jobj.addProperty("basetype", notion.getBasetypes().toString().replaceAll("\\[|\\]", ""));
 		return jobj;

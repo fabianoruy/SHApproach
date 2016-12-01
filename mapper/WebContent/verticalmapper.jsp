@@ -68,8 +68,7 @@
         conc : $('#conceptidfield').val(),
         cover : $('#coveringfield').val(),
         comm : $('#commentsfield').val(),
-        force : forceBT
-      // force Basetype
+        force : forceBT  // forces Basetype
       },
       success : function(responseXml) {
         updateMapping(responseXml);
@@ -284,7 +283,7 @@
     });
   }
 
-  /* Shows a question message dialog for Composite Matching (1 yes option). */
+  /* Shows a question message dialog for Composite Matching (EQUIVALENT). */
   function showCompositeQuestionE(text, compositeFunction) {
     $('#compositeText').empty().append(text);
     $('#dialog-composite').dialog({
@@ -304,7 +303,7 @@
     });
   }
 
-  /* Shows a question message dialog for Composite Matching (2 yes options). */
+  /* Shows a question message dialog for Composite Matching (PART OF). */
   function showCompositeQuestionP(text, compositeFunction) {
     $('#compositeText').empty().append(text);
     $('#dialog-composite').dialog({
@@ -526,10 +525,7 @@
 
   <!-- Simple Message -->
   <div id="dialog-message" title="Message" hidden>
-    <!--     <p><span class="ui-icon ui-icon-circle-check" style="float: left; margin: 0 7px 50px 0;"></span> -->
-    <p>
     <div id="messageText"></div>
-    </p>
   </div>
 
   <!-- Comment Editing -->
@@ -545,17 +541,12 @@
 
   <!-- Question Message -->
   <div id="dialog-question" title="Question" hidden>
-    <!--     <p><span class="ui-icon ui-icon-help" style="float: left; margin: 12px 12px 20px 0;"></span> -->
-    <p>
     <div id="questionText"></div>
-    </p>
   </div>
 
   <!-- Composite Match Question Message -->
   <div id="dialog-composite" title="Is it a Composite Match?" hidden>
-    <p>
     <div id="compositeText"></div>
-    </p>
   </div>
 
   <!-- ***** Dialog Boxes ***** -->

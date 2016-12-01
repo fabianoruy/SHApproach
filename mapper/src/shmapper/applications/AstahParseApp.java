@@ -2,20 +2,16 @@ package shmapper.applications;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.catalina.Manager;
 import org.apache.commons.io.FileUtils;
 
 import com.change_vision.jude.api.inf.AstahAPI;
 import com.change_vision.jude.api.inf.exception.InvalidUsingException;
-import com.change_vision.jude.api.inf.exception.LicenseNotFoundException;
-import com.change_vision.jude.api.inf.exception.NonCompatibleException;
-import com.change_vision.jude.api.inf.exception.ProjectLockedException;
-import com.change_vision.jude.api.inf.exception.ProjectNotFoundException;
 import com.change_vision.jude.api.inf.model.IAssociation;
 import com.change_vision.jude.api.inf.model.IAttribute;
 import com.change_vision.jude.api.inf.model.IClass;
@@ -37,15 +33,16 @@ import shmapper.model.Notion;
 import shmapper.model.NotionPosition;
 import shmapper.model.Ontology;
 import shmapper.model.Ontology.Level;
-import shmapper.util.ParserException;
 import shmapper.model.Package;
 import shmapper.model.Relation;
 import shmapper.model.SHInitiative;
 import shmapper.model.SeonView;
 import shmapper.model.StandardModel;
+import shmapper.util.ParserException;
 
 /** Responsible for parsing the provided Astah file, creating the objects' model. */
 public class AstahParseApp {
+	private ManagerApp main;
 	private SHInitiative initiative;
 	private String astahPath;
 	private StringBuffer parsingResults = new StringBuffer();
@@ -63,7 +60,8 @@ public class AstahParseApp {
 			astahCommandPath = winPath;
 	}
 
-	public AstahParseApp(SHInitiative initiative) {
+	public AstahParseApp(ManagerApp main, SHInitiative initiative) {
+		this.main = main;
 		this.initiative = initiative;
 	}
 
@@ -73,12 +71,13 @@ public class AstahParseApp {
 
 	/* Reads an Astah file for parsing the models (1). */
 	public void parseAstah(String filename) throws ParserException {
-		System.out.println("Astah: " + filename);
+		main.log.println("Uploaded: " + filename);
 		this.astahPath = filename;
 		ProjectAccessor accessor = null;
 		try {
 			// Accessing the astah model
 			accessor = AstahAPI.getAstahAPI().getProjectAccessor();
+			//accessor = ProjectAccessorFactory.getProjectAccessor();
 			// Opening a project (name, true not to check model version, false not to lock a project file,
 			// true to open a project file with the read only mode if the file is locked.)
 			accessor.open(filename, true, false, true);
@@ -88,9 +87,11 @@ public class AstahParseApp {
 			// Reading the model Packages (Ontologies and Models) and Notions (Concepts and Elements)
 			parseAstahModel(model);
 
-		} catch (IOException | ClassNotFoundException | LicenseNotFoundException | ProjectNotFoundException | NonCompatibleException
-				| ProjectLockedException e) {
-			e.printStackTrace();
+//		} catch (IOException | ClassNotFoundException | LicenseNotFoundException | ProjectNotFoundException | NonCompatibleException
+//				| ProjectLockedException e) {
+		} catch (Exception e) {	
+			//e.printStackTrace();
+			throw new ParserException(e.getMessage());
 		} finally {
 			accessor.close();
 		}

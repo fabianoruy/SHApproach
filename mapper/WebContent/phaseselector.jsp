@@ -151,7 +151,7 @@
               <ul style="margin: 5px">
                 <li>SEON View: ${initiative.domain}</li>
                 <%--                 <li>Integrated Model: ${initiative.integratedCM}</li> --%>
-                <li>Standard Models: ${initiative.standardCMs}</li>
+                <li>Standards' Models: ${initiative.standardCMs}</li>
                 <li>Elements and Concepts: ${initiative.allNotions.size()}</li>
               </ul>
             </div>
@@ -159,7 +159,7 @@
       </c:choose>
       <div style="float: right">
         <form action="AstahParseServlet" method="POST">
-          <input type="hidden" name="action" value="openPage">
+          <input type="hidden" name="action" value="startParse">
           <button class="phasebutton" id="parsebutton">Parse Astah</button>
         </form>
       </div>
@@ -337,7 +337,7 @@
     </form>
   </div>
 
-  <a id="logfile" href="${logfile}" target="_blank"><code>log file</code></a>
+  <a id="logfile" href="${pageContext.request.contextPath}/${main.logpath}" target="_blank"><code>log file</code></a>
 
   <!-- ##### Dialog Boxes ##### -->
   <!-- Simple Message -->

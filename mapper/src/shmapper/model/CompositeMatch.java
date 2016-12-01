@@ -17,6 +17,7 @@ public class CompositeMatch extends Match {
 	}
 
 	public String getTarget() {
+		//		return components.toString().replace(", ", " + ").replace('[', '(').replace(']', ')');
 		String text = "";
 		for (SimpleMatch match : components) {
 			text += match.getTarget() + " + ";

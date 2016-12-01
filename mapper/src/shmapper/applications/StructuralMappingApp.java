@@ -17,8 +17,8 @@ import shmapper.model.Mapping;
 import shmapper.model.Match;
 import shmapper.model.Notion;
 import shmapper.model.Notion.UFOType;
-import shmapper.model.SHInitiative.InitiativeStatus;
 import shmapper.model.SHInitiative;
+import shmapper.model.SHInitiative.InitiativeStatus;
 import shmapper.model.SeonView;
 import shmapper.model.SimpleMatch;
 import shmapper.model.StandardModel;
@@ -26,21 +26,23 @@ import shmapper.model.VerticalMapping;
 
 /** Responsible for process the previously defined structural mapping. */
 public class StructuralMappingApp {
+	private ManagerApp main;
 	private SHInitiative initiative;
 
-	public StructuralMappingApp(SHInitiative initiative) {
+	public StructuralMappingApp(ManagerApp main, SHInitiative initiative) {
+		this.main = main;
 		this.initiative = initiative;
 		// System.out.println("# StructuralMappingApp");
 	}
 
 	/* Performs the creation of all structural mappings and matches. */
-	public void performStructuralMapping(String smapfile) {
+	public void performStructuralMapping() {
 		createStructuralMappings();
-		populateStructuralMappings(smapfile);
+		populateStructuralMappings(main.getMapperpath() + "initiative/structmap.txt");
 		deduceHorizontalMappings();
 		finishStructuralMappings();
 		initiative.setStatus(InitiativeStatus.STRUCTURED);
-		System.out.println("\nStructural Mappings Created (" + initiative.getStructuralMappings().size() + "): " + initiative.getStructuralMappings());
+		System.out.println("Structural Mappings Created (" + initiative.getStructuralMappings().size() + "): " + initiative.getStructuralMappings());
 	}
 
 	/* Creates the structural mappings with the predefined structural matches. */

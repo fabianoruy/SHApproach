@@ -21,11 +21,13 @@ Phases:
   * mapper (workingDir)
     - initiative
       - index.ser
+      - structmap.txt
+      - logindex.txt
       - {domain} (initiativeDir)
         - log/logs.txt
         - images/.../astahimages.png
-        - data/[domain].ser
-        - uploaded.asta
+        - data/[domain][data].ser
+        - uploaded*.asta
 domain: {qualityassurance, requirementsdevelopment, softwaredesig, configurationmanagement}
 
 # Match validation
@@ -115,10 +117,19 @@ Nov.28
 / Horizontal Mapping (create, remove, presentation)
 
 Nov.29
-/ Horizontal Mapping
-- HM Composite Matches
-- HM Dedutions
++ Horizontal Mapping
+
+Nov.30
++ HM Composite Matches
++ HM Dedutions (simple matches)
+/ Harmonization Results (HM)
+
+Dec.01
 - Harmonization Results (HM)
+- HM Dedutions (composite)
+- Publish!
+
+Future
 - Match validation (T2)
 
 

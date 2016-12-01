@@ -153,24 +153,24 @@ public abstract class Mapping extends SerializableObject {
 		return null;
 	}
 
-//	/** Returns the single composite match, in this mapping, for the simple match. */
-//	public CompositeMatch getCompositeMatchByComponent(SimpleMatch match) {
-//		for (CompositeMatch cmatch : getCompositeMatches()) {
-//			for (SimpleMatch smatch : cmatch.getComponents()) {
-//				// is the simple match part of a composite match?
-//				if (match.equals(smatch)) {
-//					return cmatch;
-//				}
-//			}
-//		}
-//		return null;
-//	}
-	
-	/** Returns the matchs of this mapping with the given UFOType .*/
+	// /** Returns the single composite match, in this mapping, for the simple match. */
+	// public CompositeMatch getCompositeMatchByComponent(SimpleMatch match) {
+	// for (CompositeMatch cmatch : getCompositeMatches()) {
+	// for (SimpleMatch smatch : cmatch.getComponents()) {
+	// // is the simple match part of a composite match?
+	// if (match.equals(smatch)) {
+	// return cmatch;
+	// }
+	// }
+	// }
+	// return null;
+	// }
+
+	/** Returns the matchs of this mapping with the given UFOType . */
 	public List<Match> getMatchesBySourceUfotype(UFOType type) {
 		List<Match> tmatches = new ArrayList<Match>();
 		for (Match match : matches) {
-			if(match.getSource().getIndirectUfotype() == type) {
+			if (match.getSource().getIndirectUfotype() == type) {
 				tmatches.add(match);
 			}
 		}
@@ -289,10 +289,7 @@ public abstract class Mapping extends SerializableObject {
 
 	@Override
 	public String toString() {
-		String str = getBase() + " \u21d4 " + getTarget();
-		// if (structural)
-		// str += " (" + getMatches().size() + ")";
-		return str;
+		return getBase() + " \u21e8 " + getTarget();
 	}
 
 }

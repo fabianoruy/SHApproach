@@ -48,6 +48,10 @@ public abstract class Notion extends SerializableObject {
 		return definition;
 	}
 
+	public void setDefinition(String def) {
+		this.definition = def;
+	}
+
 	public String getStereotype() {
 		return stereotype;
 	}

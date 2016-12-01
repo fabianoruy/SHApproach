@@ -14,9 +14,15 @@
         <td width="400px"><b>${match.source}</b></td>
         <td width="180px">${match.coverage.text}</td>
         <td width="400px"><b>${match.target}</b></td>
+        <c:if test="${match.deduced}">
+          <td title="Deduced Match">D</td>
+        </c:if>
         <td>
+          <c:if test="${empty match.comment}">
+            {<span style="cursor:pointer" onclick="editComment('${match.id}', '${match.comment}')"><i>C</i></span>}
+          </c:if>
           <c:if test="${not empty match.comment}">
-            {<span title="${match.comment}" style="cursor: pointer"><i>C</i></span>}
+            {<span title="${match.comment}" style="cursor:pointer" onclick="editComment('${match.id}', '${match.comment}')"><i><b>C</b></i></span>}
           </c:if>
         </td>
         <td><img src="images/favicon-remove.ico" title="Remove Match" width="16px" style="cursor: pointer"
@@ -25,6 +31,38 @@
       </c:forEach>
     </table>
   </matchestable>
+
+  <mirrormatchestable>
+    <table>
+      <c:forEach items="${mapping.mirror.matches}" var="match" varStatus="loop">
+        <c:if test="${loop.index%2 == 0}">
+          <tr>
+        </c:if>
+        <c:if test="${loop.index%2 == 1}">
+          <tr style="background-color: #F0F0F0">
+        </c:if>
+        <td width="400px"><b>${match.source}</b></td>
+        <td width="180px">${match.coverage.text}</td>
+        <td width="400px"><b>${match.target}</b></td>
+        <c:if test="${match.deduced}">
+          <td title="Deduced Match">D</td>
+        </c:if>
+        
+        <td>
+          <c:if test="${empty match.comment}">
+            {<span style="cursor:pointer" onclick="editComment('${match.id}', '${match.comment}')"><i>C</i></span>}
+          </c:if>
+          <c:if test="${not empty match.comment}">
+            {<span title="${match.comment}" style="cursor:pointer" onclick="editComment('${match.id}', '${match.comment}')"><i><b>C</b></i></span>}
+          </c:if>
+        </td>
+        <td><img src="images/favicon-remove.ico" title="Remove Match" width="16px" style="cursor: pointer"
+          onclick="removeMatch('${match.id}')" /></td>
+      </tr>
+      </c:forEach>
+    </table>
+  </mirrormatchestable>
+
 
   <coverageicons>
     <c:set var="hmap" value="${mapping}" />
@@ -62,7 +100,7 @@
         <table>
           <c:forEach items="${hmap.nonCoveredElements}" var="elem">
             <tr>
-              <td width="20px">&nbsp;-&nbsp;</td>
+              <td width="25px">&nbsp;-&nbsp;</td>
               <td width="400px">${elem}</td>
               <td>${elem.indirectUfotype}</td>
               <td> </td>
@@ -73,8 +111,8 @@
               <td><img src="images/favicon-part.ico" width="16px" />&nbsp;</td>
               <td>${elem}</td>
               <td>${elem.indirectUfotype}</td>
-              <td><c:if test="${hmap.checkCompositeChance(elem)}">
-              Check Composite
+              <td><c:if test="${hmap.isCompositeAble(elem)}">
+                <button style="font-size: 80%" title="Check for Composite Matching" onclick="checkComposite('${hmap.id}', '${elem.id}')">Composite?</button>
               </c:if></td>
             </tr>
           </c:forEach>
@@ -99,5 +137,7 @@
   <messagetext>${message}</messagetext>
   <questiontext>${question}</questiontext>
   <questiontype>${qtype}</questiontype>
+  
+  <deduceresults>${deductionresults}</deduceresults>
   
 </data>

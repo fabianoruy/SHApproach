@@ -17,6 +17,7 @@
           <c:if test="${not empty match.comment}">
             {<span title="${match.comment}" style="cursor:pointer" onclick="editComment('${match.id}', '${match.comment}')"><i><b>C</b></i></span>}
           </c:if>
+          </td>
           <td>
             <img src="images/favicon-remove.ico" title="Remove Match" width="16px" style="cursor:pointer" onclick="removeMatch('${match.id}')"/>
           </td>
@@ -30,7 +31,7 @@
     <table>
       <c:forEach items="${mapping.nonCoveredElements}" var="elem">
         <tr>
-          <td>${" - "}&nbsp;</td>
+          <td width="25px">${" - "}&nbsp;</td>
           <td> ${elem}</td>
           <td>${elem.indirectUfotype}</td>
         </tr>
