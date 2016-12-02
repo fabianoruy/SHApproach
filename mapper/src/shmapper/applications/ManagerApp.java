@@ -135,8 +135,8 @@ public class ManagerApp {
 			if (os.contains("Linux")) {
 				this.log = ps;
 			} else if (os.contains("Windows")) {
-//				this.log = System.out;
-				this.log = ps;
+				this.log = System.out;
+//				this.log = ps;
 			}
 
 			this.log.println("SH Approach log file - " + new java.util.Date());

@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import shmapper.applications.ManagerApp;
 import shmapper.applications.MappingApp;
 import shmapper.applications.StructuralMappingApp;
+import shmapper.model.Coverage;
 import shmapper.model.DiagonalMapping;
 import shmapper.model.Element;
 import shmapper.model.HorizontalMapping;
@@ -19,14 +20,15 @@ import shmapper.model.Mapping;
 import shmapper.model.Match;
 import shmapper.model.Notion.UFOType;
 import shmapper.model.SHInitiative;
+import shmapper.model.SimpleMatch;
 import shmapper.model.StandardModel;
 import shmapper.model.VerticalMapping;
 
 /* Servlet implementation class PhaseSelectServlet */
 @WebServlet("/PhaseSelectServlet")
 public class PhaseSelectServlet extends HttpServlet {
-	private static final long	serialVersionUID	= 1L;
-	ManagerApp					main;
+	private static final long serialVersionUID = 1L;
+	ManagerApp main;
 
 	/* HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response). */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
@@ -86,6 +88,7 @@ public class PhaseSelectServlet extends HttpServlet {
 	/** Prepares the data to be shown in the results page. */
 	private void prepareResults(HttpServletRequest request, HttpServletResponse response) {
 		SHInitiative initiative = main.getInitiative();
+		List<StandardModel> standards = initiative.getStandardCMs();
 		List<VerticalMapping> vmappings = initiative.getVerticalContentMappings();
 		List<DiagonalMapping> dmappings = initiative.getDiagonalContentMappings();
 		List<HorizontalMapping> hmappings = initiative.getHorizontalContentMappings();
@@ -118,7 +121,6 @@ public class PhaseSelectServlet extends HttpServlet {
 
 		///// Matrix of Elements Coverage
 		Object[][][][] coverageMatrix = new Object[ufotypes.length][][][]; // UFOType x BaseElems x Bases x Data
-		List<StandardModel> standards = initiative.getStandardCMs();
 		for (int t = 0; t < ufotypes.length; t++) {
 			// Determining the max row number for the type (Elements)
 			int ecount = 0;
@@ -167,15 +169,37 @@ public class PhaseSelectServlet extends HttpServlet {
 			main.log.print(ufotypes[t] + " (" + elementsMatrix.length + ") ");
 		}
 		main.log.println("");
-		
+
 		///// Matrix of Horizontal Matches
-		Object[][] hmapsMatrix = new Object[hmappings.size()][ufotypes.length]; // HMappings x UFOTypes: matches
-		for (int i = 0; i < hmappings.size(); i++) {
-			for (int j = 0; j < ufotypes.length; j++) {
-				hmapsMatrix[i][j] = hmappings.get(i).getMatchesBySourceUfotype(ufotypes[j]);
+		//		Object[][] hmapsMatrix = new Object[hmappings.size()][ufotypes.length]; // HMappings x UFOTypes: matches
+		//		for (int i = 0; i < hmappings.size(); i++) {
+		//			for (int j = 0; j < ufotypes.length; j++) {
+		//				hmapsMatrix[i][j] = hmappings.get(i).getMatchesBySourceUfotype(ufotypes[j]);
+		//			}
+		//		}
+		Object[][][][] hmapsMatrix = new Object[hmappings.size()][ufotypes.length][][]; // HMappings x UFOTypes x Matches x Data
+		for (int m = 0; m < hmappings.size(); m++) {
+			for (int t = 0; t < ufotypes.length; t++) {
+				List<Match> allMatches = new ArrayList<Match>();
+				// Getting the elements of each type
+				for (Element elem : hmappings.get(m).getBase().getElementsByUfotype(ufotypes[t])) {
+					List<Match> elemMatches = hmappings.get(m).getMatchesBySource(elem);
+					if (!elemMatches.isEmpty()) {
+						allMatches.addAll(elemMatches);
+					} else {
+						allMatches.add(new SimpleMatch(elem, null, Coverage.NOCOVERAGE, null));
+					}
+				}
+				Object[][] matches = new Object[allMatches.size()][2];
+				for (int k = 0; k < allMatches.size(); k++) {
+					matches[k][0] = allMatches.get(k);
+					matches[k][1] = hmappings.get(m).getCoverageSituation(allMatches.get(k).getSource());
+				}
+				hmapsMatrix[m][t] = matches;
 			}
 		}
-		System.out.println("HMappings.size(): "+ hmappings.size());
+
+		System.out.println("HMappings.size(): " + hmappings.size());
 
 		///// Coverage Index
 		Object[][] coverageIndex = new Object[standards.size()][standards.size() + 2]; // Bases x Targets

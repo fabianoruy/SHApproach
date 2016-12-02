@@ -278,9 +278,10 @@ td,th {
               <c:if test="${empty ufotypes[tloop.index]}">Type not defined</c:if>
             </td>
           </tr>
-          <c:forEach items="${types}" var="match">
+          <c:forEach items="${types}" var="data">
+            <c:set var="match" value="${data[0]}" />
             <tr style="font-size: 90%">
-              <td title="${match.source.definition}">${match.source}</td>
+              <td class="${data[1]}" title="${match.source.definition}">${match.source}</td>
               <td>${match.coverage}&nbsp;
                 <c:if test="${match.deduced}">
                   (<span title="Deduced Match">D</span>)
@@ -291,6 +292,7 @@ td,th {
               </td>
               <c:if test="${match['class'].simpleName eq 'SimpleMatch'}">
                 <td title="${match.target.definition}">${match.target}</td>
+<%--                 <td class="${initiative.getCoverageSituation(match.target)}" title="${match.target.definition}">${match.target}</td> --%>
               </c:if>
               <c:if test="${match['class'].simpleName eq 'CompositeMatch'}">
                 <td>${match.target}</td>
