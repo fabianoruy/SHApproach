@@ -5,6 +5,8 @@ import java.util.List;
 
 import com.change_vision.jude.api.inf.model.IClass;
 
+import shmapper.model.Relation.RelationType;
+
 /** Represents a Notion (Element or Concept). */
 public abstract class Notion extends SerializableObject {
 	private static final long	serialVersionUID	= -6465796034657397883L;
@@ -127,6 +129,42 @@ public abstract class Notion extends SerializableObject {
 			this.relations.add(relation);
 		}
 	}
+
+	/** Returns if this Notion is (direct or indirect) Part of the given notion. */
+	public boolean isIndirectPartOf(Notion onotion) {
+		//TODO: do recursivelly
+		for (Relation relation : relations) {
+			if (relation.getSource().equals(onotion) && relation.getTarget().equals(this) && relation.getType() == RelationType.PARTOF) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** Returns if this Notion (directly) Intersects with the given notion. */
+	public boolean intersects(Notion onotion) {
+		for (Relation relation : relations) {
+			if ((relation.getSource().equals(onotion) && relation.getTarget().equals(this))
+			 || (relation.getSource().equals(this) && relation.getTarget().equals(onotion))
+						&& relation.getType() == RelationType.INTERSECTION) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/** Returns if this Notion is (directly) the Same as given notion. */
+	public boolean sameAs(Notion onotion) {
+		for (Relation relation : relations) {
+			if ((relation.getSource().equals(onotion) && relation.getTarget().equals(this))
+			 || (relation.getSource().equals(this) && relation.getTarget().equals(onotion))
+						&& relation.getType() == RelationType.SAMEAS) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 
 	@Override
 	public String toString() {

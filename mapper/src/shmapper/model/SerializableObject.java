@@ -18,6 +18,8 @@ public abstract class SerializableObject implements Serializable {
 
 	@Override
 	public boolean equals(Object other) {
+		if (other == null)
+			return false;
 		return (this.getClass().equals(other.getClass()) && this.id.equals(((SerializableObject) other).id));
 	}
 

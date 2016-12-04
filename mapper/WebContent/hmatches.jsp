@@ -115,7 +115,7 @@
         <table>
           <c:forEach items="${hmap.nonCoveredElements}" var="elem">
             <tr>
-              <td width="25px">&nbsp;-&nbsp;</td>
+              <td width="30px">&nbsp;-&nbsp;</td>
               <td width="400px">${elem}</td>
               <td>${elem.indirectUfotype}</td>
               <td> </td>

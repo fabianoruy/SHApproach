@@ -24,7 +24,7 @@ public class Concept extends Notion {
 	}
 
 	@Override
-	public Package getPackage() {
+	public Ontology getPackage() {
 		return ontology;
 	}
 

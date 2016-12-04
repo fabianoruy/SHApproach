@@ -6,7 +6,7 @@ import java.util.List;
 import com.change_vision.jude.api.inf.model.IPackage;
 
 /* Represents a View extracted the SEON Ontologies. */
-public class SeonView extends Package {
+public class SeonView extends Package<Concept> {
 	private static final long	serialVersionUID	= 6480365986851483463L;
 	private String				scope;
 	private List<Ontology>		ontologies;
@@ -39,6 +39,11 @@ public class SeonView extends Package {
 			concepts.addAll(onto.getConcepts());
 		}
 		return concepts;
+	}
+	
+	@Override
+	public List<Concept> getNotions() {
+		return getConcepts();
 	}
 
 	public Concept getConceptByName(String name) {

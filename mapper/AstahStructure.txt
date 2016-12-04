@@ -128,6 +128,16 @@ Dec.01 (mapper5)
 + Harmonization Results (HM)
 + HM Dedutions (comments, mechanism)
 
+
+Dec.04
++ Consistency check (no presentation)
+
+Dec.05
+- Composite Match improvements
+- Uncovered Justifications
+- Consistency check presentation
+- Asserted Relations results
+
 ----------------------------------------------------
 Future
 - Results per Standard
@@ -135,6 +145,9 @@ Future
 - Justification for uncovered 
 - Match validation (T2)
 - UI improvements
+- Consistency check
+----------------------------------------------------
+
 
 
 

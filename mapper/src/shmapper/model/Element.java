@@ -37,7 +37,7 @@ public class Element extends Notion {
 	}
 
 	@Override
-	public Package getPackage() {
+	public Model getPackage() {
 		return model;
 	}
 

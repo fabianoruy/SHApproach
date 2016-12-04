@@ -1,9 +1,11 @@
 package shmapper.model;
 
+import java.util.List;
+
 import com.change_vision.jude.api.inf.model.IPackage;
 
 /* Represents an abstract Package (Ontology, Standard Model or ICM). */
-public abstract class Package extends SerializableObject {
+public abstract class Package<T> extends SerializableObject {
 	private static final long	serialVersionUID	= -8983523819554241974L;
 	private String				name;
 	private String				definition;
@@ -26,6 +28,8 @@ public abstract class Package extends SerializableObject {
 	public String getDefinition() {
 		return definition;
 	}
+
+	public abstract List<T> getNotions();
 
 	public Diagram getDiagram() {
 		return diagram;

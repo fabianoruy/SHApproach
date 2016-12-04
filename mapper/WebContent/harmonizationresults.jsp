@@ -134,14 +134,14 @@ td,th {
   <br />
   <h2><b>Content Vertical Mappings</b></h2>
   <c:forEach items="${vmapsMatrix}" var="table" varStatus="mloop">
-    <c:set var="map" value="${initiative.verticalContentMappings[mloop.index]}" />
-    <h3 id="${map.id}"><b>${map}</b> (Coverage: ${map.coverage}%)</h3>
+    <c:set var="vmap" value="${initiative.verticalContentMappings[mloop.index]}" />
+    <h3 id="${vmap.id}"><b>${vmap}</b> (Coverage: ${vmap.coverage}%)</h3>
     <div style="width: 70%">
       <table>
         <tr style="background-color: #999999">
-          <th style="width: 450px">${map.base}&nbsp;Element</th>
+          <th style="width: 450px">${vmap.base}&nbsp;Element</th>
           <th style="width: 400px">Match</th>
-          <th style="width: 450px">${map.target}&nbsp;Concept</th>
+          <th style="width: 450px">${vmap.target}&nbsp;Concept</th>
         </tr>
         <c:forEach items="${table}" var="types" varStatus="tloop">
           <tr style="background-color: #c8c8c8">
@@ -150,19 +150,19 @@ td,th {
               <c:if test="${empty ufotypes[tloop.index]}">Type not defined</c:if>
             </td>
           </tr>
-          <c:forEach items="${types}" var="match">
+          <c:forEach items="${types}" var="data">
+            <c:set var="match" value="${data[0]}" />
             <tr style="font-size: 90%">
-              <td title="${match.source.definition}">${match.source}</td>
+              <c:if test="${data[2] != 0}">
+                <td rowspan="${data[2]}" class="${data[1]}" title="${match.source.definition}">${match.source}</td>
+              </c:if>
               <td>${match.coverage}<c:if test="${not empty match.comment}">
                   <br />{<i>${match.comment}</i>}</c:if>
               </td>
               <c:if test="${match['class'].simpleName eq 'SimpleMatch'}">
-                <td title="${match.target.definition}">${match.target}</td>
+                <c:set var="title" value="title='${match.target.definition}'" />
               </c:if>
-              <c:if test="${match['class'].simpleName eq 'CompositeMatch'}">
-                <td>${match.target}</td>
-              </c:if>
-
+              <td ${title}>${match.target}</td>
             </tr>
           </c:forEach>
         </c:forEach>
@@ -205,7 +205,9 @@ td,th {
       </c:forEach>
     </table>
   </div>
-
+  
+  
+  <!------------------------  VERTICAL COVERAGE  ------------------------>
   <br />
   <hr />
   <br />
@@ -262,8 +264,8 @@ td,th {
   <br />
   <h2><b>Content Horizontal Mappings</b></h2>
   <c:forEach items="${hmapsMatrix}" var="table" varStatus="mloop">
-    <c:set var="hmap" value="${initiative.horizontalContentMappings[mloop.index]}" />
-    <h3 id="${hmap.id}"><b>${hmap.base} &#8660; ${hmap.target}</b> (Coverage: ${hmap.coverage}% / ${hmap.mirror.coverage}%)</h3>
+    <c:set var="hmap" value="${allhmaps[mloop.index]}" />
+    <h3 id="${hmap.id}"><b>${hmap}</b> (Coverage: ${hmap.coverage}%)</h3>
     <div style="width: 70%">
       <table>
         <tr style="background-color: #999999">
@@ -281,7 +283,9 @@ td,th {
           <c:forEach items="${types}" var="data">
             <c:set var="match" value="${data[0]}" />
             <tr style="font-size: 90%">
-              <td class="${data[1]}" title="${match.source.definition}">${match.source}</td>
+              <c:if test="${data[2] != 0}">
+                <td rowspan="${data[2]}" class="${data[1]}" title="${match.source.definition}">${match.source}</td>
+              </c:if>
               <td>${match.coverage}&nbsp;
                 <c:if test="${match.deduced}">
                   (<span title="Deduced Match">D</span>)
@@ -291,12 +295,9 @@ td,th {
                 </c:if>
               </td>
               <c:if test="${match['class'].simpleName eq 'SimpleMatch'}">
-                <td title="${match.target.definition}">${match.target}</td>
-<%--                 <td class="${initiative.getCoverageSituation(match.target)}" title="${match.target.definition}">${match.target}</td> --%>
+                <c:set var="title" value="title='${match.target.definition}'" />
               </c:if>
-              <c:if test="${match['class'].simpleName eq 'CompositeMatch'}">
-                <td>${match.target}</td>
-              </c:if>
+              <td ${title}>${match.target}</td>
             </tr>
           </c:forEach>
         </c:forEach>
@@ -305,21 +306,9 @@ td,th {
     <br />
   </c:forEach>
   
-<!--   <br /> -->
-<!--   <hr/> -->
-<!--   <br /> -->
-<!--   <h2 id="hcoverage"><b>Coverage: Standards' Elements by Other Standards - Horizontal Mappings</b></h2> -->
-<!--   <table style="font-size: 80%"> -->
-<!--     <tr><td class='FULLY'>Fully Covered Element</td></tr> -->
-<!--     <tr><td class='PARTIALLY'>Partially Covered Element</td></tr> -->
-<!--     <tr><td class='NONCOVERED'>Not Covered Element</td></tr> -->
-<!--   </table> -->
-<!--   <br /> -->
-<!--   Not Available Yet -->
-
   <br />
   <br />
-  <div style="text-align: center; width: 100%; margin: 10px 0 0 0">
+  <div style="text-align: center; width: 100%; margin: 15px 0 0 0">
     <form action="PhaseSelectServlet" method="POST">
       <input type="hidden" name="action" value="openSelection">
       <button id="finishbutton">Return to Menu</button>

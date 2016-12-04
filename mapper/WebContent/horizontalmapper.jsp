@@ -304,7 +304,7 @@
 
   function showCoverageStatus(divId) {
     $("#" + divId).dialog({
-      width : 600,
+      width : 700,
       height : 720
     });
   }

@@ -7,6 +7,7 @@ import java.util.Map;
 
 import shmapper.model.CompositeMatch;
 import shmapper.model.Concept;
+import shmapper.model.Conflict;
 import shmapper.model.Coverage;
 import shmapper.model.DiagonalMapping;
 import shmapper.model.Diagram;
@@ -58,6 +59,20 @@ public class MappingApp {
 		question = "";
 		questionType = null;
 		main.log.println("* Current Mapping: " + this.mapping);
+
+		List<Mapping> allMappings = new ArrayList<Mapping>();
+		allMappings.addAll(initiative.getVerticalContentMappings());
+		allMappings.addAll(initiative.getDiagonalContentMappings());
+		for (HorizontalMapping hmap : initiative.getHorizontalContentMappings()) {
+			allMappings.add(hmap);
+			allMappings.add(hmap.getMirror());
+		}
+		for (Mapping map : allMappings) {
+			System.out.println("\n# " + map + " identified conflicts:");
+			for (Conflict conflict : map.identifyConflicts()) {
+				System.out.println(conflict);
+			}
+		}
 	}
 
 	public Mapping getCurrentMapping() {
@@ -166,7 +181,7 @@ public class MappingApp {
 
 	/** Validates the Ontology Disjointness (T1). */
 	private boolean validateOntologyDisjointness(SimpleMatch match) {
-		// Validates if the element (source) is not already fully covered ([E] or [P]) by other matches (T1).
+		// Validates if the element (source) has not a conflictuous match (combinations different of [W] and [I]) (T1).
 		Element source = match.getSource();
 
 		// Verifying matches in the same Vertical Mapping AND in the correspondent Diagonal Mapping
@@ -232,6 +247,13 @@ public class MappingApp {
 				question += QUESTION + "Is the element <b>" + source + "</b> <b><i>fully covered<i></b> by these " + repMatches.size() + " targets together?";
 			}
 		}
+	}
+
+	/** Checks the Standard Disjointness (T2) in a Vertical Mapping. */
+	private boolean checkStandardDisjointness(VerticalMapping vmap) {
+		// Checks if each element has matches leading to overlap in the Standard.
+
+		return true;
 	}
 
 	/** Creates a hash containing all the diagram notions (as keys) and their respective coords in the diagram. */
@@ -464,7 +486,8 @@ public class MappingApp {
 				+ " matches</b> have been created from the previous mappings with the <b>SEON View</b> and the <b>ICM</b>.<br/>";
 		results += "It represents a coverage of <b style='color:blue'>" + hmap.getCoverage() + "% for " + hmap.getBase() + "</b> and <b style='color:blue'>"
 				+ hmap.getTargetCoverage() + "% for " + hmap.getTarget() + "</b>.<br/>";
-		results += "<br/><b>Please, check if these matches are correct</b><br/>(in the main and mirror mapping).<br/>";
+		results += "<br/><b>Please, check if these matches are correct</b> (in the main and mirror mapping) and proceed with the Horizontal Mapping:<br/>";
+		results += " - check the relations;<br/> - fill the required comments;<br/> - create new matches;<br/> - check the composite matches.";
 		hmap.setDeduced(true);
 		return results;
 	}
@@ -554,7 +577,7 @@ public class MappingApp {
 		return mcount;
 	}
 
-	/** Returns the 'sum' of two coverages, considering Table 2 (T2 - Deductions). */
+	/** Returns the 'sum' of two coverages, considering Table 3 (T3 - Deductions). */
 	private Coverage sumCoverage(Coverage coverA, Coverage coverB) {
 		if (coverA == Coverage.EQUIVALENT) // E+E=E; E+P=W; E+W=P; E+I=I;
 			return coverB.getReflex();

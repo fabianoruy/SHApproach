@@ -8,7 +8,7 @@ import com.change_vision.jude.api.inf.model.IPackage;
 import shmapper.model.Notion.UFOType;
 
 /* Represents a Model with Elements. */
-public abstract class Model extends Package {
+public abstract class Model extends Package<Element> {
 	private static final long	serialVersionUID	= 5300026087585445762L;
 	private boolean				structural;
 	private List<Element>		elements;
@@ -25,6 +25,11 @@ public abstract class Model extends Package {
 
 	public List<Element> getElements() {
 		return this.elements;
+	}
+	
+	@Override
+	public List<Element> getNotions() {
+		return getElements();
 	}
 
 	public void addElement(Element elem) {

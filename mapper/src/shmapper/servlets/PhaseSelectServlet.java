@@ -2,7 +2,9 @@ package shmapper.servlets;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -27,8 +29,8 @@ import shmapper.model.VerticalMapping;
 /* Servlet implementation class PhaseSelectServlet */
 @WebServlet("/PhaseSelectServlet")
 public class PhaseSelectServlet extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-	ManagerApp main;
+	private static final long	serialVersionUID	= 1L;
+	ManagerApp					main;
 
 	/* HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response). */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
@@ -67,7 +69,8 @@ public class PhaseSelectServlet extends HttpServlet {
 				response.getWriter().println("Application Finished!\n");
 				response.getWriter().println(initiative.getContentMappings().size() + " Content Mappings were created:");
 				for (Mapping map : initiative.getContentMappings()) {
-					response.getWriter().println(map + ": " + map.getStatus() + " (" + map.getCoverage() + "%)");
+					response.getWriter().println(
+							"(" + map.getClass().getSimpleName() + ") " + map.getBase() + " --> " + map.getTarget() + ": " + map.getStatus() + " (" + map.getCoverage() + "%)");
 				}
 				// TODO: put the logfile here. Needs to be HTML.
 				request.getSession().invalidate();
@@ -100,12 +103,48 @@ public class PhaseSelectServlet extends HttpServlet {
 		} // last is null
 
 		///// Matrix of Vertical Matches
-		Object[][] vmapsMatrix = new Object[vmappings.size()][ufotypes.length]; // VMappings x UFOTypes: matches
-		for (int i = 0; i < vmappings.size(); i++) {
-			for (int j = 0; j < ufotypes.length; j++) {
-				vmapsMatrix[i][j] = vmappings.get(i).getMatchesBySourceUfotype(ufotypes[j]);
+//		Object[][] vmapsMatrix = new Object[vmappings.size()][ufotypes.length]; // VMappings x UFOTypes: matches
+//		for (int i = 0; i < vmappings.size(); i++) {
+//			for (int j = 0; j < ufotypes.length; j++) {
+//				vmapsMatrix[i][j] = vmappings.get(i).getMatchesBySourceUfotype(ufotypes[j]);
+//			}
+//		}
+		///// Matrix of Vertical Matches
+		Object[][][][] vmapsMatrix = new Object[vmappings.size()][ufotypes.length][][]; // HMappings x UFOTypes x Matches x Data
+		Map<Element, Integer> rowspan = new HashMap<Element, Integer>();
+		for (int m = 0; m < vmappings.size(); m++) {
+			VerticalMapping vmap = vmappings.get(m);
+			for (int t = 0; t < ufotypes.length; t++) {
+				List<Match> allMatches = new ArrayList<Match>();
+				// Getting the elements of each type
+				for (Element elem : vmap.getBase().getElementsByUfotype(ufotypes[t])) {
+					List<Match> elemMatches = vmap.getMatchesBySource(elem);
+					if (!elemMatches.isEmpty()) {
+						allMatches.addAll(elemMatches);
+						rowspan.put(elem, elemMatches.size());
+					} else {
+						allMatches.add(new SimpleMatch(elem, null, Coverage.NOCOVERAGE, null));
+						rowspan.put(elem, 1);
+					}
+				}
+				Object[][] matches = new Object[allMatches.size()][4];
+				int lines = 0, count = 0;
+				for (int k = 0; k < allMatches.size(); k++) {
+					Match match = allMatches.get(k);
+					if (count == 0) {
+						lines = rowspan.get(match.getSource());
+						count = lines;
+					}
+					matches[k][0] = match;
+					matches[k][1] = vmap.getCoverageSituation(match.getSource());
+					matches[k][2] = lines;
+					count--;
+					lines = 0;
+				}
+				vmapsMatrix[m][t] = matches;
 			}
 		}
+
 
 		///// Matrix of ICM Elements (and related matches)
 		List<Element> elements = initiative.getIntegratedCM().getElements();
@@ -171,29 +210,42 @@ public class PhaseSelectServlet extends HttpServlet {
 		main.log.println("");
 
 		///// Matrix of Horizontal Matches
-		//		Object[][] hmapsMatrix = new Object[hmappings.size()][ufotypes.length]; // HMappings x UFOTypes: matches
-		//		for (int i = 0; i < hmappings.size(); i++) {
-		//			for (int j = 0; j < ufotypes.length; j++) {
-		//				hmapsMatrix[i][j] = hmappings.get(i).getMatchesBySourceUfotype(ufotypes[j]);
-		//			}
-		//		}
-		Object[][][][] hmapsMatrix = new Object[hmappings.size()][ufotypes.length][][]; // HMappings x UFOTypes x Matches x Data
-		for (int m = 0; m < hmappings.size(); m++) {
+		Object[][][][] hmapsMatrix = new Object[2 * hmappings.size()][ufotypes.length][][]; // HMappings x UFOTypes x
+																							// Matches x Data
+		List<HorizontalMapping> allhmaps = new ArrayList<>();
+		for (HorizontalMapping hmap : hmappings) {
+			allhmaps.add(hmap);
+			allhmaps.add(hmap.getMirror());
+		}
+		rowspan = new HashMap<Element, Integer>();
+		for (int m = 0; m < allhmaps.size(); m++) {
+			HorizontalMapping hmap = allhmaps.get(m);
 			for (int t = 0; t < ufotypes.length; t++) {
 				List<Match> allMatches = new ArrayList<Match>();
 				// Getting the elements of each type
-				for (Element elem : hmappings.get(m).getBase().getElementsByUfotype(ufotypes[t])) {
-					List<Match> elemMatches = hmappings.get(m).getMatchesBySource(elem);
+				for (Element elem : hmap.getBase().getElementsByUfotype(ufotypes[t])) {
+					List<Match> elemMatches = hmap.getMatchesBySource(elem);
 					if (!elemMatches.isEmpty()) {
 						allMatches.addAll(elemMatches);
+						rowspan.put(elem, elemMatches.size());
 					} else {
 						allMatches.add(new SimpleMatch(elem, null, Coverage.NOCOVERAGE, null));
+						rowspan.put(elem, 1);
 					}
 				}
-				Object[][] matches = new Object[allMatches.size()][2];
+				Object[][] matches = new Object[allMatches.size()][4];
+				int lines = 0, count = 0;
 				for (int k = 0; k < allMatches.size(); k++) {
-					matches[k][0] = allMatches.get(k);
-					matches[k][1] = hmappings.get(m).getCoverageSituation(allMatches.get(k).getSource());
+					Match match = allMatches.get(k);
+					if (count == 0) {
+						lines = rowspan.get(match.getSource());
+						count = lines;
+					}
+					matches[k][0] = match;
+					matches[k][1] = hmap.getCoverageSituation(match.getSource());
+					matches[k][2] = lines;
+					count--;
+					lines = 0;
 				}
 				hmapsMatrix[m][t] = matches;
 			}
@@ -226,6 +278,7 @@ public class PhaseSelectServlet extends HttpServlet {
 		request.setAttribute("vmapsMatrix", vmapsMatrix);
 		request.setAttribute("dmapsMatrix", dmapsMatrix);
 		request.setAttribute("hmapsMatrix", hmapsMatrix);
+		request.setAttribute("allhmaps", allhmaps);
 		request.setAttribute("coverageIndex", coverageIndex);
 		request.setAttribute("coverageMatrix", coverageMatrix);
 	}

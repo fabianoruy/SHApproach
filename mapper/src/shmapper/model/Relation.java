@@ -13,10 +13,29 @@ public class Relation extends SerializableObject {
 	private boolean				composition;
 	private Notion				source;
 	private Notion				target;
+	private RelationType		type;
 	private String				sourceMult;
 	private String				targetMult;
 	private boolean				original;
 
+	public static enum RelationType {
+		SAMEAS("the SAME as"),
+		PARTOF("PART of"),
+		INTERSECTION("INTERSECTED with");
+
+		private final String text;
+
+		private RelationType(final String text) {
+			this.text = text;
+		}
+
+		@Override
+		public String toString() {
+			return text;
+		}
+	}
+
+	/** Default constructor, for original relations. */
 	public Relation(Notion source, Notion target, IAssociation assoc) {
 		IAttribute firstEnd = assoc.getMemberEnds()[0];
 		IAttribute secondEnd = assoc.getMemberEnds()[1];
@@ -27,12 +46,23 @@ public class Relation extends SerializableObject {
 			this.stereotype = assoc.getStereotypes()[0]; // only the first for while
 		}
 		this.composition = (firstEnd.isComposite() || firstEnd.isAggregate());
+		if (composition)
+			this.type = RelationType.PARTOF;
+
 		this.sourceMult = getMultiplicity(firstEnd);
 		this.targetMult = getMultiplicity(secondEnd);
 
 		this.source = source;
 		this.target = target;
 		this.original = true;
+	}
+
+	/** Alternative constructor for asserted relations. */
+	public Relation(Element source, Element target, RelationType type) {
+		this.source = source;
+		this.target = target;
+		this.type = type;
+		this.original = false;
 	}
 
 	public String getName() {
@@ -67,20 +97,24 @@ public class Relation extends SerializableObject {
 		return this.targetMult;
 	}
 
-	public void setOriginal(boolean original) {
-		this.original = original;
-	}
-
 	public boolean isOriginal() {
 		return original;
+	}
+
+	public RelationType getType() {
+		// TODO: remove if for new initiatives
+		if (composition)
+			this.type = RelationType.PARTOF;
+
+		return type;
 	}
 
 	@Override
 	public String toString() {
 		String rname = name;
 		String ster = "";
-		if (composition)
-			rname = "<>--" + name;
+		if (getType() != null)
+			rname = type.toString();
 		if (stereotype != null)
 			ster = "  &lt&lt" + stereotype + "&gt&gt";
 		return source.getName() + " " + rname + " " + target.getName() + ster;
