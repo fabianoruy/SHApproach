@@ -7,7 +7,7 @@ import java.util.Map;
 
 import shmapper.model.CompositeMatch;
 import shmapper.model.Concept;
-import shmapper.model.Conflict;
+import shmapper.model.Issue;
 import shmapper.model.Coverage;
 import shmapper.model.DiagonalMapping;
 import shmapper.model.Diagram;
@@ -59,20 +59,6 @@ public class MappingApp {
 		question = "";
 		questionType = null;
 		main.log.println("* Current Mapping: " + this.mapping);
-
-		List<Mapping> allMappings = new ArrayList<Mapping>();
-		allMappings.addAll(initiative.getVerticalContentMappings());
-		allMappings.addAll(initiative.getDiagonalContentMappings());
-		for (HorizontalMapping hmap : initiative.getHorizontalContentMappings()) {
-			allMappings.add(hmap);
-			allMappings.add(hmap.getMirror());
-		}
-		for (Mapping map : allMappings) {
-			System.out.println("\n# " + map + " identified conflicts:");
-			for (Conflict conflict : map.identifyConflicts()) {
-				System.out.println(conflict);
-			}
-		}
 	}
 
 	public Mapping getCurrentMapping() {

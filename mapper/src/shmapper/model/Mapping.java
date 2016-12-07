@@ -274,51 +274,51 @@ public abstract class Mapping extends SerializableObject {
 		matches.remove(rmatch);
 	}
 
-	/** Identifies and returns the conflicts related only to this mapping. */
-	public List<Conflict> identifyConflicts() {
-		List<Conflict> conflicts = new ArrayList<Conflict>();
+	/** Identifies and returns the Issues related only to this mapping. */
+	public List<Issue> identifyIssues() {
+		List<Issue> issues = new ArrayList<Issue>();
 		// for each target concept, get all matches
 		for (Notion target : (List<Notion>) getTarget().getNotions()) {
 			List<SimpleMatch> tmatches = getSimpleMatchesByTarget(target);
-			// analyses each pair of matches for conflicts (T2)
+			// analyses each pair of matches for questions (T2)
 			for (int i = 0; i < tmatches.size(); i++) {
 				for (int j = i + 1; j < tmatches.size(); j++) {
-					Conflict conflict = getConflict(tmatches.get(i), tmatches.get(j));
-					if (conflict != null)
-						conflicts.add(conflict);
+					Issue issue = getIssue(tmatches.get(i), tmatches.get(j));
+					if (issue != null)
+						issues.add(issue);
 				}
 			}
 		}
-		return conflicts;
+		return issues;
 	}
 
-	/** Returns the conflict between two matches with 'distinct' sources and same target (T2), if exists. */
-	private Conflict getConflict(Match match1, Match match2) {
+	/** Returns the Issue between two matches with 'distinct' sources and same target (T2), if it exists. */
+	private Issue getIssue(Match match1, Match match2) {
 		Coverage E = Coverage.EQUIVALENT, P = Coverage.PARTIAL, W = Coverage.WIDER, I = Coverage.INTERSECTION;
 		Coverage cover1 = match1.getCoverage(), cover2 = match2.getCoverage();
-		// PP, PI, IP, II: no conflict
+		// PP, PI, IP, II: no issue
 		if ((cover1 == P || cover1 == I) && (cover2 == P || cover2 == I)) {
 			return null;
 		}
-		// EE: same as conflict
+		// EE: equivalent issue
 		if (cover1 == E && cover2 == E) {
-			if (!match1.getSource().sameAs(match2.getSource()))
-				return new Conflict(match1, match2, RelationType.SAMEAS);
+			if (!match1.getSource().isEquivalentTo(match2.getSource()))
+				return new Issue(match1, match2, RelationType.EQUIVALENT);
 
-			// EI, WI, IE, IW, WW: interserction conflict
+			// EI, WI, IE, IW, WW: intersection issue
 		} else if (cover1 == I || cover2 == I || (cover1 == W && cover2 == W)) {
-			if (!match1.getSource().intersects(match2.getSource()))
-				return new Conflict(match1, match2, RelationType.INTERSECTION);
+			if (!match1.getSource().intersectsWith(match2.getSource()))
+				return new Issue(match1, match2, RelationType.INTERSECTION);
 
-			// (EP, WE, WP) and (no wholeof): whole of conflict
+			// (EP, WE, WP) and (no wholeof): whole of issue
 		} else if ((cover1 == E && cover2 == P) || (cover1 == W && (cover2 == E || cover2 == P))) {
 			if (!match2.getSource().isIndirectPartOf(match1.getSource()))
-				return new Conflict(match2, match1, RelationType.PARTOF);
+				return new Issue(match2, match1, RelationType.PARTOF);
 
-			// (EW, PE, PW) and (no partof): part of conflict
+			// (EW, PE, PW) and (no partof): part of issue
 		} else if ((cover1 == E && cover2 == W) || (cover1 == P && (cover2 == E || cover2 == W))) {
 			if (!match1.getSource().isIndirectPartOf(match2.getSource()))
-				return new Conflict(match1, match2, RelationType.PARTOF);
+				return new Issue(match1, match2, RelationType.PARTOF);
 		}
 		return null; // Other: no conclusion
 	}

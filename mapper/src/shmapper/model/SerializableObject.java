@@ -20,7 +20,9 @@ public abstract class SerializableObject implements Serializable {
 	public boolean equals(Object other) {
 		if (other == null)
 			return false;
-		return (this.getClass().equals(other.getClass()) && this.id.equals(((SerializableObject) other).id));
+		if (!this.getClass().equals(other.getClass()))
+			return false;
+		return this.id.equals(((SerializableObject) other).id);
 	}
 
 }

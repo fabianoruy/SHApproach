@@ -19,9 +19,7 @@ public class Relation extends SerializableObject {
 	private boolean				original;
 
 	public static enum RelationType {
-		SAMEAS("the SAME as"),
-		PARTOF("PART of"),
-		INTERSECTION("INTERSECTED with");
+		EQUIVALENT("EQUIVALENT to"), PARTOF("PART of"), INTERSECTION("INTERSECTED with");
 
 		private final String text;
 
@@ -59,8 +57,13 @@ public class Relation extends SerializableObject {
 
 	/** Alternative constructor for asserted relations. */
 	public Relation(Element source, Element target, RelationType type) {
-		this.source = source;
-		this.target = target;
+		if (type == RelationType.PARTOF) {
+			this.source = target;
+			this.target = source;
+		} else {
+			this.source = source;
+			this.target = target;
+		}
 		this.type = type;
 		this.original = false;
 	}
@@ -113,8 +116,11 @@ public class Relation extends SerializableObject {
 	public String toString() {
 		String rname = name;
 		String ster = "";
-		if (getType() != null)
+		if (getType() != null) {
 			rname = type.toString();
+			if (type == RelationType.PARTOF)
+				return target.getName() + " " + rname + " " + source.getName();
+		}
 		if (stereotype != null)
 			ster = "  &lt&lt" + stereotype + "&gt&gt";
 		return source.getName() + " " + rname + " " + target.getName() + ster;

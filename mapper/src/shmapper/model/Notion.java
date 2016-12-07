@@ -130,41 +130,53 @@ public abstract class Notion extends SerializableObject {
 		}
 	}
 
-	/** Returns if this Notion is (direct or indirect) Part of the given notion. */
-	public boolean isIndirectPartOf(Notion onotion) {
-		//TODO: do recursivelly
+	/** Returns the Whole of this Notion, if exists. */
+	public Notion getWhole() {
+		// considering a unique whole
 		for (Relation relation : relations) {
-			if (relation.getSource().equals(onotion) && relation.getTarget().equals(this) && relation.getType() == RelationType.PARTOF) {
-				return true;
+			if (relation.getType() == RelationType.PARTOF && relation.getTarget().equals(this))
+				return relation.getSource();
+		}
+		return null;
+	}
+
+	/** Returns if THIS Notion is (direct or indirect) Part of the given notion. */
+	public boolean isIndirectPartOf(Notion onotion) {
+		// Is THIS part of Other?
+		// TODO: do recursivelly
+		for (Relation relation : relations) {
+			if (relation.getType() == RelationType.PARTOF) {
+				if (relation.getSource().equals(onotion) && relation.getTarget().equals(this)) {
+					return true;
+				}
 			}
 		}
 		return false;
 	}
 
 	/** Returns if this Notion (directly) Intersects with the given notion. */
-	public boolean intersects(Notion onotion) {
+	public boolean intersectsWith(Notion onotion) {
 		for (Relation relation : relations) {
-			if ((relation.getSource().equals(onotion) && relation.getTarget().equals(this))
-			 || (relation.getSource().equals(this) && relation.getTarget().equals(onotion))
-						&& relation.getType() == RelationType.INTERSECTION) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	/** Returns if this Notion is (directly) the Same as given notion. */
-	public boolean sameAs(Notion onotion) {
-		for (Relation relation : relations) {
-			if ((relation.getSource().equals(onotion) && relation.getTarget().equals(this))
-			 || (relation.getSource().equals(this) && relation.getTarget().equals(onotion))
-						&& relation.getType() == RelationType.SAMEAS) {
-				return true;
+			if (relation.getType() == RelationType.INTERSECTION) {
+				if ((relation.getSource().equals(onotion) && relation.getTarget().equals(this)) || (relation.getSource().equals(this) && relation.getTarget().equals(onotion))) {
+					return true;
+				}
 			}
 		}
 		return false;
 	}
 
+	/** Returns if this Notion is (directly) Equivalent to the given notion. */
+	public boolean isEquivalentTo(Notion onotion) {
+		for (Relation relation : relations) {
+			if (relation.getType() == RelationType.EQUIVALENT) {
+				if ((relation.getSource().equals(onotion) && relation.getTarget().equals(this)) || (relation.getSource().equals(this) && relation.getTarget().equals(onotion))) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
 	@Override
 	public String toString() {

@@ -18,6 +18,7 @@ import shmapper.model.Coverage;
 import shmapper.model.DiagonalMapping;
 import shmapper.model.Element;
 import shmapper.model.HorizontalMapping;
+import shmapper.model.Issue;
 import shmapper.model.Mapping;
 import shmapper.model.Match;
 import shmapper.model.Notion.UFOType;
@@ -272,6 +273,8 @@ public class PhaseSelectServlet extends HttpServlet {
 				}
 			}
 		}
+		
+		identifyIssues(initiative);
 
 		// Calling the results page
 		request.setAttribute("ufotypes", ufotypes);
@@ -281,6 +284,30 @@ public class PhaseSelectServlet extends HttpServlet {
 		request.setAttribute("allhmaps", allhmaps);
 		request.setAttribute("coverageIndex", coverageIndex);
 		request.setAttribute("coverageMatrix", coverageMatrix);
+	}
+	
+	/** Identifies and prints the main initiative issues. */
+	private void identifyIssues(SHInitiative initiative) {
+		List<Mapping> allMappings = new ArrayList<Mapping>();
+		allMappings.addAll(initiative.getVerticalContentMappings());
+		allMappings.addAll(initiative.getDiagonalContentMappings());
+		for (HorizontalMapping hmap : initiative.getHorizontalContentMappings()) {
+			allMappings.add(hmap);
+			allMappings.add(hmap.getMirror());
+		}
+		for (Mapping map : allMappings) {
+			System.out.println("\n# " + map + " identified issues:");
+			for (Issue issue : map.identifyIssues()) {
+				System.out.println(issue);
+			}
+		}
+		System.out.println("-------------------------------------------------------");
+		for (VerticalMapping vmap : initiative.getVerticalContentMappings()) {
+			System.out.println("\n# " + vmap + " identified relational issues:");
+			for (Issue issue : vmap.identifyRelationalIssues()) {
+				System.out.println(issue);
+			}
+		}
 	}
 
 }
