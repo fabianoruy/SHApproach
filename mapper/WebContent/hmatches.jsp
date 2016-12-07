@@ -5,37 +5,34 @@
   <matchestable>
     <table>
       <c:forEach items="${mapping.matches}" var="match" varStatus="loop">
-        <c:if test="${loop.index%2 == 0}">
-          <tr>
-        </c:if>
-        <c:if test="${loop.index%2 == 1}">
-          <tr style="background-color: #F0F0F0">
-        </c:if>
-        <td width="400px"><b>${match.source}</b></td>
-        <td width="180px">${match.coverage.text}</td>
-        <td width="400px"><b>${match.target}</b></td>
-        <c:if test="${match.deduced}">
-          <td title="Deduced Match">D</td>
-        </c:if>
-        <c:if test="${not match.deduced}">
-          <td></td>
-        </c:if>
-        <td>
-          <c:choose>
-            <c:when test="${not empty match.comment}">
-              {<span title="${match.comment}" style="cursor:pointer" onclick="editComment('${match.id}', '${match.comment}')"><i><b>C</b></i></span>}
-            </c:when>
-            <c:when test="${(empty match.comment) && (match.coverage == 'EQUIVALENT' || match.coverage == 'PARTIAL')}">
-              {<span style="cursor:pointer" onclick="editComment('${match.id}', '')"><i>C</i></span>}
-            </c:when>
-            <c:when test="${(empty match.comment) && (match.coverage == 'WIDER' || match.coverage == 'INTERSECTION')}">
-              {<span style="cursor:pointer; color:red" title="add comment!" onclick="editComment('${match.id}', '')"><i>C</i></span>}
-            </c:when>
-          </c:choose>
-        </td>
-        <td><img src="images/favicon-remove.ico" title="Remove Match" width="16px" style="cursor: pointer"
-          onclick="removeMatch('${match.id}')" /></td>
-      </tr>
+        <c:set var="color" value="style='background-color:#F0F0F0'"/>
+        <c:if test="${loop.index%2 == 0}"><c:set var="color" value=""/></c:if>
+        <tr ${color}>
+          <td width="400px" title="${match.source.definition}"><b>${match.source}</b></td>
+          <td width="180px">${match.coverage.text}</td>
+          <c:set var="tdef" value="title='[]'"/>
+          <c:if test="${match['class'].simpleName eq 'SimpleMatch'}">
+            <c:set var="tdef" value="title='${match.target.definition}'"/>
+          </c:if>
+          <td width="400px" ${tdef}><b>${match.target}</b></td>
+          <c:if test="${match.deduced}"><td title="Deduced Match">D</td></c:if>
+          <c:if test="${not match.deduced}"><td></td></c:if>
+          <td>
+            <c:choose>
+              <c:when test="${not empty match.comment}">
+                {<span title="${match.comment}" style="cursor:pointer" onclick="editComment('${match.id}', '${match.comment}')"><i><b>C</b></i></span>}
+              </c:when>
+              <c:when test="${(empty match.comment) && (match.coverage == 'EQUIVALENT' || match.coverage == 'PARTIAL')}">
+                {<span style="cursor:pointer" onclick="editComment('${match.id}', '')"><i>C</i></span>}
+              </c:when>
+              <c:when test="${(empty match.comment) && (match.coverage == 'WIDER' || match.coverage == 'INTERSECTION')}">
+                {<span style="cursor:pointer; color:red" title="add comment!" onclick="editComment('${match.id}', '')"><i>C</i></span>}
+              </c:when>
+            </c:choose>
+          </td>
+          <td><img src="images/favicon-remove.ico" title="Remove Match" width="16px" style="cursor: pointer"
+            onclick="removeMatch('${match.id}')" /></td>
+        </tr>
       </c:forEach>
     </table>
   </matchestable>
@@ -43,37 +40,34 @@
   <mirrormatchestable>
     <table>
       <c:forEach items="${mapping.mirror.matches}" var="match" varStatus="loop">
-        <c:if test="${loop.index%2 == 0}">
-          <tr>
-        </c:if>
-        <c:if test="${loop.index%2 == 1}">
-          <tr style="background-color: #F0F0F0">
-        </c:if>
-        <td width="400px"><b>${match.source}</b></td>
-        <td width="180px">${match.coverage.text}</td>
-        <td width="400px"><b>${match.target}</b></td>
-        <c:if test="${match.deduced}">
-          <td title="Deduced Match">D</td>
-        </c:if>
-        <c:if test="${not match.deduced}">
-          <td></td>
-        </c:if>
-        <td>
-          <c:choose>
-            <c:when test="${not empty match.comment}">
-              {<span title="${match.comment}" style="cursor:pointer" onclick="editComment('${match.id}', '${match.comment}')"><i><b>C</b></i></span>}
-            </c:when>
-            <c:when test="${(empty match.comment) && (match.coverage == 'EQUIVALENT' || match.coverage == 'PARTIAL')}">
-              {<span style="cursor:pointer" onclick="editComment('${match.id}', '')"><i>C</i></span>}
-            </c:when>
-            <c:when test="${(empty match.comment) && (match.coverage == 'WIDER' || match.coverage == 'INTERSECTION')}">
-              {<span style="cursor:pointer; color:red" title="add comment!" onclick="editComment('${match.id}', '')"><i>C</i></span>}
-            </c:when>
-          </c:choose>
-        </td>
-        <td><img src="images/favicon-remove.ico" title="Remove Match" width="16px" style="cursor: pointer"
-          onclick="removeMatch('${match.id}')" /></td>
-      </tr>
+        <c:set var="color" value="style='background-color:#F0F0F0'"/>
+        <c:if test="${loop.index%2 == 0}"><c:set var="color" value=""/></c:if>
+        <tr ${color}>
+          <td width="400px" title="${match.source.definition}"><b>${match.source}</b></td>
+          <td width="180px">${match.coverage.text}</td>
+          <c:set var="tdef" value="title='[]'"/>
+          <c:if test="${match['class'].simpleName eq 'SimpleMatch'}">
+            <c:set var="tdef" value="title='${match.target.definition}'"/>
+          </c:if>
+          <td width="400px" ${tdef}><b>${match.target}</b></td>
+          <c:if test="${match.deduced}"><td title="Deduced Match">D</td></c:if>
+          <c:if test="${not match.deduced}"><td></td></c:if>
+          <td>
+            <c:choose>
+              <c:when test="${not empty match.comment}">
+                {<span title="${match.comment}" style="cursor:pointer" onclick="editComment('${match.id}', '${match.comment}')"><i><b>C</b></i></span>}
+              </c:when>
+              <c:when test="${(empty match.comment) && (match.coverage == 'EQUIVALENT' || match.coverage == 'PARTIAL')}">
+                {<span style="cursor:pointer" onclick="editComment('${match.id}', '')"><i>C</i></span>}
+              </c:when>
+              <c:when test="${(empty match.comment) && (match.coverage == 'WIDER' || match.coverage == 'INTERSECTION')}">
+                {<span style="cursor:pointer; color:red" title="add comment!" onclick="editComment('${match.id}', '')"><i>C</i></span>}
+              </c:when>
+            </c:choose>
+          </td>
+          <td><img src="images/favicon-remove.ico" title="Remove Match" width="16px" style="cursor: pointer"
+            onclick="removeMatch('${match.id}')" /></td>
+        </tr>
       </c:forEach>
     </table>
   </mirrormatchestable>

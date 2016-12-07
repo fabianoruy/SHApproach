@@ -30,8 +30,8 @@ import shmapper.model.VerticalMapping;
 /* Servlet implementation class PhaseSelectServlet */
 @WebServlet("/PhaseSelectServlet")
 public class PhaseSelectServlet extends HttpServlet {
-	private static final long	serialVersionUID	= 1L;
-	ManagerApp					main;
+	private static final long serialVersionUID = 1L;
+	ManagerApp main;
 
 	/* HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response). */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
@@ -70,8 +70,8 @@ public class PhaseSelectServlet extends HttpServlet {
 				response.getWriter().println("Application Finished!\n");
 				response.getWriter().println(initiative.getContentMappings().size() + " Content Mappings were created:");
 				for (Mapping map : initiative.getContentMappings()) {
-					response.getWriter().println(
-							"(" + map.getClass().getSimpleName() + ") " + map.getBase() + " --> " + map.getTarget() + ": " + map.getStatus() + " (" + map.getCoverage() + "%)");
+					response.getWriter().println("(" + map.getClass().getSimpleName() + ") " + map.getBase() + " --> " + map.getTarget() + ": "
+							+ map.getStatus() + " (" + map.getCoverage() + "%)");
 				}
 				// TODO: put the logfile here. Needs to be HTML.
 				request.getSession().invalidate();
@@ -103,13 +103,6 @@ public class PhaseSelectServlet extends HttpServlet {
 			ufotypes[i] = UFOType.values()[i];
 		} // last is null
 
-		///// Matrix of Vertical Matches
-//		Object[][] vmapsMatrix = new Object[vmappings.size()][ufotypes.length]; // VMappings x UFOTypes: matches
-//		for (int i = 0; i < vmappings.size(); i++) {
-//			for (int j = 0; j < ufotypes.length; j++) {
-//				vmapsMatrix[i][j] = vmappings.get(i).getMatchesBySourceUfotype(ufotypes[j]);
-//			}
-//		}
 		///// Matrix of Vertical Matches
 		Object[][][][] vmapsMatrix = new Object[vmappings.size()][ufotypes.length][][]; // HMappings x UFOTypes x Matches x Data
 		Map<Element, Integer> rowspan = new HashMap<Element, Integer>();
@@ -145,7 +138,6 @@ public class PhaseSelectServlet extends HttpServlet {
 				vmapsMatrix[m][t] = matches;
 			}
 		}
-
 
 		///// Matrix of ICM Elements (and related matches)
 		List<Element> elements = initiative.getIntegratedCM().getElements();
@@ -255,25 +247,28 @@ public class PhaseSelectServlet extends HttpServlet {
 		System.out.println("HMappings.size(): " + hmappings.size());
 
 		///// Coverage Index
-		Object[][] coverageIndex = new Object[standards.size()][standards.size() + 2]; // Bases x Targets
+		Object[][][] coverageIndex = new Object[standards.size()][standards.size() + 2][2]; // Bases x Targets x Data: c%, id
 		for (int i = 0; i < standards.size(); i++) {
 			StandardModel base = standards.get(i);
 			VerticalMapping vmap = initiative.getVerticalContentMapping(base);
 			DiagonalMapping dmap = initiative.getDiagonalContentMapping(base);
-			coverageIndex[i][0] = base;
-			coverageIndex[i][1] = vmap.getCoverage() + dmap.getCoverage();
+			coverageIndex[i][0][0] = base;
+			coverageIndex[i][1][0] = vmap.getCoverage() + dmap.getCoverage();
+			coverageIndex[i][1][1] = "vcoverage";
 			for (int j = i; j < standards.size(); j++) {
 				StandardModel target = null;
 				if (i < j) {
 					target = standards.get(j);
 					HorizontalMapping hmap = initiative.getHorizontalContentMapping(base, target);
-					coverageIndex[i][j + 2] = hmap.getCoverage(); // base coverage
-					coverageIndex[j][i + 2] = hmap.getTargetCoverage(); // target coverage
+					coverageIndex[i][j + 2][0] = hmap.getCoverage(); // coverage
+					coverageIndex[i][j + 2][1] = hmap.getId(); // id
+					coverageIndex[j][i + 2][0] = hmap.getMirror().getCoverage(); // target coverage
+					coverageIndex[j][i + 2][1] = hmap.getMirror().getId(); // target id
 					// main.log.printf("(%d,%d): %s X %s\n", i, j, base, target);
 				}
 			}
 		}
-		
+
 		identifyIssues(initiative);
 
 		// Calling the results page
@@ -285,7 +280,7 @@ public class PhaseSelectServlet extends HttpServlet {
 		request.setAttribute("coverageIndex", coverageIndex);
 		request.setAttribute("coverageMatrix", coverageMatrix);
 	}
-	
+
 	/** Identifies and prints the main initiative issues. */
 	private void identifyIssues(SHInitiative initiative) {
 		List<Mapping> allMappings = new ArrayList<Mapping>();
@@ -296,16 +291,16 @@ public class PhaseSelectServlet extends HttpServlet {
 			allMappings.add(hmap.getMirror());
 		}
 		for (Mapping map : allMappings) {
-			System.out.println("\n# " + map + " identified issues:");
+			main.log.println("\n# " + map + " identified issues:");
 			for (Issue issue : map.identifyIssues()) {
-				System.out.println(issue);
+				main.log.println(issue);
 			}
 		}
-		System.out.println("-------------------------------------------------------");
+		main.log.println("-------------------------------------------------------");
 		for (VerticalMapping vmap : initiative.getVerticalContentMappings()) {
-			System.out.println("\n# " + vmap + " identified relational issues:");
+			main.log.println("\n# " + vmap + " identified relational issues:");
 			for (Issue issue : vmap.identifyRelationalIssues()) {
-				System.out.println(issue);
+				main.log.println(issue);
 			}
 		}
 	}

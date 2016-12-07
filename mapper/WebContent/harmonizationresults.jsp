@@ -106,21 +106,20 @@ td,th {
   <table style="text-align: center">
     <tr style="background-color: #e6e6e6">
       <th style="width: 200px">BASE x TARGET</th>
-      <th style="width: 200px"><a href="#vcoverage">SEON View + ICM</a></th>
+      <th style="width: 200px">SEON View + ICM</th>
       <c:forEach items="${coverageIndex}" var="base">
-<%--         <th style="width: 200px"><a href="#hcover${base[0].id}">${base[0]}</a></th> --%>
-        <th style="width: 200px"><a href="#hcoverage">${base[0]}</a></th>
+        <th style="width: 200px">${base[0][0]}</th>
       </c:forEach>
     </tr>
     <c:forEach items="${coverageIndex}" var="base">
       <tr>
-        <th style="background-color: #e6e6e6">${base[0]}</th>
+        <th style="background-color: #e6e6e6">${base[0][0]}</th>
         <c:forEach items="${base}" begin="1" var="cover">
-          <c:if test="${empty cover}">
+          <c:if test="${empty cover[0]}">
             <td>-</td>
           </c:if>
-          <c:if test="${not empty cover}">
-            <td>${cover}%</td>
+          <c:if test="${not empty cover[0]}">
+            <td><a href="#${cover[1]}">${cover[0]}%</a></td>
           </c:if>
         </c:forEach>
       </tr>
@@ -222,7 +221,7 @@ td,th {
   <table>
     <tr style="background-color: #999999">
       <c:forEach items="${initiative.standardCMs}" var="std" varStatus="sloop">
-        <th style="width: 30%; font-size: 120%">${std} (${coverageIndex[sloop.index][1]}%)</th>
+        <th style="width: 30%; font-size: 120%">${std} (${coverageIndex[sloop.index][1][0]}%)</th>
       </c:forEach>
     </tr>
     <c:forEach items="${coverageMatrix}" var="elements" varStatus="loop">

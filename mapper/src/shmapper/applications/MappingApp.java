@@ -7,7 +7,6 @@ import java.util.Map;
 
 import shmapper.model.CompositeMatch;
 import shmapper.model.Concept;
-import shmapper.model.Issue;
 import shmapper.model.Coverage;
 import shmapper.model.DiagonalMapping;
 import shmapper.model.Diagram;

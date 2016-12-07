@@ -40,7 +40,7 @@ public abstract class Mapping extends SerializableObject {
 		this.structural = structural;
 	}
 
-	/** Returns the coverage of the matchs over the Standard's Elements (base). */
+	/** Returns the coverage of the matches over the Standard's Elements (base). */
 	public int getCoverage() {
 		// coverage (%): baseModel.elements.([E] + [P] + [W]/2 + [I]/2) / baseModel.elements;
 		int all = getBase().getElements().size();

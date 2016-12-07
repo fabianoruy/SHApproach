@@ -130,7 +130,7 @@ public class VerticalMappingServlet extends HttpServlet {
 	private JsonObject createJSON(Notion notion) {
 		JsonObject jobj = new JsonObject();
 		jobj.addProperty("name", notion.getName().replace("'", ""));
-		String definition = notion.getDefinition().replaceAll("@Ex.", "Ex.").replaceAll("(\\r\\n|\\n\\r|\\r|\\n)", " ").replace("'", "").replace("\"", "");
+		String definition = notion.getDefinition().replaceAll("@Ex.", "Ex.").replaceAll("(\\r\\n|\\n\\r|\\r|\\n)", " ").replaceAll("'|\"", "");
 		jobj.addProperty("definition", definition);
 		jobj.addProperty("basetype", notion.getBasetypes().toString().replaceAll("\\[|\\]", ""));
 		return jobj;

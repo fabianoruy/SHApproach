@@ -2,12 +2,12 @@ package shmapper.model;
 
 /* Represents an abstract Match between an Element and a Concept/Element. */
 public abstract class Match extends SerializableObject {
-	private static final long	serialVersionUID	= -8851562653124263290L;
-	private Element				source;
-	private Coverage			coverage;
-	private String				comment;
+	private static final long serialVersionUID = -8851562653124263290L;
+	private Element source;
+	private Coverage coverage;
+	private String comment;
 	private boolean deduced;
-	private Mapping				mapping;
+	private Mapping mapping;
 
 	public Match(Element elem, Coverage cover, String comm) {
 		this.source = elem;
@@ -25,17 +25,19 @@ public abstract class Match extends SerializableObject {
 	}
 
 	public String getComment() {
-		return comment;
+		if (comment != null)
+			return comment.replaceAll("'|\"", "");
+		return null;
 	}
 
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
-	
+
 	public boolean isDeduced() {
 		return deduced;
 	}
-	
+
 	public void setDeduced(boolean deduced) {
 		this.deduced = deduced;
 	}
@@ -47,6 +49,5 @@ public abstract class Match extends SerializableObject {
 	public void setMapping(Mapping mapping) {
 		this.mapping = mapping;
 	}
-
 
 }

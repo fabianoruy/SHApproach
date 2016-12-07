@@ -19,16 +19,16 @@ import shmapper.model.User;
 
 /** Main Application, responsible for managing the remaining. */
 public class ManagerApp {
-	private AstahParseApp			parseApp;
-	private StructuralMappingApp	smapApp;
-	private MappingApp				mapApp;
-	private SHInitiative			initiative;
+	private AstahParseApp parseApp;
+	private StructuralMappingApp smapApp;
+	private MappingApp mapApp;
+	private SHInitiative initiative;
 	// private String astahpath;
-	private String					mapperpath;
-	private String					initpath;
-	private String					logpath;
-	public PrintStream				log;
-	private static boolean			readUsers	= false;
+	private String mapperpath;
+	private String initpath;
+	private String logpath;
+	public PrintStream log;
+	private static boolean readUsers = false;
 
 	/** Constructor initializing the main application parameters. */
 	public ManagerApp(User user, String path) {
@@ -136,7 +136,7 @@ public class ManagerApp {
 				this.log = ps;
 			} else if (os.contains("Windows")) {
 				this.log = System.out;
-//				this.log = ps;
+				//this.log = ps;
 			}
 
 			this.log.println("SH Approach log file - " + new java.util.Date());

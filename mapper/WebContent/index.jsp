@@ -48,11 +48,11 @@
         . Import and process Structural Mappings<br/>
         . Do Vertical Mappings (simple and composite matches, disjoint and basetype validations)<br/>
         . Do ICM Mappings<br />
-        + Do Horizontal Mappings<br />
-        + Deduce matches in Horizontal Mappings <br/>
+        . Do Horizontal Mappings<br />
+        . Deduce matches in Horizontal Mappings <br/>
         . Monitor mappings' coverage<br/>
-        + See initiative results<br />
         . Save progress
+        + See initiative results<br />
       </p>
       <p>
         <b>In this version, you can't:</b><br />
@@ -60,7 +60,7 @@
       </p>
       <br/>
       <br/>
-      <p><b> Version 0.5 - 2016-12-01</b></p>
+      <p><b> Version 0.6 - 2016-12-07</b></p>
     </code>
   </div>
 </BODY>
