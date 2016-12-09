@@ -86,9 +86,9 @@ public class AstahParseApp {
 			// Reading the model Packages (Ontologies and Models) and Notions (Concepts and Elements)
 			parseAstahModel(model);
 
-//		} catch (IOException | ClassNotFoundException | LicenseNotFoundException | ProjectNotFoundException | NonCompatibleException
-//				| ProjectLockedException e) {
-		} catch (Exception e) {	
+			//		} catch (IOException | ClassNotFoundException | LicenseNotFoundException | ProjectNotFoundException | NonCompatibleException
+			//				| ProjectLockedException e) {
+		} catch (Exception e) {
 			//e.printStackTrace();
 			throw new ParserException(e.getMessage());
 		} finally {
@@ -202,9 +202,10 @@ public class AstahParseApp {
 
 		// Creates the Integrated Structural Model (ISM) and its (specific) elements.
 		IntegratedModel ism = new IntegratedModel(true, ismpack);
-		ism.setName("Integrated Structural Model");
+		ism.setName("ISM");
+		ism.setDescription("Integrated Structural Model");
 		initiative.addPackage(ism);
-		addResult(" * Integrated SM created.\n\n");
+		addResult(" * ISM created.\n\n");
 
 		// Parse the ISM Diagram and elements
 		parseIMElements(ism, ismpack);
@@ -236,9 +237,10 @@ public class AstahParseApp {
 
 		// Creates the Integrated Content Model (ICM) and its (specific) elements.
 		IntegratedModel icm = new IntegratedModel(false, contentpack);
-		icm.setName("Integrated Content Model");
+		icm.setName("ICM");
+		icm.setDescription("Integrated Content Model");
 		initiative.addPackage(icm);
-		addResult(" * Integrated CM created.\n");
+		addResult(" * ICM created.\n");
 
 		// Parse the ICM Diagram and elements
 		parseIMElements(icm, contentpack);

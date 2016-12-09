@@ -84,11 +84,13 @@ public abstract class Notion extends SerializableObject {
 			// one branch is enough (assuming all braches have the same ufotype)
 			return generalizations.get(0).getIndirectUfotype();
 		}
+		//TODO remove
 		if (this.name.equals("Work Unit")) {
 			this.setUfotype(UFOType.EVENT);
 			return UFOType.EVENT;
 		}
 		System.out.println("#No UFOType# " + this);
+		
 		return null;
 	}
 

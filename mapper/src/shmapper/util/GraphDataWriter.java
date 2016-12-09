@@ -20,10 +20,10 @@ import shmapper.model.VerticalMapping;
 
 /* Responsible for generate the CSV files to plot a Network Graph of concepts and relations. */
 public class GraphDataWriter {
-	private SHInitiative	initiative;
-	private String			path;
-	private List<Notion>	notions;
-	private Set<Relation>	relations;
+	private SHInitiative initiative;
+	private String path;
+	private List<Notion> notions;
+	private Set<Relation> relations;
 
 	public GraphDataWriter(SHInitiative initiative, String path) {
 		this.initiative = initiative;
@@ -133,8 +133,12 @@ public class GraphDataWriter {
 			System.out.println(count + " relations.");
 
 			// Getting the notions' matches info
+			List<SimpleMatch> matches = new ArrayList<SimpleMatch>(map.getSimpleMatches());
+			if (map instanceof DiagonalMapping) {
+				matches.addAll(initiative.getVerticalContentMapping(map.getBase()).getSimpleMatches());
+			}
 			reltype = "Match";
-			for (SimpleMatch match : map.getSimpleMatches()) {
+			for (SimpleMatch match : matches) {
 				Notion source = match.getSource();
 				Notion target = match.getTarget();
 				int spos = notions.indexOf(source);
