@@ -26,6 +26,7 @@ import shmapper.model.SHInitiative;
 import shmapper.model.SimpleMatch;
 import shmapper.model.StandardModel;
 import shmapper.model.VerticalMapping;
+import shmapper.util.GraphDataWriter;
 
 /* Servlet implementation class PhaseSelectServlet */
 @WebServlet("/PhaseSelectServlet")
@@ -73,6 +74,9 @@ public class PhaseSelectServlet extends HttpServlet {
 					response.getWriter().println("(" + map.getClass().getSimpleName() + ") " + map.getBase() + " --> " + map.getTarget() + ": "
 							+ map.getStatus() + " (" + map.getCoverage() + "%)");
 				}
+				// Writing the nodes files
+				new GraphDataWriter(initiative, main.getMapperpath() + main.getInitpath() + "data/").generateDataFiles();
+				
 				// TODO: put the logfile here. Needs to be HTML.
 				request.getSession().invalidate();
 

@@ -9,13 +9,13 @@ import shmapper.model.Relation.RelationType;
 
 /** Represents a Notion (Element or Concept). */
 public abstract class Notion extends SerializableObject {
-	private static final long serialVersionUID = -6465796034657397883L;
-	private String name;
-	private String definition;
-	private String stereotype;
-	private UFOType ufotype;
-	private List<Notion> generalizations;
-	private List<Relation> relations;
+	private static final long	serialVersionUID	= -6465796034657397883L;
+	private String				name;
+	private String				definition;
+	private String				stereotype;
+	private UFOType				ufotype;
+	private List<Notion>		generalizations;
+	private List<Relation>		relations;
 
 	public static enum UFOType {
 		EVENT, OBJECT, AGENT, MOMENT, SITUATION;
@@ -28,8 +28,7 @@ public abstract class Notion extends SerializableObject {
 		this.definition = astahClass.getDefinition();
 		if (astahClass.getStereotypes().length > 0) {
 			stereotype = astahClass.getStereotypes()[0]; // only the first for while
-		} else
-			this.stereotype = "";
+		} else this.stereotype = "";
 		this.generalizations = new ArrayList<Notion>();
 		this.relations = new ArrayList<Relation>();
 	}
@@ -81,9 +80,15 @@ public abstract class Notion extends SerializableObject {
 	public UFOType getIndirectUfotype() {
 		if (ufotype != null)
 			return ufotype;
-		if (!generalizations.isEmpty())
+		if (!generalizations.isEmpty()) {
 			// one branch is enough (assuming all braches have the same ufotype)
 			return generalizations.get(0).getIndirectUfotype();
+		}
+		if (this.name.equals("Work Unit")) {
+			this.setUfotype(UFOType.EVENT);
+			return UFOType.EVENT;
+		}
+		System.out.println("#No UFOType# " + this);
 		return null;
 	}
 
@@ -161,8 +166,7 @@ public abstract class Notion extends SerializableObject {
 	public boolean intersectsWith(Notion onotion) {
 		for (Relation relation : relations) {
 			if (relation.getType() == RelationType.INTERSECTION) {
-				if ((relation.getSource().equals(onotion) && relation.getTarget().equals(this))
-						|| (relation.getSource().equals(this) && relation.getTarget().equals(onotion))) {
+				if ((relation.getSource().equals(onotion) && relation.getTarget().equals(this)) || (relation.getSource().equals(this) && relation.getTarget().equals(onotion))) {
 					return true;
 				}
 			}
@@ -174,8 +178,7 @@ public abstract class Notion extends SerializableObject {
 	public boolean isEquivalentTo(Notion onotion) {
 		for (Relation relation : relations) {
 			if (relation.getType() == RelationType.EQUIVALENT) {
-				if ((relation.getSource().equals(onotion) && relation.getTarget().equals(this))
-						|| (relation.getSource().equals(this) && relation.getTarget().equals(onotion))) {
+				if ((relation.getSource().equals(onotion) && relation.getTarget().equals(this)) || (relation.getSource().equals(this) && relation.getTarget().equals(onotion))) {
 					return true;
 				}
 			}
