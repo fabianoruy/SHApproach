@@ -5,8 +5,8 @@ public class SimpleMatch extends Match {
 	private static final long	serialVersionUID	= 2134549264691121407L;
 	private Notion				target;
 
-	public SimpleMatch(Element source, Notion target, Coverage cover, String comm) {
-		super(source, cover, comm);
+	public SimpleMatch(Element source, Notion target, MatchType type, String comm) {
+		super(source, type, comm);
 		this.target = target;
 	}
 
@@ -15,12 +15,12 @@ public class SimpleMatch extends Match {
 	}
 
 	public String getType() {
-		return "E [" + getCoverage().name().charAt(0) + "] " + target.getClass().getName().charAt(0);
+		return "E [" + getMatchType().name().charAt(0) + "] " + target.getClass().getName().charAt(0);
 	}
 
 	@Override
 	public String toString() {
-		return getSource() + " " + getCoverage().getAbbreviation() + " " + target;
+		return getSource() + " " + getMatchType().getAbbreviation() + " " + target;
 	}
 
 	@Override

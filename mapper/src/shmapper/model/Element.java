@@ -7,7 +7,7 @@ public class Element extends Notion {
 	private static final long	serialVersionUID	= -3365856985890766861L;
 	private Model				model;
 
-	public static enum CoverateSituation {
+	public static enum CoverageSituation {
 		NONCOVERED, PARTIALLY, FULLY, DISCARDED;
 	}
 

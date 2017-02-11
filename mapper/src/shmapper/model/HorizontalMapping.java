@@ -7,8 +7,8 @@ public class HorizontalMapping extends Mapping {
 	private HorizontalMapping	mirror;
 	private boolean				deduced;
 
-	public HorizontalMapping(StandardModel base, StandardModel target) {
-		super(base);
+	public HorizontalMapping(StandardModel base, StandardModel target, SHInitiative initiative) {
+		super(base, initiative);
 		this.target = target;
 		this.deduced = false;
 	}
@@ -26,7 +26,7 @@ public class HorizontalMapping extends Mapping {
 	public HorizontalMapping getMirror() {
 		// TODO: mirror mapping should be created in the begining (together with the Content Mappings)
 		if (mirror == null) {
-			this.mirror = new HorizontalMapping(target, super.getBase());
+			this.mirror = new HorizontalMapping(target, super.getBase(), getInitiative());
 			this.mirror.mirror = this;
 		}
 		// System.out.println("Mirror: "+ mirror);
@@ -37,7 +37,7 @@ public class HorizontalMapping extends Mapping {
 	public boolean isCompositeAble(Element source) {
 		// Checks if the element has a set of only partial coverages ([W] or [I]) possibly leading to a Composite Match.
 		for (Match match : this.getMatchesBySource(source)) {
-			if (match.getCoverage() == Coverage.EQUIVALENT || match.getCoverage() == Coverage.PARTIAL)
+			if (match.getMatchType() == MatchType.EQUIVALENT || match.getMatchType() == MatchType.PARTIAL)
 				return false;
 		}
 		if (this.getSimpleMatchesBySource(source).size() > 1)

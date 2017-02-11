@@ -7,7 +7,7 @@ public class CompositeMatch extends Match {
 	private static final long	serialVersionUID	= -6126451502312008378L;
 	private List<SimpleMatch>	components;
 
-	public CompositeMatch(Element source, Coverage cover, String comm, List<SimpleMatch> matches) {
+	public CompositeMatch(Element source, MatchType cover, String comm, List<SimpleMatch> matches) {
 		super(source, cover, comm);
 		this.components = matches;
 	}
@@ -28,7 +28,7 @@ public class CompositeMatch extends Match {
 
 	@Override
 	public String toString() {
-		return getSource() + " " + getCoverage().getAbbreviation() + " " + getTarget();
+		return getSource() + " " + getMatchType().getAbbreviation() + " " + getTarget();
 	}
 
 	@Override

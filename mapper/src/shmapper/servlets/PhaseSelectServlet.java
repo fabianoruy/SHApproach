@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import shmapper.applications.ManagerApp;
 import shmapper.applications.MappingApp;
 import shmapper.applications.StructuralMappingApp;
-import shmapper.model.Coverage;
+import shmapper.model.MatchType;
 import shmapper.model.DiagonalMapping;
 import shmapper.model.Element;
 import shmapper.model.HorizontalMapping;
@@ -75,7 +75,7 @@ public class PhaseSelectServlet extends HttpServlet {
 							+ map.getStatus() + " (" + map.getCoverage() + "%)");
 				}
 				// Writing the nodes files
-				new GraphDataWriter(initiative, main.getMapperpath() + main.getInitpath() + "data/").generateDataFiles();
+				//new GraphDataWriter(initiative, main.getMapperpath() + main.getInitpath() + "data/").generateDataFiles();
 				
 				// TODO: put the logfile here. Needs to be HTML.
 				request.getSession().invalidate();
@@ -121,7 +121,7 @@ public class PhaseSelectServlet extends HttpServlet {
 						allMatches.addAll(elemMatches);
 						rowspan.put(elem, elemMatches.size());
 					} else {
-						allMatches.add(new SimpleMatch(elem, null, Coverage.NOCOVERAGE, null));
+						allMatches.add(new SimpleMatch(elem, null, MatchType.NORELATION, null));
 						rowspan.put(elem, 1);
 					}
 				}
@@ -155,7 +155,7 @@ public class PhaseSelectServlet extends HttpServlet {
 			dmapsMatrix[i][1] = matches;
 		}
 
-		///// Matrix of Elements Coverage
+		///// Matrix of Elements MatchType
 		Object[][][][] coverageMatrix = new Object[ufotypes.length][][][]; // UFOType x BaseElems x Bases x Data
 		for (int t = 0; t < ufotypes.length; t++) {
 			// Determining the max row number for the type (Elements)
@@ -226,7 +226,7 @@ public class PhaseSelectServlet extends HttpServlet {
 						allMatches.addAll(elemMatches);
 						rowspan.put(elem, elemMatches.size());
 					} else {
-						allMatches.add(new SimpleMatch(elem, null, Coverage.NOCOVERAGE, null));
+						allMatches.add(new SimpleMatch(elem, null, MatchType.NORELATION, null));
 						rowspan.put(elem, 1);
 					}
 				}
@@ -250,7 +250,7 @@ public class PhaseSelectServlet extends HttpServlet {
 
 		System.out.println("HMappings.size(): " + hmappings.size());
 
-		///// Coverage Index
+		///// MatchType Index
 		Object[][][] coverageIndex = new Object[standards.size()][standards.size() + 2][2]; // Bases x Targets x Data: c%, id
 		for (int i = 0; i < standards.size(); i++) {
 			StandardModel base = standards.get(i);

@@ -5,8 +5,8 @@ public class DiagonalMapping extends Mapping {
 	private static final long	serialVersionUID	= -5114513298327757457L;
 	private IntegratedModel		target;
 
-	public DiagonalMapping(StandardModel base, IntegratedModel target) {
-		super(base);
+	public DiagonalMapping(StandardModel base, IntegratedModel target, SHInitiative initiative) {
+		super(base, initiative);
 		this.target = target;
 	}
 

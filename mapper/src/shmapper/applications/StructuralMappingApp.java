@@ -8,7 +8,7 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.io.FileUtils;
 
-import shmapper.model.Coverage;
+import shmapper.model.MatchType;
 import shmapper.model.DiagonalMapping;
 import shmapper.model.Element;
 import shmapper.model.HorizontalMapping;
@@ -54,17 +54,17 @@ public class StructuralMappingApp {
 		List<StandardModel> standards = initiative.getStandardSMs();
 		// One VM for Standard (Std * 1)
 		for (int i = 0; i < standards.size(); i++) {
-			initiative.addStructuralMapping(new VerticalMapping(standards.get(i), seon));
+			initiative.addStructuralMapping(new VerticalMapping(standards.get(i), seon, initiative));
 		}
 		// One HM for each pair of Standards (Std * (Std-1))
 		for (int i = 0; i < standards.size(); i++) {
 			for (int j = i + 1; j < standards.size(); j++) {
-				initiative.addStructuralMapping(new HorizontalMapping(standards.get(i), standards.get(j)));
+				initiative.addStructuralMapping(new HorizontalMapping(standards.get(i), standards.get(j), initiative));
 			}
 		}
 		// One DM for Standard (Std * 1)
 		for (int i = 0; i < standards.size(); i++) {
-			initiative.addStructuralMapping(new DiagonalMapping(standards.get(i), integrated));
+			initiative.addStructuralMapping(new DiagonalMapping(standards.get(i), integrated, initiative));
 		}
 	}
 
@@ -122,7 +122,7 @@ public class StructuralMappingApp {
 					target = ((IntegratedModel) currentMap.getTarget()).getElementByName(tktarg);
 					// System.out.println("Target: " + tktarg);
 				}
-				match = new SimpleMatch(source, target, Coverage.CORRESPONDENCE, null);
+				match = new SimpleMatch(source, target, MatchType.CORRESPONDENCE, null);
 				source.setUfotype(UFOType.valueOf(tkufo));
 				target.setUfotype(UFOType.valueOf(tkufo));
 				currentMap.addMatch(match);
@@ -147,7 +147,7 @@ public class StructuralMappingApp {
 								// And search for the matches with the same target in VM2
 								for (Match tmatch : vmap2.getSimpleMatchesByTarget(((SimpleMatch) bmatch).getTarget())) {
 									// Create a match in HM with source (from MV1 source) and target (from VM2 source).
-									hmap.addMatch(new SimpleMatch(source, tmatch.getSource(), Coverage.CORRESPONDENCE, null));
+									hmap.addMatch(new SimpleMatch(source, tmatch.getSource(), MatchType.CORRESPONDENCE, null));
 								}
 							}
 							break;
@@ -165,7 +165,7 @@ public class StructuralMappingApp {
 							for (Match bmatch : dmap1.getMatches()) {
 								Element source = bmatch.getSource();
 								for (Match tmatch : dmap2.getSimpleMatchesByTarget(((SimpleMatch) bmatch).getTarget())) {
-									hmap.addMatch(new SimpleMatch(source, tmatch.getSource(), Coverage.CORRESPONDENCE, null));
+									hmap.addMatch(new SimpleMatch(source, tmatch.getSource(), MatchType.CORRESPONDENCE, null));
 								}
 							}
 							break;

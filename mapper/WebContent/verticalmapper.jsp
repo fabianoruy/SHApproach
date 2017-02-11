@@ -25,6 +25,7 @@
   padding: 8px;
   min-height: 140px;
 }
+
 </style>
 <script src="js/jquery.min.js"></script>
 <script src="js/jquery-ui.js"></script>
@@ -33,6 +34,7 @@
 <script>
   var stdJson = JSON.parse('${stdJson}');
   var ontoJson = JSON.parse('${ontoJson}');
+  var coverJson;
   //console.log(json);
 
   $(document).ready(function() {
@@ -142,6 +144,46 @@
       }
     });
   }
+  
+  /* Calls (the servlet via ajax) for discarding an element. */
+  function doDiscard(elemId) {
+    $.ajax({
+      type : 'POST',
+      url : 'VerticalMappingServlet',
+      data : {
+        action : 'discardElement',
+        elemId : elemId,
+      },
+      success : function(responseXml) {
+        updateMapping(responseXml);
+  	  	$('#discardbutton').hide();
+      	$('#restorebutton').show();
+      	$('#matchbutton').prop('disabled', true);
+      	$('#elementfield').append("&nbsp<span style='color:red'><b>(Discarded)</b></span>");
+      }
+    });
+  }
+  
+  /* Calls (the servlet via ajax) for restoring an element. */
+  function doRestore(elemId) {
+    $.ajax({
+      type : 'POST',
+      url : 'VerticalMappingServlet',
+      data : {
+        action : 'restoreElement',
+        elemId : elemId,
+      },
+      success : function(responseXml) {
+        updateMapping(responseXml);
+  	  	$('#discardbutton').show();
+      	$('#restorebutton').hide();
+      	$('#matchbutton').prop('disabled', false);
+      	$('#elementfield').text(stdJson[elemId].name);
+      }
+    });
+  }
+
+
 
   /* Updates the page with the current information. */
   function updateMapping(responseXml) {
@@ -173,6 +215,9 @@
     $('#covernumber').text($(responseXml).find('coveragetext').html());
     $('.icon').remove();
     $('#standarddiv').append($(responseXml).find('coverageicons').html());
+    //console.log($(responseXml).find('coveragelist').html());
+    coverJson = JSON.parse($(responseXml).find('coveragelist').html());
+    //console.log(coverJson);
   }
 
   /* Highlight the diagrams' elements/concepts and make then selectable. */
@@ -186,13 +231,24 @@
 
     // Fills the Element field from the map click
     $('#StandardMap').click(function(e) {
-      var name = stdJson[e.target.id].name;
-      var btype = stdJson[e.target.id].basetype;
-      var def = stdJson[e.target.id].definition;
-      $('#elementidfield').val(e.target.id);
+      var id = e.target.id;
+      var name = stdJson[id].name;
+      var btype = stdJson[id].basetype;
+      var def = stdJson[id].definition;
+      $('#elementidfield').val(id);
       $('#elementfield').text(name);
       $('#ebasetypefield').text("(" + btype + ")");
       $('#edefinitionfield').text(def);
+      if(coverJson[id] == 'DISCARDED') {//check if the element is already discarded
+	  	$('#discardbutton').hide();
+      	$('#restorebutton').show();
+      	$('#matchbutton').prop('disabled', true);
+      	$('#elementfield').append("&nbsp<span style='color:red'><b>(Discarded)</b></span>");
+      } else {
+  	  	$('#discardbutton').show();
+      	$('#restorebutton').hide();
+      	$('#matchbutton').prop('disabled', false);
+      }
     });
 
     // Fill the Concept field from the map click
@@ -205,14 +261,36 @@
       $('#cbasetypefield').text("(" + btype + ")");
       $('#cdefinitionfield').text(def);
     });
+    
+    // Clears the concept box when "NORELATION" is selected
+    $('#coveringfield').change(function() {
+      if ($(this).val() == 'NORELATION') {
+        $('#conceptidfield').val('');
+        $('#conceptfield').text('');
+        $('#cbasetypefield').text('');
+        $('#cdefinitionfield').text('');
+      }
+    });
   });
-
-  /* Cleans the Ontology Concept when Not Covered is selected. */
-  function cleanOC() {
-    if ($('#coveringfield :selected').val() == 'NOCOVERAGE') {
-      $('#conceptidfield').val('');
-      $('#conceptfield').val('');
+  
+  /* Discards the selected element from the initiative. */
+  function discardElement() {
+    var id = $('#elementidfield').val();
+    if(coverJson[id] == 'FULLY' || coverJson[id] == 'PARTIALLY') {
+      showMessage("This element already has matches. Remove them if you want to discard it.");
+      return false;
     }
+    showQuestion("Are you sure to discard <b>" + stdJson[id].name + "</b> from the initiative? It will be disregarded from all mappings.", function() {
+      doDiscard(id);
+    });
+  }
+
+  /* Restores the selected element to the initiative. */
+  function restoreElement() {
+    var id = $('#elementidfield').val();
+    showQuestion("Do you want to bring <b>" + stdJson[id].name + "</b> back to the initiative?", function() {
+      doRestore(id);
+    });
   }
 
   /* Check if the fields are well filled. */
@@ -224,12 +302,16 @@
     var comm = $('#commentsfield').val();
 
     // verifying
-    if (elem == '' || (conc == '' && relc != 'NOCOVERAGE')) {
+    if (elem == '' || (conc == '' && relc != 'NORELATION')) {
       showMessage("Select an element from each diagram.");
       return false;
     }
     if (comm == '' && (relc == 'WIDER' || relc == 'INTERSECTION')) {
       showMessage("WIDER and INTERSECTION matches require a comment explaining the non-covered part(s).");
+      return false;
+    }
+    if (comm == '' && (relc == 'SPECIALIZATION')) {
+      showMessage("SPECIALIZATION matches require a comment explaining the specialization restrictions (conditions to be satisfied for specializing).");
       return false;
     }
     return true;
@@ -378,29 +460,38 @@
   <h3>How do the Standard's Elements cover the Ontology's Concepts?</h3>
   <div style="display: inline-block; width: 1000px">
     <div style="width: 410px; float: left">
-      <label> <b>Standard Element</b>
-      </label> <br />
+      <label> <b>Standard Element</b>&nbsp;&nbsp; </label>
+      <img id="discardbutton" src="images/favicon-discarded.ico" title="Discard element (remove it from the initiative scope)" width="16px" style="cursor:pointer" onclick="discardElement()" hidden/>
+      <img id="restorebutton" src="images/favicon-restore.ico" title="Recover element (bring it back to the initiative scope)" width="16px" style="cursor:pointer" onclick="restoreElement()" hidden/>
+      <br />
       <div class="elembox" title="Select an Element from the Standard model">
         <input id="elementidfield" type="hidden" /> <span id="elementfield" style="font-weight: bold">(select an
           element)</span> <br /> <span id="ebasetypefield"></span> <br /> <span id="edefinitionfield" style="font-size: 90%"></span>
       </div>
     </div>
 
-    <div style="width: 140px; float: left; margin: 0 20px 0 20px">
+    <div style="width: 150px; float: left; margin: 0 20px 0 10px">
       <div style="display: inline-block">
-        <b>Coverage (<a href=#nothing onclick="showCoverageInfo()">?</a>)
-        </b> <br /> <select id="coveringfield" title="Which is the coverage of the Element on the Concept?"
-          onchange="cleanOC(this)">
+        <b>Match Type (<a href=#nothing onclick="showCoverageInfo()">?</a>)
+        </b> <br /> <select id="coveringfield" title="Which is the coverage of the Element on the Concept?">
           <option value="EQUIVALENT">[E] EQUIVALENT</option>
+          <option disabled>──────────</option>
           <option value="PARTIAL">[P] PART OF</option>
           <option value="WIDER">[W] WIDER</option>
-          <option value="INTERSECTION">[I] INTERSECTION</option>
-          <!--         <option value="NOCOVERAGE">[-] NO COVERAGE</option> -->
+          <option value="INTERSECTION">[I]  INTERSECTION</option>
+          <option disabled>──────────</option>
+          <option value="SPECIALIZATION">[S] SPECIALIZATION</option>
+          <option value="GENERALIZATION">[G] GENERALIZATION</option>
+          <option disabled>──────────</option>
+          <option value="ACTS">[A] ACTS AS</option>
+          <option value="BYACTED">[B] IS ACTED BY</option>
+          <option disabled>──────────</option>
+          <option value="NORELATION">[-]  NO RELATION</option>
         </select>
       </div>
       <div style="display: inline-block; width: 140px; height: 138px; position: relative">
         <button id="matchbutton"
-          style="width: 80px; height: 30px; font-weight: bold; position: absolute; top: 25px; right: 30px;">MATCH!</button>
+          style="width: 80px; height: 30px; font-weight: bold; position: absolute; top: 25px; right: 25px;">MATCH!</button>
       </div>
     </div>
 
@@ -450,73 +541,100 @@
     style="font-size: 95%; overflow: auto; border: 1px solid gray; width: 500px; height: 500px" hidden></div>
 
   <!-- Information Dialog -->
-  <div id="coverinfo" title="Coverage Relations" hidden>
-    <p>Some symbols are used to establish a relation between a <b>Standard&rsquo;s Element</b> and an <b>Ontology&rsquo;s
-        Concept</b> (or between two Elements from different Standards). It is always a binary relation comparing the <b>notions&rsquo;
-        coverage</b> on the domain, i.e. <em>how the domain portion covered by an Element is related to the domain
-        portion covered by a Concept (or by another Element</em>). <br /> For example, <b>A [P] O</b> (A is PART OF O),
-      means that &ldquo;<em>Element A covers a portion of the domain that <b>is part of</b> the portion covered by
-        Concept O
-    </em>&rdquo;.
+  <div id="coverinfo" title="Types of Match" hidden>
+    <p>Some Match Types are used to establish a relation between a <b>Standard&rsquo;s Element</b> and an <b>Ontology&rsquo;s
+        Concept</b> (or between two Elements from different Standards). It is a binary relation comparing the <b>notions</b>. <br />
+        For example, <b>A [P] O</b> (A is PART OF O), means that &ldquo;<em>Element A represents a notion that <b>is part of</b> the notion
+        represented by Concept O</em>&rdquo;.
     </p>
-    <p>For the matches where an Element remains with non-covered portions (WIDER or INTERSECTION relations), a
-      comment is required for explaining such portions.</p>
     <table border=1 cellpadding=6 style="width: 100%; font-size: 95%">
       <tbody style="border: 1px solid gray">
         <tr style="background-color: #F0F0F0">
-          <th width="140"><b>Coverage</b></th>
+          <th width="140"><b>Type of Match</b></th>
           <th width="60"><b>Symbol</b></th>
           <th width="300"><b>Meaning</b></th>
-          <th width="150"><b>View</b></th>
+          <th width="150"><b>Representation</b></th>
           <th width="250"><b>Example</b></th>
         </tr>
         <tr>
           <td><b>[E] EQUIVALENT</b></td>
           <td><b>A [E] O</b></td>
-          <td>A is Equivalent to O.<br /> Element A covers a portion of the domain that <b>is equivalent to</b>
-            the portion covered by Concept O.
-          </td>
-          <td style="text-align: center"><IMG src="images/Equivalent.png"></td>
+          <td>A is Equivalent to O.<br /> Element A represents a notion that <b>is equivalent to</b> the notion represented by Concept O.</td>
+          <td style="text-align: center"><IMG src="images/Equivalent.png"><br/><IMG src="images/Equivalent2.png"></td>
           <td>(Element) Risk Plan<br /> <b>[E]</b> <br /> (Concept) Plan of Risks
           </td>
         </tr>
         <tr>
           <td><b>[P] PART OF</b></td>
           <td><b>A [P] O</b></td>
-          <td>A is Part of O<br /> Element A covers a portion of the domain that <b>is part of</b> the portion
-            covered by Concept O (O includes A).
-          </td>
-          <td style="text-align: center"><IMG src="images/Partof.png"></td>
+          <td>A is Part of O<br /> Element A represents a notion that <b>is part of</b> the notion represented by Concept O.<br/>(O includes A)</td>
+          <td style="text-align: center"><IMG src="images/Partof.png"><br/><IMG src="images/Partof2.png"></td>
           <td>(Element) Risk Plan<br /> <b>[P]</b> <br /> (Concept) Project Plan
           </td>
         </tr>
         <tr>
           <td><b>[W] WIDER</b></td>
           <td><b>A [W] O</b></td>
-          <td>A is Wider than O.<br /> Element A covers a portion of the domain that <b>is wider than</b> the
-            portion covered by Concept O (A includes O).
-          </td>
-          <td style="text-align: center"><IMG src="images/Wider.png"></td>
-          <td>(Element) Risk Plan<br /> <b>[W]</b> <br /> (Concept) Mitigation Plan<br /> <br /> <b>{contingency
-              actions not covered}</b>
+          <td>A is Wider than O.<br /> Element A represents a notion that <b>is wider than</b> the notion represented by Concept O.<br/>(A includes O)</td>
+          <td style="text-align: center"><IMG src="images/Wider.png"><br/><IMG src="images/Wider2.png"></td>
+          <td>(Element) Risk Plan<br /> <b>[W]</b> <br /> (Concept) Mitigation Plan<br /> <br /> <b>{contingency actions not covered}</b>
           </td>
         </tr>
         <tr>
           <td><b>[I] INTERSECTION</b></td>
           <td><b>A [I] O</b></td>
-          <td>A has Intersection with O.<br /> Element A covers a portion of the domain that <b>has
-              intersection with</b> the portion covered by Concept O.
-          </td>
-          <td style="text-align: center"><IMG src="images/Intersection.png"></td>
-          <td>(Element) Risk Plan<br /> <b>[I]</b> <br /> (Concept) Internal Project Plan<br /> <br /> <b>{external
-              risks not covered}</b>
+          <td>A has Intersection with O.<br /> Element A represents a notion that <b>has intersection with</b> the notion represented by Concept O.<br/> (A and O include P)</td>
+          <td style="text-align: center"><IMG src="images/Intersection.png"><br/><IMG src="images/Intersection2.png"></td>
+          <td>(Element) Requirements Verification and Validation<br /> <b>[I]</b> <br /> (Concept) Requirements Validation and Agreement<br /> <br /> <b>{verification not covered}</b>
           </td>
         </tr>
+        <tr>
+          <td><b>[S] SPECIALIZATION</b></td>
+          <td><b>A [S] O</b></td>
+          <td>A is a Specialization of O.<br /> Element A represents a notion that <b>specializes</b> the notion represented by Concept O.</td>
+          <td style="text-align: center"><IMG src="images/Specialization.png"></td>
+          <td>(Element) Software Designer <br /> <b>[S]</b> <br /> (Concept) Developer
+          </td>
+        </tr>
+        <tr>
+          <td><b>[G] GENERALIZATION</b></td>
+          <td><b>A [G] O</b></td>
+          <td>A is a Generalization of O.<br /> Element A represents a notion that <b>generalizes</b> the notion represented by Concept O.<br/>(O specializes A)</td>
+          <td style="text-align: center"><IMG src="images/Generalization.png"></td>
+          <td>(Element) Requirement <br /> <b>[G]</b> <br /> (Concept) Functional Requirement
+          </td>
+        </tr>
+        <tr>
+          <td><b>[A] ACTS</b></td>
+          <td><b>A [A] O</b></td>
+          <td>A Acts as O.<br /> Element A represents a notion that can <b>act as</b> the <i>role</i> represented by Concept O.<br/></td>
+          <td style="text-align: center"><IMG src="images/Acts.png"></td>
+          <td>(Element) System Analyst <br /> <b>[A]</b> <br /> (Concept) Requirements Reviewer <br/> <small><i><br/>(a System Analyst can play the role of Requirements Reviewer)</i></small>
+          </td>
+        </tr>
+        <tr>
+          <td><b>[B] IS ACTED BY</b></td>
+          <td><b>A [B] O</b></td>
+          <td>A is acted By O.<br /> Element A represents the notion of a <i>role</i> that can be <b>acted by</b> the notion represented by Concept O.<br/>(O acts as A)</td>
+          <td style="text-align: center"><IMG src="images/ByActed.png"></td>
+          <td>(Element) Requirements Agreement <br /> <b>[B]</b> <br /> (Concept) Client E-mail <br/> <small><i><br/>(a Client E-mail can play the role of Requirements Agreement)</i></small>
+          </td>
+        </tr>
+        <tr>
+          <td><b>[-] </b></td>
+          <td><b>A [-]</b></td>
+          <td>A has no relation.<br /> Element A represents a notion that <b>has no corresponding relation</b> with any notion in the target model.<br/></td>
+          <td style="text-align: center">-</td>
+          <td>(Element) Sequence Diagram <br /> <b>[-]</b> <br /> <small><i><br/>(there is no corresponding concept in the ontology)</i></small>
+          </td>
+        </tr>
+        
       </tbody>
     </table>
-    <p>An Element that is EQUIVALENT or PART OF any Concept is considered <b>fully covered</b> <img
-      src="images/favicon-full.ico">. <br /> An Element that is WIDER than or have INTERSECTION with any Concept
-      is considered <b>partially covered</b> <img src="images/favicon-part.ico">.
+    <p>Elements with no matches are considered <b>non covered</b>.
+    <br />Elements with Equivalent or Part of relations are considered <b>fully covered</b> <img width="16" src="images/favicon-full.ico">
+    <br />Element with other matches are considered <b>partially covered</b> <img width="16" src="images/favicon-part.ico">
+    <br />Elements said out of scope are considered <b>discarded</b> <img width="16" src="images/favicon-discarded.ico">
     </p>
   </div>
 

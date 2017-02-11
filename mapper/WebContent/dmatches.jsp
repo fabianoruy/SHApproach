@@ -66,7 +66,7 @@
       <c:if test="${loop.index%2 == 0}"><c:set var="color" value=""/></c:if>
       <tr ${color}>
         <td style="width: 250px" title="${match.source.definition}">${match.source.model}:&nbsp;${match.source}</td>
-        <td style="text-align: center">${match.coverage.abbreviation}</td>
+        <td style="text-align: center">${match.matchType.abbreviation}</td>
         <c:if test="${loop.index == 0}">
           <td style="width: 150px" rowspan="${rows}"><b>${elem}</b> <br />(${elem.basetypes[0]})</td>
           <td style="width: 400px" rowspan="${rows}" style="font-size: 90%">

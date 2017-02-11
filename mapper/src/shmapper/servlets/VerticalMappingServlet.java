@@ -1,6 +1,7 @@
 package shmapper.servlets;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -14,6 +15,8 @@ import com.google.gson.JsonObject;
 import shmapper.applications.ManagerApp;
 import shmapper.applications.MappingApp;
 import shmapper.model.Diagram;
+import shmapper.model.Element;
+import shmapper.model.Element.CoverageSituation;
 import shmapper.model.Notion;
 import shmapper.model.NotionPosition;
 import shmapper.model.SeonView;
@@ -25,10 +28,11 @@ import shmapper.model.VerticalMapping;
 public class VerticalMappingServlet extends HttpServlet {
 	private static final long	serialVersionUID	= 1L;
 	private MappingApp			mapper;
+	private ManagerApp			main;
 
 	/* HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response). */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
-		ManagerApp main = null;
+		main = null;
 		try {
 			// Accessing the main app from the Session
 			main = (ManagerApp) request.getSession().getAttribute("main");
@@ -68,10 +72,10 @@ public class VerticalMappingServlet extends HttpServlet {
 				// Creating a new Simple Match
 				String elemId = request.getParameter("elem");
 				String concId = request.getParameter("conc");
-				String cover = request.getParameter("cover");
+				String type = request.getParameter("cover");
 				String comm = request.getParameter("comm");
 				boolean force = Boolean.valueOf(request.getParameter("force"));
-				mapper.createSimpleMatch(elemId, concId, cover, comm, force);
+				mapper.createSimpleMatch(elemId, concId, type, comm, force);
 
 				updatePage(request, response);
 
@@ -95,11 +99,25 @@ public class VerticalMappingServlet extends HttpServlet {
 				String matchId = request.getParameter("matchId");
 				String comment = request.getParameter("comment");
 				mapper.changeMatchComment(matchId, comment);
-				System.out.println("Change comment: " + comment);
+
+				updatePage(request, response);
+
+			} else if (request.getParameter("action").equals("discardElement")) {
+				// Discarding an element from the initiative scope.
+				String elemId = request.getParameter("elemId");
+				mapper.discardElement(elemId);
+
+				updatePage(request, response);
+
+			} else if (request.getParameter("action").equals("restoreElement")) {
+				// Restoring an element to the initiative scope.
+				String elemId = request.getParameter("elemId");
+				mapper.restoreElement(elemId);
 
 				updatePage(request, response);
 
 			}
+
 		} catch (Exception e) {
 			e.printStackTrace(main.log);
 		}
@@ -109,10 +127,14 @@ public class VerticalMappingServlet extends HttpServlet {
 	private void updatePage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// Setting attributes and calling the page
 		if (mapper != null) {
+			Map<Element, CoverageSituation> coverages = mapper.getCurrentMapping().getElementsSituations();
+			System.out.println("Coverages: "+ coverages);
 			request.setAttribute("message", mapper.getMessage());
 			request.setAttribute("question", mapper.getQuestion());
 			request.setAttribute("qtype", mapper.getQuestionType());
 			request.setAttribute("mapping", mapper.getCurrentMapping());
+			//request.setAttribute("coveragemap", coverages);
+			request.setAttribute("coveragelist", createJSON(coverages));
 			request.getRequestDispatcher("vmatches.jsp").forward(request, response);
 		}
 	}
@@ -133,6 +155,15 @@ public class VerticalMappingServlet extends HttpServlet {
 		String definition = notion.getDefinition().replaceAll("@Ex.", "Ex.").replaceAll("(\\r\\n|\\n\\r|\\r|\\n)", " ").replaceAll("'|\"", "");
 		jobj.addProperty("definition", definition);
 		jobj.addProperty("basetype", notion.getBasetypes().toString().replaceAll("\\[|\\]", ""));
+		return jobj;
+	}
+
+	/* Creates the JSON for the elements' situations. */
+	private JsonElement createJSON(Map<Element, Element.CoverageSituation> situations) {
+		JsonObject jobj = new JsonObject();
+		for (Element elem : situations.keySet()) {
+			jobj.addProperty(elem.getId(), situations.get(elem).name());
+		}
 		return jobj;
 	}
 

@@ -9,7 +9,7 @@
         <c:if test="${loop.index%2 == 0}"><c:set var="color" value=""/></c:if>
         <tr ${color}>
           <td width="400px" title="${match.source.definition}"><b>${match.source}</b></td>
-          <td width="180px">${match.coverage.text}</td>
+          <td width="180px">${match.matchType.text}</td>
           <c:set var="tdef" value="title='[]'"/>
           <c:if test="${match['class'].simpleName eq 'SimpleMatch'}">
             <c:set var="tdef" value="title='${match.target.definition}'"/>
@@ -68,6 +68,12 @@
           <img class="icon" src="images/favicon-part.ico" style="top:${npos.ypos - 12+1}px; left:${xpos}px; position:absolute"></img>
         </c:if>
       </c:forEach>
+      <c:forEach items="${mapping.discardedElements}" var="elem">
+        <c:if test="${npos.notion eq elem}">
+          <c:set var="xpos" value="${npos.xpos + npos.width - 24 + 12+1}"/>
+          <img class="icon" src="images/favicon-discarded.ico" style="top:${npos.ypos - 12+1}px; left:${xpos}px; position:absolute"></img>
+        </c:if>
+      </c:forEach>
     </c:forEach>
   </coverageicons>
   
@@ -77,5 +83,7 @@
   <messagetext>${message}</messagetext>
   <questiontext>${question}</questiontext>
   <questiontype>${qtype}</questiontype>
+  
+  <coveragelist>${coveragelist}</coveragelist>
   
 </data>

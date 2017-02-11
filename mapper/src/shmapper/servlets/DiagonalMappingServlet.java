@@ -150,7 +150,7 @@ public class DiagonalMappingServlet extends HttpServlet {
 			}
 			// System.out.println("");
 
-			// Coverage numbers
+			// MatchType numbers
 			Object[][] coverages = new Object[dmappings.size()][3];
 			for (int i = 0; i < coverages.length; i++) {
 				StandardModel std = dmappings.get(i).getBase();

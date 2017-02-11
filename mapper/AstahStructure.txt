@@ -133,19 +133,50 @@ Dec.04
 + Consistency check (no presentation)
 
 Dec.05
-- Composite Match improvements
-- Uncovered Justifications
-- Consistency check presentation
-- Asserted Relations results
++ Results per Standard
+----------------------------------------------------
+
+Fev.10
+- New MatchTypes [S,G,A,B,-]
+- Notions discard (out of scope)
+
+Fev.11
+- Update validations and dedutions for new types
+
+- Composite Match at the end
+- Composite Match in DM (VM+DM)
+- DM knows VM
+
+- Coverage Analysis (justifications)
+- Mapping analysis
+
+- Information texts update
+- Approach in the tool
+
+
+
+
 
 ----------------------------------------------------
 Future
-- Results per Standard
+- Composite Matches between VM and DM
+- Composite Matches at the end
+- Coverage Analysis (for mapping)
+  . Coverage Justification (uncovered)
+- Consistency check presentation
+- Asserted Relations results
+- New Relations ([S,G,A,B,-])
+  . All the calculation involved
+
+- ICM elements relations
+- Structural Mapping edition
+- Approach information
+- New Structure for Astah file (package-diagram-classes)
+
+- Astah file edition (new elements/relations, matches as dependencies)
 - Ontology index
-- Justification for uncovered 
 - Match validation (T2)
 - UI improvements
-- Consistency check
 ----------------------------------------------------
 
 

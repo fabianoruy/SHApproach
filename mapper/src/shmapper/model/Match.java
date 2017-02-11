@@ -4,14 +4,14 @@ package shmapper.model;
 public abstract class Match extends SerializableObject {
 	private static final long serialVersionUID = -8851562653124263290L;
 	private Element source;
-	private Coverage coverage;
+	private MatchType type;
 	private String comment;
 	private boolean deduced;
 	private Mapping mapping;
 
-	public Match(Element elem, Coverage cover, String comm) {
+	public Match(Element elem, MatchType type, String comm) {
 		this.source = elem;
-		this.coverage = cover;
+		this.type = type;
 		this.comment = comm;
 		this.deduced = false;
 	}
@@ -20,8 +20,8 @@ public abstract class Match extends SerializableObject {
 		return source;
 	}
 
-	public Coverage getCoverage() {
-		return coverage;
+	public MatchType getMatchType() {
+		return type;
 	}
 
 	public String getComment() {

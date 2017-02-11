@@ -154,7 +154,7 @@ public class ManagerApp {
 
 	//////////////////////////// STATIC ////////////////////////////
 	public static void manageUsers(String path) {
-		// createUsers(path); only once!!
+		//createUsers(path); //only once!!
 		if (!readUsers) {
 			recoverUsers(path);
 		}

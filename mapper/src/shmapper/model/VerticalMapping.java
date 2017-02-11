@@ -13,8 +13,8 @@ public class VerticalMapping extends Mapping {
 	private static final long	serialVersionUID	= -7873764022001248669L;
 	private SeonView			target;
 
-	public VerticalMapping(StandardModel base, SeonView target) {
-		super(base);
+	public VerticalMapping(StandardModel base, SeonView target, SHInitiative initiative) {
+		super(base, initiative);
 		this.target = target;
 	}
 
@@ -63,8 +63,8 @@ public class VerticalMapping extends Mapping {
 	private RelationalIssue getRelationalIssue(Match match1, Match match2, Relation relation) {
 		// Only for PART OF relations (could use other in the future)
 		// relation.source == match1.target; relation.target == match2.target
-		Coverage E = Coverage.EQUIVALENT, P = Coverage.PARTIAL, W = Coverage.WIDER;
-		Coverage cover1 = match1.getCoverage(), cover2 = match2.getCoverage();
+		MatchType E = MatchType.EQUIVALENT, P = MatchType.PARTIAL, W = MatchType.WIDER;
+		MatchType cover1 = match1.getMatchType(), cover2 = match2.getMatchType();
 		// EE, EP, WE, WP: Part of relational issue
 		if ((cover1 == E || cover1 == W) && (cover2 == E || cover2 == P)) {
 			if (!match2.getSource().isIndirectPartOf(match1.getSource())) {

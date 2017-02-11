@@ -12,23 +12,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import shmapper.model.Element.CoverateSituation;
+import shmapper.model.Element.CoverageSituation;
 
 /* Represents a Standard Harmonization Initiative. */
 public class SHInitiative extends SerializableObject {
-	private static final long	serialVersionUID	= 6817595375134398343L;
-	private String				domain;
-	private String				purpose;
-	private String				scope;
-	private String				people;
-	private String				description;
-	private String				astahPath;
-	private InitiativeStatus	status;
-	private List<Package>		packages;
-	private List<Mapping>		structmaps;
-	private List<Mapping>		contentmaps;
-	private Map<String, Notion>	notionMap;
-	private transient String	datafile;
+	private static final long		serialVersionUID	= 6817595375134398343L;
+	private String					domain;
+	private String					purpose;
+	private String					scope;
+	private String					people;
+	private String					description;
+	private String					astahPath;
+	private InitiativeStatus		status;
+	private List<Package>			packages;
+	private List<Mapping>			structmaps;
+	private List<Mapping>			contentmaps;
+	private Map<String, Notion>		notionMap;
+	private Map<String, Element>	discardedMap;
+	private transient String		datafile;
 
 	public static enum InitiativeStatus {
 		INITIATED, PARSED, STRUCTURED, CONTENTED, FINISHED, CREATED
@@ -40,6 +41,7 @@ public class SHInitiative extends SerializableObject {
 		this.structmaps = new ArrayList<Mapping>();
 		this.contentmaps = new ArrayList<Mapping>();
 		this.notionMap = new HashMap<String, Notion>();
+		this.discardedMap = new HashMap<String, Element>();
 		this.status = InitiativeStatus.INITIATED;
 	}
 
@@ -50,6 +52,7 @@ public class SHInitiative extends SerializableObject {
 		this.structmaps = new ArrayList<Mapping>();
 		this.contentmaps = new ArrayList<Mapping>();
 		this.notionMap = new HashMap<String, Notion>();
+		this.discardedMap = new HashMap<String, Element>();
 		this.status = InitiativeStatus.INITIATED;
 	}
 
@@ -62,17 +65,17 @@ public class SHInitiative extends SerializableObject {
 
 		// One VM for Standard (Std * 1)
 		for (int i = 0; i < standards.size(); i++) {
-			contentmaps.add(new VerticalMapping(standards.get(i), seon));
+			contentmaps.add(new VerticalMapping(standards.get(i), seon, this));
 		}
 		// One HM for each pair of Standards (Std * (Std-1))
 		for (int i = 0; i < standards.size(); i++) {
 			for (int j = i + 1; j < standards.size(); j++) {
-				contentmaps.add(new HorizontalMapping(standards.get(i), standards.get(j)));
+				contentmaps.add(new HorizontalMapping(standards.get(i), standards.get(j), this));
 			}
 		}
 		// One DM for Standard (Std * 1)
 		for (int i = 0; i < standards.size(); i++) {
-			contentmaps.add(new DiagonalMapping(standards.get(i), integrated));
+			contentmaps.add(new DiagonalMapping(standards.get(i), integrated, this));
 		}
 	}
 
@@ -145,7 +148,7 @@ public class SHInitiative extends SerializableObject {
 	}
 
 	/* Returns the Current Coverage Situation of an Element in the context of the Initiative. */
-	public CoverateSituation getCoverageSituation(Element elem) {
+	public CoverageSituation getCoverageSituation(Element elem) {
 		Model model = elem.getModel();
 		VerticalMapping vmapping = null;
 		DiagonalMapping dmapping = null;
@@ -160,8 +163,8 @@ public class SHInitiative extends SerializableObject {
 			}
 		}
 		// Checking the situation on each Mapping.
-		CoverateSituation situation = dmapping.getCoverageSituation(elem);
-		if (situation == CoverateSituation.NONCOVERED)
+		CoverageSituation situation = dmapping.getCoverageSituation(elem);
+		if (situation == CoverageSituation.NONCOVERED)
 			situation = vmapping.getCoverageSituation(elem);
 		return situation;
 	}
@@ -355,6 +358,26 @@ public class SHInitiative extends SerializableObject {
 		this.notionMap.remove(notion.getId());
 	}
 
+	/** Returns the list of discared elements. */
+	public List<Element> getDiscardedElements() {
+		return new ArrayList<Element>(discardedMap.values());
+	}
+
+	/** Discards an element from the initiative scope. It is not removed, only disregarded. */
+	public void discardElement(Element elem) {
+		this.discardedMap.put(elem.getId(), elem);
+	}
+
+	/** Restores an element to the initiative scope. */
+	public void restoreElement(Element elem) {
+		this.discardedMap.remove(elem.getId());
+	}
+
+	/** Verifies if an element was discarded. */
+	public boolean isDiscarded(Element elem) {
+		return this.discardedMap.containsKey(elem.getId());
+	}
+
 	/* Returns a Package by id. */
 	public Package getPackageById(String id) {
 		for (Package pack : packages) {
@@ -424,6 +447,7 @@ public class SHInitiative extends SerializableObject {
 
 	/* Saves this initiative. */
 	public void saveInitiative() throws IOException {
+		//this.discardedMap = new HashMap<String, Element>();
 		new File(datafile).getParentFile().mkdirs();
 		FileOutputStream fileOut = new FileOutputStream(datafile);
 		ObjectOutputStream out = new ObjectOutputStream(fileOut);

@@ -9,7 +9,7 @@
         <c:if test="${loop.index%2 == 0}"><c:set var="color" value=""/></c:if>
         <tr ${color}>
           <td width="400px" title="${match.source.definition}"><b>${match.source}</b></td>
-          <td width="180px">${match.coverage.text}</td>
+          <td width="180px">${match.matchType.text}</td>
           <c:set var="tdef" value="title='[]'"/>
           <c:if test="${match['class'].simpleName eq 'SimpleMatch'}">
             <c:set var="tdef" value="title='${match.target.definition}'"/>
@@ -22,10 +22,10 @@
               <c:when test="${not empty match.comment}">
                 {<span title="${match.comment}" style="cursor:pointer" onclick="editComment('${match.id}', '${match.comment}')"><i><b>C</b></i></span>}
               </c:when>
-              <c:when test="${(empty match.comment) && (match.coverage == 'EQUIVALENT' || match.coverage == 'PARTIAL')}">
+              <c:when test="${(empty match.comment) && (match.matchType == 'EQUIVALENT' || match.matchType == 'PARTIAL')}">
                 {<span style="cursor:pointer" onclick="editComment('${match.id}', '')"><i>C</i></span>}
               </c:when>
-              <c:when test="${(empty match.comment) && (match.coverage == 'WIDER' || match.coverage == 'INTERSECTION')}">
+              <c:when test="${(empty match.comment) && (match.matchType == 'WIDER' || match.matchType == 'INTERSECTION')}">
                 {<span style="cursor:pointer; color:red" title="add comment!" onclick="editComment('${match.id}', '')"><i>C</i></span>}
               </c:when>
             </c:choose>
@@ -44,7 +44,7 @@
         <c:if test="${loop.index%2 == 0}"><c:set var="color" value=""/></c:if>
         <tr ${color}>
           <td width="400px" title="${match.source.definition}"><b>${match.source}</b></td>
-          <td width="180px">${match.coverage.text}</td>
+          <td width="180px">${match.matchType.text}</td>
           <c:set var="tdef" value="title='[]'"/>
           <c:if test="${match['class'].simpleName eq 'SimpleMatch'}">
             <c:set var="tdef" value="title='${match.target.definition}'"/>
@@ -57,10 +57,10 @@
               <c:when test="${not empty match.comment}">
                 {<span title="${match.comment}" style="cursor:pointer" onclick="editComment('${match.id}', '${match.comment}')"><i><b>C</b></i></span>}
               </c:when>
-              <c:when test="${(empty match.comment) && (match.coverage == 'EQUIVALENT' || match.coverage == 'PARTIAL')}">
+              <c:when test="${(empty match.comment) && (match.matchType == 'EQUIVALENT' || match.matchType == 'PARTIAL')}">
                 {<span style="cursor:pointer" onclick="editComment('${match.id}', '')"><i>C</i></span>}
               </c:when>
-              <c:when test="${(empty match.comment) && (match.coverage == 'WIDER' || match.coverage == 'INTERSECTION')}">
+              <c:when test="${(empty match.comment) && (match.matchType == 'WIDER' || match.matchType == 'INTERSECTION')}">
                 {<span style="cursor:pointer; color:red" title="add comment!" onclick="editComment('${match.id}', '')"><i>C</i></span>}
               </c:when>
             </c:choose>

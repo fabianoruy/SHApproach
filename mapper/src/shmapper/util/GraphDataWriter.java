@@ -147,7 +147,7 @@ public class GraphDataWriter {
 					cid = String.format("%03d", id);
 					sid = String.format("%03d", spos + 1);
 					tid = String.format("%03d", tpos + 1);
-					label = match.getCoverage().getAbbreviation();
+					label = match.getMatchType().getAbbreviation();
 					System.out.println(sid + ";" + tid + ";" + label + ";" + reltype + ";" + cid + ";" + type);
 					writer.println(sid + ";" + tid + ";" + label + ";" + reltype + ";" + cid + ";" + type);
 					id++;
