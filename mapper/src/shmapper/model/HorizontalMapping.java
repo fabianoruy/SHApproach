@@ -1,5 +1,8 @@
 package shmapper.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /* Represents a Horizontal Mapping between two Models. */
 public class HorizontalMapping extends Mapping {
 	private static final long	serialVersionUID	= -1747666812598375016L;
@@ -36,13 +39,12 @@ public class HorizontalMapping extends Mapping {
 	/** Checks if a given partially covered element is able to create a composite match. */
 	public boolean isCompositeAble(Element source) {
 		// Checks if the element has a set of only partial coverages ([W] or [I]) possibly leading to a Composite Match.
-		for (Match match : this.getMatchesBySource(source)) {
-			if (match.getMatchType() == MatchType.EQUIVALENT || match.getMatchType() == MatchType.PARTIAL)
-				return false;
+		List<SimpleMatch> smatches = new ArrayList<>();
+		for (SimpleMatch match : getSimpleMatchesBySource(source)) {
+			if(match.getMatchType() == MatchType.WIDER || match.getMatchType() == MatchType.INTERSECTION)
+				smatches.add(match);
 		}
-		if (this.getSimpleMatchesBySource(source).size() > 1)
-			return true;
-		return false;
+		return (smatches.size() >= 2);
 	}
 
 	public boolean isDeduced() {

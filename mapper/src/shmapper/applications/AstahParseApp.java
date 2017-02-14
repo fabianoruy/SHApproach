@@ -462,6 +462,7 @@ public class AstahParseApp {
 			command += " -image cl"; // selecting only Class diagrams
 			command += " -f " + astahFile; // defining input astah file
 			command += " -o " + targetPath; // defining output directory
+			//command += " -t " + "svg"; // defining output type
 			main.log.println("$ " + command);
 			main.log.flush();
 

@@ -23,6 +23,25 @@ public class VerticalMapping extends Mapping {
 		return target;
 	}
 
+	/** Checks if a given partially covered element is able to create a composite match. */
+	public boolean isCompositeAble(Element source) {
+		return (getCMatchComponents(source).size() >= 2);
+	}
+	
+	/** Returns the possible components ([W] and [I]) to create a composite match with the given source. */
+	public List<SimpleMatch> getCMatchComponents(Element source) {
+		// Selects only the partial coverages ([W] or [I]), in VM + DM, leading to a Composite Match.
+		List<SimpleMatch> smatches = new ArrayList<>();
+		List<SimpleMatch> allsmatches = getSimpleMatchesBySource(source);
+		allsmatches.addAll(getInitiative().getDiagonalContentMapping((StandardModel) source.getModel()).getSimpleMatchesBySource(source));
+		for (SimpleMatch match : allsmatches) {
+			if (match.getMatchType() == MatchType.WIDER || match.getMatchType() == MatchType.INTERSECTION)
+				smatches.add(match);
+		}
+		return smatches;
+	}
+	
+
 	/** Identifies and returns the Relational Issues related only to this mapping (only for Vertical). */
 	public List<RelationalIssue> identifyRelationalIssues() {
 		List<RelationalIssue> issues = new ArrayList<RelationalIssue>();

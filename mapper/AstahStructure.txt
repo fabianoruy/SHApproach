@@ -135,20 +135,21 @@ Dec.04
 Dec.05
 + Results per Standard
 ----------------------------------------------------
+----------------------------------------------------
 
 Fev.10
-- New MatchTypes [S,G,A,B,-]
-- Notions discard (out of scope)
++ New MatchTypes [S,G,A,B,-]
++ Notions discard (out of scope)
 
-Fev.11
-- Update validations and dedutions for new types
+Fev.13
++ Composite Match at the end (VM)
++ Composite Match in DM (VM+DM)
 
-- Composite Match at the end
-- Composite Match in DM (VM+DM)
-- DM knows VM
-
-- Coverage Analysis (justifications)
+Fev.14
 - Mapping analysis
+- Coverage Analysis (justifications)
+
+- Update validations and dedutions for new types
 
 - Information texts update
 - Approach in the tool

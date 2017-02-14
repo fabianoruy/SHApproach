@@ -79,6 +79,13 @@ public class VerticalMappingServlet extends HttpServlet {
 
 				updatePage(request, response);
 
+			} else if (request.getParameter("action").equals("checkCompositeMatch")) {
+				// Checking for a new Composite Match.
+				String sourceId = request.getParameter("source");
+				mapper.checkCompositeMatch(sourceId);
+
+				updatePage(request, response);
+
 			} else if (request.getParameter("action").equals("compositeMatch")) {
 				// Creating a new Composite Match.
 				String elemId = request.getParameter("elem");

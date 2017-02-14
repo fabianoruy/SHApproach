@@ -35,15 +35,8 @@
   var stdJson = JSON.parse('${stdJson}');
   var ontoJson = JSON.parse('${ontoJson}');
   var coverJson;
-  //console.log(json);
-
-  $(document).ready(function() {
-    $('#matchbutton').click(function() {
-      if (checkFields()) {
-        doMatch(false);
-      }
-    });
-  });
+  var cmatchescount = 0;
+  var previouscmatchescount = -1;
 
   /* Calls (the servlet via ajax) for updating the page with the current Mapping. */
   function doUpdate() {
@@ -85,7 +78,7 @@
       url : 'VerticalMappingServlet',
       data : {
         action : 'compositeMatch',
-        elem : $('#elementidfield').val(),
+        elem : elemSavedId,
         cover : cover
       },
       success : function(responseXml) {
@@ -93,6 +86,24 @@
       }
     });
   }
+  
+  var elemSavedId = null;
+  /* Calls (the servlet via ajax) for checking a Composite Match. */
+  function checkComposite(elemId) {
+    elemSavedId = elemId;
+    $.ajax({
+      type : 'POST',
+      url : 'VerticalMappingServlet',
+      data : {
+        action : 'checkCompositeMatch',
+        source : elemId
+      },
+      success : function(responseXml) {
+        updateMapping(responseXml);
+      }
+    });
+  }
+
 
   /* Calls (the servlet via ajax) for removing a Match. */
   function removeMatch(matchId) {
@@ -182,9 +193,7 @@
       }
     });
   }
-
-
-
+  
   /* Updates the page with the current information. */
   function updateMapping(responseXml) {
     //console.log(responseXml);
@@ -198,9 +207,10 @@
       showCompositeQuestionP(question, doCompositeMatch);
       break;
     case 'Basetype':
-      showQuestion(question, function() {
-        doMatch(true);
-      });
+      showQuestion(question,
+        function() {doMatch(true);},
+        function() {}
+      );
       return;
       break;
     default:
@@ -215,13 +225,32 @@
     $('#covernumber').text($(responseXml).find('coveragetext').html());
     $('.icon').remove();
     $('#standarddiv').append($(responseXml).find('coverageicons').html());
-    //console.log($(responseXml).find('coveragelist').html());
     coverJson = JSON.parse($(responseXml).find('coveragelist').html());
-    //console.log(coverJson);
+    cmatchescount = JSON.parse($(responseXml).find('cmatchescount').html());
+    if(previouscmatchescount == -1) previouscmatchescount = cmatchescount; 
+    console.log("conter: "+cmatchescount);
   }
 
   /* Highlight the diagrams' elements/concepts and make then selectable. */
   $(function() {
+    $('#matchbutton').click(function() {
+      if (checkFields()) {
+        doMatch(false);
+      }
+    });
+    
+    $('#finishbutton').click(function(e) {
+      if(previouscmatchescount < cmatchescount) {
+        showQuestion("This mapping has some possible Composite Matches. Do you want to deal with them now?",
+          function() {showCoverageStatus();},
+          function() {$('#finishform').submit();}
+        );
+      } else {
+        $('#finishform').submit();
+      }
+    });
+    
+
     $('.map').maphilight();
     //     $('.elembox').mouseover(function(e) {
     //       console.log($('#elementidfield').val());
@@ -280,17 +309,19 @@
       showMessage("This element already has matches. Remove them if you want to discard it.");
       return false;
     }
-    showQuestion("Are you sure to discard <b>" + stdJson[id].name + "</b> from the initiative? It will be disregarded from all mappings.", function() {
-      doDiscard(id);
-    });
+    showQuestion("Are you sure to discard <b>" + stdJson[id].name + "</b> from the initiative? It will be disregarded from all mappings.",
+      function() {doDiscard(id);},
+      function() {}
+    );
   }
 
   /* Restores the selected element to the initiative. */
   function restoreElement() {
     var id = $('#elementidfield').val();
-    showQuestion("Do you want to bring <b>" + stdJson[id].name + "</b> back to the initiative?", function() {
-      doRestore(id);
-    });
+    showQuestion("Do you want to bring <b>" + stdJson[id].name + "</b> back to the initiative?",
+      function() {doRestore(id);},
+      function() {}
+    );
   }
 
   /* Check if the fields are well filled. */
@@ -325,8 +356,8 @@
 
   function showCoverageStatus() {
     $("#coveragediv").dialog({
-      width : 530,
-      height : 700
+      width : 700,
+      height : 720
     });
   }
 
@@ -346,7 +377,7 @@
   }
 
   /* Shows a question message dialog. */
-  function showQuestion(text, yesFunction) {
+  function showQuestion(text, yesFunction, noFunction) {
     $('#questionText').empty().append(text);
     $('#dialog-question').dialog({
       resizable : false,
@@ -360,6 +391,7 @@
         },
         No : function() {
           $(this).dialog('close');
+          noFunction();
         }
       }
     });
@@ -374,11 +406,11 @@
       width : 700,
       modal : true,
       buttons : {
-        "Yes, the element is EQUIVALENT to the sun of the concepts." : function() {
+        "Yes, the Element is EQUIVALENT to the sun of the Concepts." : function() {
           $(this).dialog('close');
           compositeFunction('EQUIVALENT');
         },
-        "No, the element remains not fully covered." : function() {
+        "No, the Element remains not fully covered." : function() {
           $(this).dialog('close');
         }
       }
@@ -394,11 +426,11 @@
       width : 700,
       modal : true,
       buttons : {
-        "Yes, the element is PART OF the sun of the concepts." : function() {
+        "Yes, the Element is PART OF the sun of the Concepts." : function() {
           $(this).dialog('close');
           compositeFunction('PARTIAL');
         },
-        "No, the element remains not fully covered." : function() {
+        "No, the Element remains not fully covered." : function() {
           $(this).dialog('close');
         }
       }
@@ -485,8 +517,8 @@
           <option disabled>──────────</option>
           <option value="ACTS">[A] ACTS AS</option>
           <option value="BYACTED">[B] IS ACTED BY</option>
-          <option disabled>──────────</option>
-          <option value="NORELATION">[-]  NO RELATION</option>
+          <!-- <option disabled>──────────</option> -->
+          <!-- <option value="NORELATION">[-]  NO RELATION</option> -->
         </select>
       </div>
       <div style="display: inline-block; width: 140px; height: 138px; position: relative">
@@ -529,11 +561,14 @@
   </div>
 
   <div style="text-align: center; width: 1000px; margin: 15px 0 0 0">
-    <form action="PhaseSelectServlet" method="POST">
-      <input type="hidden" name="action" value="openSelection">
       <button id="finishbutton">SAVE and Return to Menu</button>
-    </form>
   </div>
+  
+  <form action="PhaseSelectServlet" method="POST" id="finishform">
+    <input type="hidden" name="action" value="openSelection">
+  </form>
+      
+        
   <!-- ***** Match Blocks ***** -->
 
   <!-- Information Dialog -->

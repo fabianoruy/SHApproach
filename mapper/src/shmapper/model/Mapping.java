@@ -74,7 +74,7 @@ public abstract class Mapping extends SerializableObject {
 	}
 
 	public List<Match> getMatches() {
-		return this.matches;
+		return new ArrayList<>(matches);
 	}
 
 	/** Returns the Match with the id parameter. */

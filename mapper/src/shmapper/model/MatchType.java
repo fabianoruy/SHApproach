@@ -7,7 +7,7 @@ public enum MatchType {
 	WIDER("is WIDER than"),
 	INTERSECTION("has INTERSECTION with"),
 	CORRESPONDENCE("is (structurally) CORRESPONDENT with"),
-	SPECIALIZATON("is SPECIALIZATION of"),
+	SPECIALIZATION("is SPECIALIZATION of"),
 	GENERALIZATION("is GENERALIZATION of"),
 	ACTS("ACTS as"),
 	BYACTED("is ACTED BY"),
@@ -37,10 +37,10 @@ public enum MatchType {
 			return MatchType.WIDER;
 		if(this == MatchType.WIDER)
 			return MatchType.PARTIAL;
-		if(this == MatchType.SPECIALIZATON)
+		if(this == MatchType.SPECIALIZATION)
 			return MatchType.GENERALIZATION;
 		if(this == MatchType.GENERALIZATION)
-			return MatchType.SPECIALIZATON;
+			return MatchType.SPECIALIZATION;
 		if(this == MatchType.ACTS)
 			return MatchType.BYACTED;
 		if(this == MatchType.BYACTED)

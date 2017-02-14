@@ -26,14 +26,16 @@
     </table>
   </matchestable>
   
+  <c:set var="cmcount" value="0"/>
   <coveragetable>
     <b>${mapping.base} Elements:</b>
     <table>
       <c:forEach items="${mapping.nonCoveredElements}" var="elem">
         <tr>
-          <td width="25px">${" - "}&nbsp;</td>
-          <td> ${elem}</td>
+          <td width="30px">&nbsp;-&nbsp;</td>
+          <td width="400px"> ${elem}</td>
           <td>${elem.indirectUfotype}</td>
+          <td> </td>
         </tr>
       </c:forEach>
       <c:forEach items="${mapping.partiallyCoveredElements}" var="elem">
@@ -41,6 +43,10 @@
           <td><img src="images/favicon-part.ico" width="16px"/>&nbsp;</td>
           <td> ${elem}</td>
           <td>${elem.indirectUfotype}</td>
+          <td><c:if test="${mapping.isCompositeAble(elem)}">
+            <button style="font-size: 80%" title="Check for Composite Matching" onclick="checkComposite('${elem.id}')">Composite?</button>
+            <c:set var="cmcount" value="${cmcount + 1}"/>
+          </c:if></td>
         </tr>
       </c:forEach>
       <c:forEach items="${mapping.fullyCoveredElements}" var="elem">
@@ -48,11 +54,12 @@
           <td><img src="images/favicon-full.ico" width="16px"/>&nbsp;</td>
           <td> ${elem}</td>
           <td>${elem.indirectUfotype}</td>
+          <td> </td>
         </tr>
       </c:forEach>
-      
     </table>
   </coveragetable>
+  <cmatchescount>${cmcount}</cmatchescount>
   
   <coverageicons>
     <c:forEach items="${mapping.base.diagram.positions}" var="npos">

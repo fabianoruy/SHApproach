@@ -89,40 +89,26 @@ public class MappingApp {
 	public SimpleMatch createSimpleMatch(String elemId, String concId, String typeName, String comm, boolean forceBT) {
 		Element source = (Element) initiative.getNotionById(elemId);
 		Concept target = (Concept) initiative.getNotionById(concId);
+		System.out.println("typeName: " + typeName);
 		MatchType type = MatchType.valueOf(typeName);
 
 		SimpleMatch match = new SimpleMatch(source, target, type, comm);
-		if (validateMatchUniqueness(match)) {
-			if (validateFullCoverage(match)) {
-				if (forceBT || validateBasetypesCorrespondence(match)) {
-					mapping.addMatch(match); // At this moment the match is registered
-					message = CHECKED + "Match <b>" + match + "</b> created!";
-					main.log.println("(" + mapping.getMatches().size() + ") " + match);
-					if (initiative.getStatus() == InitiativeStatus.STRUCTURED) {
-						initiative.setStatus(InitiativeStatus.CONTENTED);
+		if (!initiative.isDiscarded(source)) {
+			if (validateMatchUniqueness(match)) {
+				if (validateFullCoverage(match)) {
+					if (forceBT || validateBasetypesCorrespondence(match)) {
+						mapping.addMatch(match); // At this moment the match is registered
+						message = CHECKED + "Match <b>" + match + "</b> created!";
+						main.log.println("(" + mapping.getMatches().size() + ") " + match);
+						if (initiative.getStatus() == InitiativeStatus.STRUCTURED) {
+							initiative.setStatus(InitiativeStatus.CONTENTED);
+						}
+						return match;
 					}
-					// for asking if a Composite Match also has to be created
-					checkCompositeMatch(match);
-					return match;
 				}
 			}
 		}
 		return null;
-	}
-
-	/** Creates a new Composite Match (only [E] and [W] coverages). */
-	public CompositeMatch createCompositeMatch(String elemId, String coverName) {
-		// TODO: FIX IT: it is allowing to create a Composite Match when we already have partially covered with an ICM
-		// Element
-		Element source = (Element) initiative.getNotionById(elemId);
-		MatchType cover = MatchType.valueOf(coverName);
-		List<SimpleMatch> smatches = mapping.getSimpleMatchesBySource(source);
-
-		CompositeMatch compMatch = new CompositeMatch(source, cover, null, smatches);
-		mapping.addMatch(compMatch); // At this moment the match is registered
-		message = CHECKED + "Composite Match <b>" + compMatch + "</b> created!";
-		main.log.println("(" + mapping.getMatches().size() + ") " + compMatch);
-		return compMatch;
 	}
 
 	/** Removes a match from the mapping. */
@@ -173,16 +159,14 @@ public class MappingApp {
 		// Verifying matches in the same Vertical Mapping AND in the correspondent Diagonal Mapping
 		DiagonalMapping dmapping = initiative.getDiagonalContentMapping((StandardModel) source.getModel());
 		List<Match> matches = mapping.getMatchesBySource(source);
-		matches.addAll(dmapping.getMatchesBySource(source));
+		matches.addAll(dmapping.getMatchesBySource(source)); // all VM + DM matches
 		for (Match omatch : matches) {
 			String target = ((omatch.getMapping() instanceof VerticalMapping) ? "concept" : "<b>ICM Element</b>") + ": (" + omatch + ")";
 			message += "The element <b>" + source + "</b> is already matched with other " + target + ".<br/>";
-			MatchType type = match.getMatchType();
 			MatchType otype = omatch.getMatchType();
-			// both coverages must be [W] or [I]
-			if (!((type == MatchType.WIDER || type == MatchType.INTERSECTION) &&
-					(otype == MatchType.WIDER || otype == MatchType.INTERSECTION))) {
-				message += PROBLEM + "Multiple matches for the same Element are allowed only for combinations of WIDER and INTERSECTION coverages.";
+			// it can not be fully covered (has a [E] or [P])
+			if (otype == MatchType.EQUIVALENT || otype == MatchType.PARTIAL) {
+				message += PROBLEM + "The Element " + source + " is already fully covered.";
 				return false;
 			}
 		}
@@ -210,37 +194,41 @@ public class MappingApp {
 		return false;
 	}
 
-	/** Checks if a given match (only vertical, just created) can lead to a composite match. */
-	private void checkCompositeMatch(SimpleMatch match) {
-		// Checks if the element has a set of only partial coverages ([W] or [I]) possibly leading to a Composite Match.
-		MatchType cover = match.getMatchType();
-		Element source = match.getSource();
-		if (cover == MatchType.WIDER || cover == MatchType.INTERSECTION) {
-			List<SimpleMatch> repMatches = mapping.getSimpleMatchesBySource(source);
-			if (repMatches.size() > 1) {
-				question = message + "<br/><br/>";
-				question += "The element <b>" + source + "</b> has now " + repMatches.size() + " matches with different targets.<br/>";
-				question += "<code>";
-				// if all matches are [W], only the EQUIVALENT and NO options are available.
-				questionType = QuestionType.CompositeEquivalent;
-				for (SimpleMatch omatch : repMatches) {
-					question += "* <b>" + omatch + "</b><br/>";
-					if (omatch.getMatchType() == MatchType.INTERSECTION) {
-						// if there is an [I], only the PART OF and NO options are available.
-						questionType = QuestionType.CompositePartof;
-					}
+	/** Checks if a given element can lead to a composite match (in a vertical mapping). */
+	public void checkCompositeMatch(String sourceId) {
+		Element source = (Element) initiative.getNotionById(sourceId);
+		List<SimpleMatch> smatches = ((VerticalMapping) mapping).getCMatchComponents(source);
+		if (smatches.size() >= 2) {
+			question = message + "<br/><br/>";
+			question += "The element <b>" + source + "</b> has " + smatches.size() + " composable matches.<br/>";
+			question += "<code>";
+			// if all matches are [W], only the EQUIVALENT and NO options are available.
+			questionType = QuestionType.CompositeEquivalent;
+			for (SimpleMatch omatch : smatches) {
+				question += "* <b>" + omatch + "</b><br/>";
+				if (omatch.getMatchType() == MatchType.INTERSECTION) {
+					// if there is an [I], only the PART OF and NO options are available.
+					questionType = QuestionType.CompositePartof;
 				}
-				question += "</code><br/>";
-				question += QUESTION + "Is the element <b>" + source + "</b> <b><i>fully covered<i></b> by these " + repMatches.size() + " targets together?";
 			}
+			question += "</code><br/>";
+			question += QUESTION + "Is the element <b>" + source + "</b> <b><i>fully covered</i></b> by these " + smatches.size() + " targets together?";
 		}
 	}
 
-	/** Checks the Standard Disjointness (T2) in a Vertical Mapping. */
-	private boolean checkStandardDisjointness(VerticalMapping vmap) {
-		// Checks if each element has matches leading to overlap in the Standard.
-
-		return true;
+	/** Creates a new Composite Match (only [E] and [W] coverages). */
+	public CompositeMatch createCompositeMatch(String elemId, String coverName) {
+		Element source = (Element) initiative.getNotionById(elemId);
+		MatchType cover = MatchType.valueOf(coverName);
+		List<SimpleMatch> components = ((VerticalMapping) mapping).getCMatchComponents(source);
+		CompositeMatch compMatch = null;
+		if (components.size() >= 2) {
+			compMatch = new CompositeMatch(source, cover, null, components);
+			mapping.addMatch(compMatch); // At this moment the match is registered
+			message = CHECKED + "Composite Match <b>" + compMatch + "</b> created!";
+			main.log.println("(" + mapping.getMatches().size() + ") " + compMatch);
+		}
+		return compMatch;
 	}
 
 	/** Creates a hash containing all the diagram notions (as keys) and their respective coords in the diagram. */
@@ -269,7 +257,7 @@ public class MappingApp {
 		// System.out.println("trying to create: " + elem + ": " + definition);
 
 		// Creating Matches
-		List<Element> sources = new ArrayList<Element>();
+		List<Element> sources = new ArrayList<>();
 		for (String[] elems : selectedElems) {
 			sources.add((Element) initiative.getNotionById(elems[0]));
 		}
@@ -567,9 +555,9 @@ public class MappingApp {
 
 	/** Returns the 'sum' of two coverages, considering Table 3 (T3 - Deductions). */
 	private MatchType sumCoverage(MatchType coverA, MatchType coverB) {
-		if (coverA == MatchType.EQUIVALENT) // E+E=E; E+P=W; E+W=P; E+I=I;
+		if (coverA == MatchType.EQUIVALENT) // E+E=E; E+P=W; E+W=P; E+I=I; E+*=*;
 			return coverB.getReflex();
-		if (coverB == MatchType.EQUIVALENT) // P+E=P; W+E=W; I+E=I;
+		if (coverB == MatchType.EQUIVALENT) // P+E=P; W+E=W; I+E=I; *+E=*;
 			return coverA;
 		if (coverA == MatchType.PARTIAL && coverB == MatchType.WIDER) // P+W=P;
 			return coverA;
