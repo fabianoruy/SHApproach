@@ -38,10 +38,10 @@ public class HorizontalMapping extends Mapping {
 
 	/** Checks if a given partially covered element is able to create a composite match. */
 	public boolean isCompositeAble(Element source) {
-		// Checks if the element has a set of only partial coverages ([W] or [I]) possibly leading to a Composite Match.
+		// Checks if the element has a set of only partial coverages ([W] or [O]) possibly leading to a Composite Match.
 		List<SimpleMatch> smatches = new ArrayList<>();
 		for (SimpleMatch match : getSimpleMatchesBySource(source)) {
-			if(match.getMatchType() == MatchType.WIDER || match.getMatchType() == MatchType.INTERSECTION)
+			if(match.getMatchType() == MatchType.WIDER || match.getMatchType() == MatchType.OVERLAP)
 				smatches.add(match);
 		}
 		return (smatches.size() >= 2);

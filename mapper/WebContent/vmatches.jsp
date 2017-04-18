@@ -30,6 +30,14 @@
   <coveragetable>
     <b>${mapping.base} Elements:</b>
     <table>
+      <c:forEach items="${mapping.discardedElements}" var="elem">
+        <tr>
+          <td><img src="images/favicon-discarded.ico" width="16px" title="Discarded"/>&nbsp;</td>
+          <td width="400px"> ${elem}</td>
+          <td>${elem.indirectUfotype}</td>
+          <td> </td>
+        </tr>
+      </c:forEach>
       <c:forEach items="${mapping.nonCoveredElements}" var="elem">
         <tr>
           <td width="30px">&nbsp;-&nbsp;</td>
@@ -40,7 +48,7 @@
       </c:forEach>
       <c:forEach items="${mapping.partiallyCoveredElements}" var="elem">
         <tr>
-          <td><img src="images/favicon-part.ico" width="16px"/>&nbsp;</td>
+          <td><img src="images/favicon-part.ico" width="16px" title="Partially Covered"/>&nbsp;</td>
           <td> ${elem}</td>
           <td>${elem.indirectUfotype}</td>
           <td><c:if test="${mapping.isCompositeAble(elem)}">
@@ -51,7 +59,7 @@
       </c:forEach>
       <c:forEach items="${mapping.fullyCoveredElements}" var="elem">
         <tr>
-          <td><img src="images/favicon-full.ico" width="16px"/>&nbsp;</td>
+          <td><img src="images/favicon-full.ico" width="16px" title="Fully Covered"/>&nbsp;</td>
           <td> ${elem}</td>
           <td>${elem.indirectUfotype}</td>
           <td> </td>

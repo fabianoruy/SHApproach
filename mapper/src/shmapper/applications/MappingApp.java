@@ -7,7 +7,6 @@ import java.util.Map;
 
 import shmapper.model.CompositeMatch;
 import shmapper.model.Concept;
-import shmapper.model.MatchType;
 import shmapper.model.DiagonalMapping;
 import shmapper.model.Diagram;
 import shmapper.model.Element;
@@ -15,9 +14,9 @@ import shmapper.model.HorizontalMapping;
 import shmapper.model.IntegratedModel;
 import shmapper.model.Mapping;
 import shmapper.model.Match;
+import shmapper.model.MatchType;
 import shmapper.model.Notion;
 import shmapper.model.NotionPosition;
-import shmapper.model.Ontology;
 import shmapper.model.SHInitiative;
 import shmapper.model.SHInitiative.InitiativeStatus;
 import shmapper.model.SimpleMatch;
@@ -206,8 +205,8 @@ public class MappingApp {
 			questionType = QuestionType.CompositeEquivalent;
 			for (SimpleMatch omatch : smatches) {
 				question += "* <b>" + omatch + "</b><br/>";
-				if (omatch.getMatchType() == MatchType.INTERSECTION) {
-					// if there is an [I], only the PART OF and NO options are available.
+				if (omatch.getMatchType() == MatchType.OVERLAP) {
+					// if there is an [O], only the PART OF and NO options are available.
 					questionType = QuestionType.CompositePartof;
 				}
 			}
@@ -386,7 +385,7 @@ public class MappingApp {
 	public void checkHCompositeMatch(String hmapId, String sourceId) {
 		HorizontalMapping hmap = mapping.getId().equals(hmapId) ? (HorizontalMapping) mapping : ((HorizontalMapping) mapping).getMirror();
 		Element source = (Element) initiative.getNotionById(sourceId);
-		// Checks if the element has a set of only partial coverages ([W] or [I]) possibly leading to a Composite Match.
+		// Checks if the element has a set of only partial coverages ([W] or [O]) possibly leading to a Composite Match.
 		if (hmap.isCompositeAble(source)) {
 			List<SimpleMatch> matches = hmap.getSimpleMatchesBySource(source);
 			question += "The element <b>" + source + "</b> has now " + matches.size() + " matches with different targets in this mapping.<br/>";
@@ -395,8 +394,8 @@ public class MappingApp {
 			questionType = QuestionType.CompositeEquivalent;
 			for (SimpleMatch match : matches) {
 				question += "* <b>" + match + "</b><br/>";
-				if (match.getMatchType() == MatchType.INTERSECTION) {
-					// if there is an [I], only the PART OF and NO options are available.
+				if (match.getMatchType() == MatchType.OVERLAP) {
+					// if there is an [O], only the PART OF and NO options are available.
 					questionType = QuestionType.CompositePartof;
 				}
 			}
@@ -494,14 +493,14 @@ public class MappingApp {
 					MatchType cover = sumCoverage(bcover, tcover);
 					if (cover != null) {
 						// Create new match: source from Base VM, target form Target VM
-						if (tcover == MatchType.EQUIVALENT && (bcover == MatchType.WIDER || bcover == MatchType.INTERSECTION))
+						if (tcover == MatchType.EQUIVALENT && (bcover == MatchType.WIDER || bcover == MatchType.OVERLAP))
 							bcomment = bvmatch.getComment();
 						SimpleMatch match = new SimpleMatch(source, target, cover, bcomment);
 						match.setDeduced(true);
 						hmapping.addMatch(match);
 
 						// And the corresponding mirror
-						if (bcover == MatchType.EQUIVALENT && (tcover == MatchType.WIDER || tcover == MatchType.INTERSECTION))
+						if (bcover == MatchType.EQUIVALENT && (tcover == MatchType.WIDER || tcover == MatchType.OVERLAP))
 							tcomment = tvmatch.getComment();
 						SimpleMatch hctam = new SimpleMatch(target, source, cover.getReflex(), tcomment);
 						hctam.setDeduced(true);
@@ -555,9 +554,9 @@ public class MappingApp {
 
 	/** Returns the 'sum' of two coverages, considering Table 3 (T3 - Deductions). */
 	private MatchType sumCoverage(MatchType coverA, MatchType coverB) {
-		if (coverA == MatchType.EQUIVALENT) // E+E=E; E+P=W; E+W=P; E+I=I; E+*=*;
+		if (coverA == MatchType.EQUIVALENT) // E+E=E; E+P=W; E+W=P; E+O=O; E+*=*;
 			return coverB.getReflex();
-		if (coverB == MatchType.EQUIVALENT) // P+E=P; W+E=W; I+E=I; *+E=*;
+		if (coverB == MatchType.EQUIVALENT) // P+E=P; W+E=W; O+E=O; *+E=*;
 			return coverA;
 		if (coverA == MatchType.PARTIAL && coverB == MatchType.WIDER) // P+W=P;
 			return coverA;

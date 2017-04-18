@@ -50,7 +50,7 @@ public abstract class Mapping extends SerializableObject {
 
 	/** Returns the coverage of the matches over the Standard's Elements (base). */
 	public int getCoverage() {
-		// coverage (%): baseModel.elements.([E] + [P] + [W]/2 + [I]/2) / baseModel.elements;
+		// coverage (%): baseModel.elements.([E] + [P] + [W]/2 + [O]/2) / baseModel.elements;
 		int all = getBase().getElements().size() - getDiscardedElements().size();
 		int partially = getPartiallyCoveredElements().size();
 		int noncovered = getNonCoveredElements().size();
@@ -260,7 +260,7 @@ public abstract class Mapping extends SerializableObject {
 		List<Element> elems = new LinkedList<Element>(base.getElementsByUfotype(type));
 		for (Match match : matches) {
 			MatchType cover = match.getMatchType();
-			// removing elements with Equivalent or Partial, remmaining the ones with ONLY Wider/Intersection coverage.
+			// removing elements with Equivalent or Partial (fully covered).
 			if (cover == MatchType.EQUIVALENT || cover == MatchType.PARTIAL) {
 				elems.remove(match.getSource());
 			}
@@ -317,10 +317,10 @@ public abstract class Mapping extends SerializableObject {
 
 	/** Returns the Issue between two matches with 'distinct' sources and same target (T2), if it exists. */
 	private Issue getIssue(Match match1, Match match2) {
-		MatchType E = MatchType.EQUIVALENT, P = MatchType.PARTIAL, W = MatchType.WIDER, I = MatchType.INTERSECTION;
+		MatchType E = MatchType.EQUIVALENT, P = MatchType.PARTIAL, W = MatchType.WIDER, O = MatchType.OVERLAP;
 		MatchType cover1 = match1.getMatchType(), cover2 = match2.getMatchType();
 		// PP, PI, IP, II: no issue
-		if ((cover1 == P || cover1 == I) && (cover2 == P || cover2 == I)) {
+		if ((cover1 == P || cover1 == O) && (cover2 == P || cover2 == O)) {
 			return null;
 		}
 		// EE: equivalent issue
@@ -328,8 +328,8 @@ public abstract class Mapping extends SerializableObject {
 			if (!match1.getSource().isEquivalentTo(match2.getSource()))
 				return new Issue(match1, match2, RelationType.EQUIVALENT);
 
-			// EI, WI, IE, IW, WW: intersection issue
-		} else if (cover1 == I || cover2 == I || (cover1 == W && cover2 == W)) {
+			// EO, WO, OE, OW, WW: overlap issue
+		} else if (cover1 == O || cover2 == O || (cover1 == W && cover2 == W)) {
 			if (!match1.getSource().intersectsWith(match2.getSource()))
 				return new Issue(match1, match2, RelationType.INTERSECTION);
 

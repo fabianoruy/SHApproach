@@ -145,7 +145,11 @@ Fev.13
 + Composite Match at the end (VM)
 + Composite Match in DM (VM+DM)
 
-Fev.14
+Apr.17
++ INTERSECTION -> OVERLAP
++ No match types representation
+
+TODO
 - Mapping analysis
 - Coverage Analysis (justifications)
 

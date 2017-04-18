@@ -5,7 +5,7 @@ public enum MatchType {
 	EQUIVALENT("is EQUIVALENT to"),
 	PARTIAL("is PART of"),
 	WIDER("is WIDER than"),
-	INTERSECTION("has INTERSECTION with"),
+	OVERLAP("has an OVERLAP with"),
 	CORRESPONDENCE("is (structurally) CORRESPONDENT with"),
 	SPECIALIZATION("is SPECIALIZATION of"),
 	GENERALIZATION("is GENERALIZATION of"),

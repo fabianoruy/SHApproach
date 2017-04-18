@@ -28,14 +28,14 @@ public class VerticalMapping extends Mapping {
 		return (getCMatchComponents(source).size() >= 2);
 	}
 	
-	/** Returns the possible components ([W] and [I]) to create a composite match with the given source. */
+	/** Returns the possible components ([W] and [O]) to create a composite match with the given source. */
 	public List<SimpleMatch> getCMatchComponents(Element source) {
-		// Selects only the partial coverages ([W] or [I]), in VM + DM, leading to a Composite Match.
+		// Selects only the partial coverages ([W] or [O]), in VM + DM, leading to a Composite Match.
 		List<SimpleMatch> smatches = new ArrayList<>();
 		List<SimpleMatch> allsmatches = getSimpleMatchesBySource(source);
 		allsmatches.addAll(getInitiative().getDiagonalContentMapping((StandardModel) source.getModel()).getSimpleMatchesBySource(source));
 		for (SimpleMatch match : allsmatches) {
-			if (match.getMatchType() == MatchType.WIDER || match.getMatchType() == MatchType.INTERSECTION)
+			if (match.getMatchType() == MatchType.WIDER || match.getMatchType() == MatchType.OVERLAP)
 				smatches.add(match);
 		}
 		return smatches;

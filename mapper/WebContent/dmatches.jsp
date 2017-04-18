@@ -36,7 +36,7 @@
                       <option value="EQUIVALENT">[E]</option>
                       <option value="PARTIAL">[P]</option>
                       <option value="WIDER">[W]</option>
-                      <option value="INTERSECTION">[I]</option>
+                      <option value="OVERLAP">[O]</option>
                     </select>
                   </c:if>
                 </div>

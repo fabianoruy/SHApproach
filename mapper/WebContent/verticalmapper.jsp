@@ -337,8 +337,8 @@
       showMessage("Select an element from each diagram.");
       return false;
     }
-    if (comm == '' && (relc == 'WIDER' || relc == 'INTERSECTION')) {
-      showMessage("WIDER and INTERSECTION matches require a comment explaining the non-covered part(s).");
+    if (comm == '' && (relc == 'WIDER' || relc == 'OVERLAP')) {
+      showMessage("WIDER and OVERLAP matches require a comment explaining the non-covered part(s).");
       return false;
     }
     if (comm == '' && (relc == 'SPECIALIZATION')) {
@@ -510,7 +510,7 @@
           <option disabled>──────────</option>
           <option value="PARTIAL">[P] PART OF</option>
           <option value="WIDER">[W] WIDER</option>
-          <option value="INTERSECTION">[I]  INTERSECTION</option>
+          <option value="OVERLAP">[O]  OVERLAP</option>
           <option disabled>──────────</option>
           <option value="SPECIALIZATION">[S] SPECIALIZATION</option>
           <option value="GENERALIZATION">[G] GENERALIZATION</option>
@@ -559,6 +559,12 @@
       <!-- Matches included here by ajax -->
     </div>
   </div>
+  
+  <div style="width: 1000px; margin: 15px 0 0 0">
+    <b>Mapping Analysis</b> <br />
+    <textarea id="analysisfield" title="Describe the analysis about this mapping, e.g., which are the main parts/types not covered." rows="5" cols="139"></textarea>
+  </div>
+  
 
   <div style="text-align: center; width: 1000px; margin: 15px 0 0 0">
       <button id="finishbutton">SAVE and Return to Menu</button>
@@ -587,15 +593,15 @@
         <tr style="background-color: #F0F0F0">
           <th width="140"><b>Type of Match</b></th>
           <th width="60"><b>Symbol</b></th>
-          <th width="300"><b>Meaning</b></th>
-          <th width="150"><b>Representation</b></th>
+          <th width="250"><b>Meaning</b></th>
+          <!-- <th width="150"><b>Representation</b></th> -->
           <th width="250"><b>Example</b></th>
         </tr>
         <tr>
           <td><b>[E] EQUIVALENT</b></td>
           <td><b>A [E] O</b></td>
           <td>A is Equivalent to O.<br /> Element A represents a notion that <b>is equivalent to</b> the notion represented by Concept O.</td>
-          <td style="text-align: center"><IMG src="images/Equivalent.png"><br/><IMG src="images/Equivalent2.png"></td>
+          <!-- <td style="text-align: center"><IMG src="images/Equivalent.png"><br/><IMG src="images/Equivalent2.png"></td> -->
           <td>(Element) Risk Plan<br /> <b>[E]</b> <br /> (Concept) Plan of Risks
           </td>
         </tr>
@@ -603,7 +609,7 @@
           <td><b>[P] PART OF</b></td>
           <td><b>A [P] O</b></td>
           <td>A is Part of O<br /> Element A represents a notion that <b>is part of</b> the notion represented by Concept O.<br/>(O includes A)</td>
-          <td style="text-align: center"><IMG src="images/Partof.png"><br/><IMG src="images/Partof2.png"></td>
+          <!-- <td style="text-align: center"><IMG src="images/Partof.png"><br/><IMG src="images/Partof2.png"></td> -->
           <td>(Element) Risk Plan<br /> <b>[P]</b> <br /> (Concept) Project Plan
           </td>
         </tr>
@@ -611,23 +617,23 @@
           <td><b>[W] WIDER</b></td>
           <td><b>A [W] O</b></td>
           <td>A is Wider than O.<br /> Element A represents a notion that <b>is wider than</b> the notion represented by Concept O.<br/>(A includes O)</td>
-          <td style="text-align: center"><IMG src="images/Wider.png"><br/><IMG src="images/Wider2.png"></td>
+          <!-- <td style="text-align: center"><IMG src="images/Wider.png"><br/><IMG src="images/Wider2.png"></td> -->
           <td>(Element) Risk Plan<br /> <b>[W]</b> <br /> (Concept) Mitigation Plan<br /> <br /> <b>{contingency actions not covered}</b>
           </td>
         </tr>
         <tr>
-          <td><b>[I] INTERSECTION</b></td>
-          <td><b>A [I] O</b></td>
-          <td>A has Intersection with O.<br /> Element A represents a notion that <b>has intersection with</b> the notion represented by Concept O.<br/> (A and O include P)</td>
-          <td style="text-align: center"><IMG src="images/Intersection.png"><br/><IMG src="images/Intersection2.png"></td>
-          <td>(Element) Requirements Verification and Validation<br /> <b>[I]</b> <br /> (Concept) Requirements Validation and Agreement<br /> <br /> <b>{verification not covered}</b>
+          <td><b>[O] OVERLAP</b></td>
+          <td><b>A [O] O</b></td>
+          <td>A has OVERLAP with O.<br /> Element A represents a notion that <b>has overlap with</b> the notion represented by Concept O.<br/> (A and O include P)</td>
+          <!-- <td style="text-align: center"><IMG src="images/Intersection.png"><br/><IMG src="images/Intersection2.png"></td> -->
+          <td>(Element) Requirements Verification and Validation<br /> <b>[O]</b> <br /> (Concept) Requirements Validation and Agreement<br /> <br /> <b>{verification not covered}</b>
           </td>
         </tr>
         <tr>
           <td><b>[S] SPECIALIZATION</b></td>
           <td><b>A [S] O</b></td>
           <td>A is a Specialization of O.<br /> Element A represents a notion that <b>specializes</b> the notion represented by Concept O.</td>
-          <td style="text-align: center"><IMG src="images/Specialization.png"></td>
+          <!-- <td style="text-align: center"><IMG src="images/Specialization.png"></td> -->
           <td>(Element) Software Designer <br /> <b>[S]</b> <br /> (Concept) Developer
           </td>
         </tr>
@@ -635,7 +641,7 @@
           <td><b>[G] GENERALIZATION</b></td>
           <td><b>A [G] O</b></td>
           <td>A is a Generalization of O.<br /> Element A represents a notion that <b>generalizes</b> the notion represented by Concept O.<br/>(O specializes A)</td>
-          <td style="text-align: center"><IMG src="images/Generalization.png"></td>
+          <!-- <td style="text-align: center"><IMG src="images/Generalization.png"></td> -->
           <td>(Element) Requirement <br /> <b>[G]</b> <br /> (Concept) Functional Requirement
           </td>
         </tr>
@@ -643,7 +649,7 @@
           <td><b>[A] ACTS</b></td>
           <td><b>A [A] O</b></td>
           <td>A Acts as O.<br /> Element A represents a notion that can <b>act as</b> the <i>role</i> represented by Concept O.<br/></td>
-          <td style="text-align: center"><IMG src="images/Acts.png"></td>
+          <!-- <td style="text-align: center"><IMG src="images/Acts.png"></td> -->
           <td>(Element) System Analyst <br /> <b>[A]</b> <br /> (Concept) Requirements Reviewer <br/> <small><i><br/>(a System Analyst can play the role of Requirements Reviewer)</i></small>
           </td>
         </tr>
@@ -651,7 +657,7 @@
           <td><b>[B] IS ACTED BY</b></td>
           <td><b>A [B] O</b></td>
           <td>A is acted By O.<br /> Element A represents the notion of a <i>role</i> that can be <b>acted by</b> the notion represented by Concept O.<br/>(O acts as A)</td>
-          <td style="text-align: center"><IMG src="images/ByActed.png"></td>
+          <!-- <td style="text-align: center"><IMG src="images/ByActed.png"></td> -->
           <td>(Element) Requirements Agreement <br /> <b>[B]</b> <br /> (Concept) Client E-mail <br/> <small><i><br/>(a Client E-mail can play the role of Requirements Agreement)</i></small>
           </td>
         </tr>
@@ -659,7 +665,7 @@
           <td><b>[-] </b></td>
           <td><b>A [-]</b></td>
           <td>A has no relation.<br /> Element A represents a notion that <b>has no corresponding relation</b> with any notion in the target model.<br/></td>
-          <td style="text-align: center">-</td>
+          <!-- <td style="text-align: center">-</td> -->
           <td>(Element) Sequence Diagram <br /> <b>[-]</b> <br /> <small><i><br/>(there is no corresponding concept in the ontology)</i></small>
           </td>
         </tr>

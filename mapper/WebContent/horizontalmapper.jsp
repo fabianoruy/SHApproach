@@ -282,8 +282,8 @@
       showMessage("Select an Element from each diagram.");
       return false;
     }
-    if (comm == '' && (relc == 'PARTIAL' || relc == 'WIDER' || relc == 'INTERSECTION')) {
-      showMessage("PARTIAL, WIDER and INTERSECTION matches require a comment explaining the non-covered part(s).");
+    if (comm == '' && (relc == 'PARTIAL' || relc == 'WIDER' || relc == 'OVERLAP')) {
+      showMessage("PARTIAL, WIDER and OVERLAP matches require a comment explaining the non-covered part(s).");
       return false;
     }
     return true;
@@ -457,7 +457,7 @@
           <option value="EQUIVALENT">[E] EQUIVALENT</option>
           <option value="PARTIAL">[P] PART OF</option>
           <option value="WIDER">[W] WIDER</option>
-          <option value="INTERSECTION">[I] INTERSECTION</option>
+          <option value="OVERLAP">[O] OVERLAP</option>
           <!--         <option value="NOCOVERAGE">[-] NO COVERAGE</option> -->
         </select>
       </div>
@@ -550,24 +550,23 @@
         Concept O
     </em>&rdquo;.
     </p>
-    <p>For the matches where an Element remains with non-covered portions (WIDER or INTERSECTION relations), a
-      comment is required for explaining such portions.</p>
+    <p>For the matches where an Element remains with non-covered portions (WIDER or OVERLAP relations), a comment is
+      required for explaining such portions.</p>
     <table border=1 cellpadding=6 style="width: 100%; font-size: 95%">
       <tbody style="border: 1px solid gray">
         <tr style="background-color: #F0F0F0">
           <th width="140"><b>Coverage</b></th>
           <th width="60"><b>Symbol</b></th>
           <th width="300"><b>Meaning</b></th>
-          <th width="150"><b>View</b></th>
+          <!-- <th width="150"><b>View</b></th> -->
           <th width="250"><b>Example</b></th>
         </tr>
         <tr>
           <td><b>[E] EQUIVALENT</b></td>
           <td><b>A [E] O</b></td>
           <td>A is Equivalent to O.<br /> Element A covers a portion of the domain that <b>is equivalent to</b>
-            the portion covered by Concept O.
-          </td>
-          <td style="text-align: center"><IMG src="images/Equivalent.png"></td>
+            the portion covered by Concept O.</td>
+          <!-- <td style="text-align: center"><IMG src="images/Equivalent.png"></td> -->
           <td>(Element) Risk Plan<br /> <b>[E]</b> <br /> (Concept) Plan of Risks
           </td>
         </tr>
@@ -575,9 +574,8 @@
           <td><b>[P] PART OF</b></td>
           <td><b>A [P] O</b></td>
           <td>A is Part of O<br /> Element A covers a portion of the domain that <b>is part of</b> the portion
-            covered by Concept O (O includes A).
-          </td>
-          <td style="text-align: center"><IMG src="images/Partof.png"></td>
+            covered by Concept O (O includes A).</td>
+          <!-- <td style="text-align: center"><IMG src="images/Partof.png"></td> -->
           <td>(Element) Risk Plan<br /> <b>[P]</b> <br /> (Concept) Project Plan
           </td>
         </tr>
@@ -585,28 +583,25 @@
           <td><b>[W] WIDER</b></td>
           <td><b>A [W] O</b></td>
           <td>A is Wider than O.<br /> Element A covers a portion of the domain that <b>is wider than</b> the
-            portion covered by Concept O (A includes O).
-          </td>
-          <td style="text-align: center"><IMG src="images/Wider.png"></td>
+            portion covered by Concept O (A includes O).</td>
+          <!-- <td style="text-align: center"><IMG src="images/Wider.png"></td> -->
           <td>(Element) Risk Plan<br /> <b>[W]</b> <br /> (Concept) Mitigation Plan<br /> <br /> <b>{contingency
               actions not covered}</b>
           </td>
         </tr>
         <tr>
-          <td><b>[I] INTERSECTION</b></td>
-          <td><b>A [I] O</b></td>
-          <td>A has Intersection with O.<br /> Element A covers a portion of the domain that <b>has
-              intersection with</b> the portion covered by Concept O.
-          </td>
-          <td style="text-align: center"><IMG src="images/Intersection.png"></td>
-          <td>(Element) Risk Plan<br /> <b>[I]</b> <br /> (Concept) Internal Project Plan<br /> <br /> <b>{external
+          <td><b>[O] OVERLAP</b></td>
+          <td><b>A [O] O</b></td>
+          <td>A has Overlap with O.<br /> Element A covers a portion of the domain that <b>has overlap with</b>
+            the portion covered by Concept O.</td>
+          <td>(Element) Risk Plan<br /> <b>[O]</b> <br /> (Concept) Internal Project Plan<br /> <br /> <b>{external
               risks not covered}</b>
           </td>
         </tr>
       </tbody>
     </table>
     <p>A Base Element that is EQUIVALENT or PART OF any Target Element is considered <b>fully covered</b> <img
-      src="images/favicon-full.ico">. <br /> A Base Element that is WIDER than or have INTERSECTION with any
+      src="images/favicon-full.ico">. <br /> A Base Element that is WIDER than or OVERLAPs any
       Target Element is considered <b>partially covered</b> <img src="images/favicon-part.ico">.
     </p>
   </div>

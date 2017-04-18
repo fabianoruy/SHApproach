@@ -25,7 +25,7 @@
               <c:when test="${(empty match.comment) && (match.matchType == 'EQUIVALENT' || match.matchType == 'PARTIAL')}">
                 {<span style="cursor:pointer" onclick="editComment('${match.id}', '')"><i>C</i></span>}
               </c:when>
-              <c:when test="${(empty match.comment) && (match.matchType == 'WIDER' || match.matchType == 'INTERSECTION')}">
+              <c:when test="${(empty match.comment) && (match.matchType == 'WIDER' || match.matchType == 'OVERLAP')}">
                 {<span style="cursor:pointer; color:red" title="add comment!" onclick="editComment('${match.id}', '')"><i>C</i></span>}
               </c:when>
             </c:choose>
@@ -60,7 +60,7 @@
               <c:when test="${(empty match.comment) && (match.matchType == 'EQUIVALENT' || match.matchType == 'PARTIAL')}">
                 {<span style="cursor:pointer" onclick="editComment('${match.id}', '')"><i>C</i></span>}
               </c:when>
-              <c:when test="${(empty match.comment) && (match.matchType == 'WIDER' || match.matchType == 'INTERSECTION')}">
+              <c:when test="${(empty match.comment) && (match.matchType == 'WIDER' || match.matchType == 'OVERLAP')}">
                 {<span style="cursor:pointer; color:red" title="add comment!" onclick="editComment('${match.id}', '')"><i>C</i></span>}
               </c:when>
             </c:choose>
