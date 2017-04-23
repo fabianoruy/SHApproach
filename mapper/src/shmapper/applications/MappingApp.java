@@ -367,6 +367,16 @@ public class MappingApp {
 			}
 		}
 	}
+	
+	/** Replaces the justification of a decision for a given element. */
+	public void changeDecisionJustification(String elemId, String justif) {
+		for (AnalysisDecision decision : initiative.getDecisions()) {
+			if(decision.getElement().getId().equals(elemId)) {
+				decision.setJustification(justif);
+				break;
+			}
+		}
+	}
 
 	//////////////////////////// HORIZONTAL MAPPING ////////////////////////////
 

@@ -23,6 +23,7 @@ import shmapper.model.Notion.UFOType;
 import shmapper.model.SHInitiative;
 import shmapper.model.StandardModel;
 import shmapper.model.VerticalMapping;
+import shmapper.model.AnalysisDecision;
 import shmapper.model.AnalysisDecision.Reason;
 
 /* Servlet implementation class DiagonalMappingServlet */
@@ -79,7 +80,7 @@ public class DiagonalMappingServlet extends HttpServlet {
 
 				updatePage(request, response);
 
-			////// COVERAGE ANALYSIS ///////
+				///////// COVERAGE ANALYSIS //////////
 			} else if (request.getParameter("action").equals("startAnalysis")) {
 				// Starting the Coverage Analysis.
 				main.log.println("\n# Coverage Analysis");
@@ -90,7 +91,7 @@ public class DiagonalMappingServlet extends HttpServlet {
 			} else if (request.getParameter("action").equals("updateAnalysis")) {
 				// Updating the page with the current analysis
 				updateAnalysis(request, response);
-				
+
 			} else if (request.getParameter("action").equals("createDecision")) {
 				// Creating a new Decison on an uncovered Element
 				String id = request.getParameter("elemId");
@@ -100,8 +101,23 @@ public class DiagonalMappingServlet extends HttpServlet {
 
 				updateAnalysis(request, response);
 
-			}
+			} else if (request.getParameter("action").equals("removeDecision")) {
+				// Removing a Decision
+				String elemId = request.getParameter("elemId");
+				mapper.removeDecision(elemId);
 
+				updateAnalysis(request, response);
+
+			} else if (request.getParameter("action").equals("changeJustification")) {
+				// Changing the Decision Justification.
+				String elemId = request.getParameter("elemId");
+				String justif = request.getParameter("justif");
+				mapper.changeDecisionJustification(elemId, justif);
+				System.out.println("Change justification: " + justif);
+
+				updateAnalysis(request, response);
+
+			}
 		} catch (Exception e) {
 			e.printStackTrace(main.log);
 		}
@@ -192,13 +208,6 @@ public class DiagonalMappingServlet extends HttpServlet {
 				icmElements[i][1] = matches;
 			}
 
-			// System.out.println(icmElements);
-			// for (Object[] objects : icmElements) {
-			// for (Object object : objects) {
-			// System.out.println(object);
-			// }
-			// }
-
 			// Setting attributes and calling the page
 			request.setAttribute("ufotypes", ufotypes);
 			request.setAttribute("typesMatrix", typesMatrix);
@@ -227,6 +236,13 @@ public class DiagonalMappingServlet extends HttpServlet {
 
 			// Number of Base Standards
 			int bcount = vmappings.size();
+
+			// Elements with Decisions
+			List<Element> decidedElems = new ArrayList<>();
+			for (AnalysisDecision decision : initiative.getDecisions()) {
+				decidedElems.add(decision.getElement());
+			}
+
 			// Selecting the Uncovered Elements from each base standard
 			List<Element>[] elementsByBase = new List[bcount];
 			for (int i = 0; i < elementsByBase.length; i++) {
@@ -235,7 +251,9 @@ public class DiagonalMappingServlet extends HttpServlet {
 				for (Element elem : base.getElements()) {
 					CoverageSituation sit = initiative.getCoverageSituation(elem);
 					if (sit != CoverageSituation.FULLY && sit != CoverageSituation.DISCARDED) {
-						elementsByBase[i].add(elem);
+						if (!decidedElems.contains(elem)) {
+							elementsByBase[i].add(elem);
+						}
 					}
 				}
 			}
@@ -258,8 +276,8 @@ public class DiagonalMappingServlet extends HttpServlet {
 				for (int i = 0; i < bcount; i++) {
 					// Getting the non covered elements of each type
 					List<Element> elems = new ArrayList<>();
-					for (Element elem: elementsByBase[i]) {
-						if(elem.getIndirectUfotype().equals(ufotypes[t]))
+					for (Element elem : elementsByBase[i]) {
+						if (elem.getIndirectUfotype().equals(ufotypes[t]))
 							elems.add(elem);
 					}
 					for (int j = 0; j < ecount; j++) {
@@ -294,9 +312,7 @@ public class DiagonalMappingServlet extends HttpServlet {
 					}
 				}
 				typesMatrix[t] = elements;
-				// System.out.print(ufotypes[t] + " (" + elements.length + ") ");
 			}
-			// System.out.println("");
 
 			// MatchType numbers
 			Object[][] coverages = new Object[dmappings.size()][3];
@@ -307,30 +323,11 @@ public class DiagonalMappingServlet extends HttpServlet {
 				coverages[i][2] = dmappings.get(i).getCoverage();
 			}
 
-			// ICM Elements and related Matches
-			List<Element> elements = initiative.getIntegratedCM().getElements();
-			Object[][] icmElements = new Object[elements.size()][2];
-			for (int i = 0; i < elements.size(); i++) {
-				List<Match> matches = new ArrayList<Match>();
-				for (DiagonalMapping dmap : dmappings) {
-					matches.addAll(dmap.getSimpleMatchesByTarget(elements.get(i)));
-				}
-				icmElements[i][0] = elements.get(i);
-				icmElements[i][1] = matches;
-			}
-
-			// System.out.println(icmElements);
-			// for (Object[] objects : icmElements) {
-			// for (Object object : objects) {
-			// System.out.println(object);
-			// }
-			// }
-
 			// Setting attributes and calling the page
 			request.setAttribute("ufotypes", ufotypes);
 			request.setAttribute("typesMatrix", typesMatrix);
 			request.setAttribute("coverages", coverages);
-			request.setAttribute("icmelements", icmElements);
+			request.setAttribute("decisions", initiative.getDecisions());
 			request.setAttribute("message", mapper.getMessage());
 			request.setAttribute("question", mapper.getQuestion());
 			request.getRequestDispatcher("adecisions.jsp").forward(request, response);

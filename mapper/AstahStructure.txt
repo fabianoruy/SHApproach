@@ -156,8 +156,12 @@ Apr.19
 Abr.22
 + Coverage Analysis (partial)
 
+Abr.23
++ Coverage Analysis (complete)
++ Coverage Analysis results
+
+
 TODO
-- Coverage Analysis (justifications)
 - Update validations and deductions for new types
 - Information texts update
 - Approach in the tool

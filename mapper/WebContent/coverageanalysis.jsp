@@ -147,11 +147,12 @@ td, th {
     var question = $(responseXml).find('questiontext').html();
     $('#uncovereddiv').html($(responseXml).find('uncovereddiv').html());
     $('#elemid').val("");
-    $('#elemname').val("");
-    $('#reason').val(1);
+    $('#elemname').text("");
+    $('#reason').val('EMPTY');
     $('#justif').val("");
-    $('#elementsdiv').html($(responseXml).find('elementsdiv').html());
-    $('#messagediv').html($(responseXml).find('messagediv').html());
+    //$('#coveragelabel').html($(responseXml).find('coveragelabel').html());
+    $('#decisionsdiv').html($(responseXml).find('decisionsdiv').html());
+    //$('#messagediv').html($(responseXml).find('messagediv').html());
   }
   
   function selectElement(elemID, elemname) {
@@ -168,7 +169,7 @@ td, th {
       showMessage("Select a Reason.");
       return false;
     } else if ($('#justif').val() == '') {
-      showMessage("Inform a justification for this decison.");
+      showMessage("Inform a Justification for this decison.");
       return false;
     }
     return true;
@@ -225,9 +226,9 @@ td, th {
     <br />
     In this phase, the remaining uncovered Standards portions (if there) can be analyzed and the uncovered element justified.
     Thus, elements not considered covered in the Vertical and Integrated Mappings can be explained. For doind this, just select
-    an uncovered element and give a reason and a justification. The main reasons are ALREADY COVERED, when the element itself has
-    no enough matches, but all its aspects are already covered by matches of other elements; and OUT OF SCOPE, when the element
-    (or its unconvered portion) is not relevant for the initiative scope.    
+    an uncovered element and give a reason and a justification. The main reasons are: <br/>
+    <b>ALREADY COVERED</b>, when the element itself has no enough matches, but all its aspects are already covered by the matches of other elements; and<br/>
+    <b>OUT OF SCOPE</b>, when the element (or its unconvered portion) is not relevant for the initiative scope.    
   </p>
 
   <!-- ##### Main Table Blocks ##### -->
@@ -249,7 +250,7 @@ td, th {
         <div style="display: inline-block">
           <label><b>Reason</b></label><br /> <select id="reason" style="height: 26px; width: 300px"
             title="Why does this element was not covered during the mappings?" required>
-            <option value="EMPTY"></option>
+            <option value="EMPTY">-</option>
             <option value="ALREADYCOVERED">ALREADY COVERED</option>
             <option value="OUTOFSCOPE">OUT OF SCOPE</option>
             <option value="OTHER">OTHER (describe)</option>
@@ -279,7 +280,7 @@ td, th {
       <label id="coveragelabel">
         <!-- Coverage numbers included here by ajax -->
       </label>
-      <div id="elementsdiv" style="font-size: 95%; overflow: auto; border: 1px solid gray; height: 360px; padding: 3px">
+      <div id="decisionsdiv" style="font-size: 95%; overflow: auto; border: 1px solid gray; height: 360px; padding: 3px">
         <!-- New Elements included here by ajax -->
       </div>
     </div>

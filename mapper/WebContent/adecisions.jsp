@@ -44,31 +44,26 @@
   </c:forEach>
 </coveragelabel>
   
-<elementsdiv>
+<decisionsdiv>
 <table style="border:0">
-  <c:forEach items="${icmelements}" var="elementline" varStatus="loopout">
-    <c:set var="elem" value="${elementline[0]}" />
-    <c:set var="rows" value="${elementline[1].size()}" />
-    <c:forEach items="${elementline[1]}" var="match" varStatus="loop">
-      <c:set var="color" value="style='background-color:#F0F0F0'"/>
-      <c:if test="${loop.index%2 == 0}"><c:set var="color" value=""/></c:if>
-      <tr ${color}>
-        <td style="width: 250px" title="${match.source.definition}">${match.source.model}:&nbsp;${match.source}</td>
-        <td style="text-align: center">${match.matchType.abbreviation}</td>
-        <c:if test="${loop.index == 0}">
-          <td style="width: 150px" rowspan="${rows}"><b>${elem}</b> <br />(${elem.basetypes[0]})</td>
-          <td style="width: 400px" rowspan="${rows}" style="font-size: 90%">
-            <span style="cursor:pointer" onclick="editDefinition('${elem.id}', '${elem.definition}')"> ${elem.definition}</span>
-          </td>
-          <td rowspan="${rows}">
-            <img src="images/favicon-remove.ico" title="Remove Element" width="16px" style="cursor: pointer"
-            onclick="showQuestion('Do you want to remove the element <b>${elem}</b> together with all its matches?', function() {removeElement('${elem.id}');})" /></td>
-        </c:if>
-      </tr>
-    </c:forEach>
+  <c:forEach items="${decisions}" var="decision" varStatus="loop">
+    <c:set var="color" value="style='background-color:#F0F0F0'"/>
+    <c:if test="${loop.index%2 == 0}"><c:set var="color" value=""/></c:if>
+    <tr ${color}>
+      <c:set var="elem" value="${decision.element}"/>
+      <td style="width: 50px">${elem.model}</td>
+      <td style="width: 300px" title="${elem.definition}">(${elem.indirectUfotype})&nbsp;${elem}</td>
+      <td style="width: 80px"><b>${decision.reason.text}</b></td>
+      <td style="width: 400px">
+        <span style="cursor:pointer" onclick="editJustification('${elem.id}', '${decision.justification}')">${decision.justification}</span>
+      </td>
+      <td><img src="images/favicon-remove.ico" title="Remove Decision" width="16px" style="cursor: pointer"
+            onclick="showQuestion('Do you want to remove the <b>decision (${decision.reason.text})</b> on the element <b>${elem}</b>?', function() {removeDecision('${elem.id}');})" />
+      </td>
+    </tr>
   </c:forEach>
 </table>
-</elementsdiv>
+</decisionsdiv>
 
 <messagediv>${message}</messagediv>
 

@@ -38,7 +38,7 @@ td,th {
 }
 
 .DISCARDED {
-  background-color: lightred
+  background-color: #ffe0cc
 }
 </style>
 
@@ -125,7 +125,13 @@ td,th {
       </tr>
     </c:forEach>
   </table>
-
+  
+  <br/>
+  <h2><b>Coverage Analysis</b></h2>
+  <a href="#coverageanalysis">${initiative.decisions.size()} Decisions</a>
+  <br />
+  <br />
+  
   <!------------------------  VERTICAL MAPPINGS  ------------------------>
   <br />
   <br />
@@ -258,6 +264,28 @@ td,th {
   <br />
   <br />
   <h2 id="coverageanalysis"><b>Coverage Analysis: Elements' Justifications</b></h2>
+  <table>
+    <tr style="background-color: #999999">
+      <th style="width: 40%">ELEMENT</th>
+      <th style="width: 60%">ANALYSIS</th>
+    </tr>
+    <c:forEach items="${decisionsMatrix}" var="stdDecisions" varStatus="sloop">
+      <c:forEach items="${stdDecisions}" var="decision" varStatus="loop">
+        <c:if test="${loop.index == 0}">
+          <tr style="background-color: #c8c8c8">
+            <td colspan="100%"><b>${stdDecisions[0].element.model}</b></td>
+          </tr>
+        </c:if>
+        <tr>
+          <c:set var="color" value="#eeeedd"/>
+          <c:if test="${decision.reason == 'OUTOFSCOPE'}"><c:set var="color" value="#ffe0cc"/></c:if>
+          <c:if test="${decision.reason == 'ALREADYCOVERED'}"><c:set var="color" value="#ccffcc"/></c:if>
+          <td style="background-color: ${color}">${decision.element}<br/>[${decision.element.indirectUfotype}]</td>
+          <td><b>${decision.reason.text}</b><br/>${decision.justification}</td>
+        </tr>
+      </c:forEach>
+    </c:forEach>
+  </table>
   <br />
   
   <!------------------------  HORIZONTAL MAPPINGS  ------------------------>

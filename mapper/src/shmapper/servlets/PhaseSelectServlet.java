@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import shmapper.applications.ManagerApp;
 import shmapper.applications.MappingApp;
 import shmapper.applications.StructuralMappingApp;
+import shmapper.model.AnalysisDecision;
 import shmapper.model.Concept;
 import shmapper.model.DiagonalMapping;
 import shmapper.model.Element;
@@ -285,6 +286,19 @@ public class PhaseSelectServlet extends HttpServlet {
 		}
 		main.log.println("");
 
+		
+		///// Matrix of Analysis Decisions
+		List<AnalysisDecision>[] decisionsMatrix = new List[standards.size()];
+		List<AnalysisDecision> decisions = initiative.getDecisions();
+		for (int i = 0; i < standards.size(); i++) {
+			decisionsMatrix[i] = new ArrayList<>();
+			for (AnalysisDecision decision : decisions) {
+				if(decision.getElement().getModel().equals(standards.get(i))) {
+					decisionsMatrix[i].add(decision);
+				}
+			}
+		}
+		
 		///// Matrix of Horizontal Matches
 		Object[][][][] hmapsMatrix = new Object[2 * hmappings.size()][ufotypes.length][][]; // HMappings x UFOTypes x
 																							// Matches x Data
@@ -359,6 +373,7 @@ public class PhaseSelectServlet extends HttpServlet {
 		request.setAttribute("ufotypes", ufotypes);
 		request.setAttribute("vmapsMatrix", vmapsMatrix);
 		request.setAttribute("dmapsMatrix", dmapsMatrix);
+		request.setAttribute("decisionsMatrix", decisionsMatrix);
 		request.setAttribute("hmapsMatrix", hmapsMatrix);
 		request.setAttribute("allhmaps", allhmaps);
 		request.setAttribute("coverageIndex", coverageIndex);
