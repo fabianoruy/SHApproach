@@ -333,11 +333,20 @@ td, th {
       </div>
     </div>
 
+
     <div style="text-align: center; width: 900px; margin: 10px 0 0 0">
-      <form action="PhaseSelectServlet" method="POST">
-        <input type="hidden" name="action" value="openSelection">
-        <button id="finishbutton">SAVE and Return to Menu</button>
-      </form>
+      <div style="margin: 10px 10px 10px 10px; display: inline-block">
+        <form action="DiagonalMappingServlet" method="POST">
+          <input type="hidden" name="action" value="startAnalysis">
+          <button id="analysisbutton">Coverage Analysis</button>
+        </form>
+      </div>
+      <div style="margin: 10px 10px 10px 10px; display: inline-block">
+        <form action="PhaseSelectServlet" method="POST">
+          <input type="hidden" name="action" value="openSelection">
+          <button id="finishbutton">SAVE and Return to Menu</button>
+        </form>
+      </div>
     </div>
   </div>
   <!-- ***** Elements Creation Blocks ***** -->

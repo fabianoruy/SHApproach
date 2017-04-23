@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import shmapper.model.AnalysisDecision;
+import shmapper.model.AnalysisDecision.Reason;
 import shmapper.model.CompositeMatch;
 import shmapper.model.Concept;
 import shmapper.model.DiagonalMapping;
@@ -339,6 +341,33 @@ public class MappingApp {
 		elem.setDefinition(definition);
 	}
 
+	//////////////////////////// COVERAGE ANALYSIS ////////////////////////////
+
+	/** Creates a new Decision. */
+	public AnalysisDecision createDecision(String elemId, Reason reason, String justif) {
+		// Creating new Decision
+		Element elem = (Element) initiative.getNotionById(elemId);
+		AnalysisDecision decision = new AnalysisDecision(reason, justif, elem);
+		initiative.addDecision(decision);
+		main.log.println("Created: " + decision);
+		return decision;
+	}
+
+	/** Removes a Decision from the initiative. */
+	public void removeDecision(String elemId) {
+		Element elem = (Element) initiative.getNotionById(elemId);
+		if (elem != null) {
+			// Finding and removing the decision
+			for (AnalysisDecision decision : initiative.getDecisions()) {
+				if (decision.getElement().equals(elem)) {
+					initiative.removeDecision(decision); // At this moment the decision is excluded
+					main.log.println("Excluded: " + decision);
+					break;
+				}
+			}
+		}
+	}
+
 	//////////////////////////// HORIZONTAL MAPPING ////////////////////////////
 
 	/** Creates a new (simple) Match in a Horizontal Mapping. */
@@ -579,6 +608,10 @@ public class MappingApp {
 		Element elem = (Element) initiative.getNotionById(elemId);
 		System.out.println("Element to be restored: " + elem);
 		initiative.restoreElement(elem);
+	}
+
+	public void saveAnalysis(String text) {
+		this.mapping.setAnalysis(text);
 	}
 
 }

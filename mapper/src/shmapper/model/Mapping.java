@@ -16,6 +16,7 @@ public abstract class Mapping extends SerializableObject {
 	private StandardModel		base;
 	private SHInitiative		initiative;
 	private boolean				structural;
+	private String analysis;
 	private List<Match>			matches;
 	private MappingStatus		status;
 
@@ -295,6 +296,14 @@ public abstract class Mapping extends SerializableObject {
 	/** Removes a Match from the Mapping. */
 	public void removeMatch(Match rmatch) {
 		matches.remove(rmatch);
+	}
+	
+	public String getAnalysis() {
+		return analysis;
+	}
+
+	public void setAnalysis(String analysis) {
+		this.analysis = analysis;
 	}
 
 	/** Identifies and returns the Issues related only to this mapping. */

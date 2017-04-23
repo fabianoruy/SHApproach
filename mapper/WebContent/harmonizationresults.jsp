@@ -131,7 +131,7 @@ td,th {
   <br />
   <hr size="5" noshade/>
   <br />
-  <h2><b>Content Vertical Mappings</b></h2>
+  <h2><b>Content Vertical Mappings</b> (Standard to SEON)</h2>
   <c:forEach items="${vmapsMatrix}" var="table" varStatus="mloop">
     <c:set var="vmap" value="${initiative.verticalContentMappings[mloop.index]}" />
     <h3 id="${vmap.id}"><b>${vmap}</b> (Coverage: ${vmap.coverage}%)</h3>
@@ -155,7 +155,7 @@ td,th {
               <c:if test="${data[2] != 0}">
                 <td rowspan="${data[2]}" class="${data[1]}" title="${match.source.definition}">${match.source}</td>
               </c:if>
-              <td>${match.coverage}<c:if test="${not empty match.comment}">
+              <td>${match.matchType}<c:if test="${not empty match.comment}">
                   <br />{<i>${match.comment}</i>}</c:if>
               </td>
               <c:if test="${match['class'].simpleName eq 'SimpleMatch'}">
@@ -194,7 +194,7 @@ td,th {
         <c:forEach items="${elementline[1]}" var="match" varStatus="loop">
           <tr style="font-size: 90%; ${rowcolor} ">
             <td style="width: 250px">${match.source.model}:&nbsp;${match.source}</td>
-            <td style="text-align: center; width: 50px">${match.coverage.abbreviation}</td>
+            <td style="text-align: center; width: 50px">${match.matchType.abbreviation}</td>
             <c:if test="${loop.index == 0}">
               <td style="width: 150px" rowspan="${rows}"><b>${elem}</b> <br />(${elem.basetypes[0]})</td>
               <td style="width: 400px" rowspan="${rows}" style="font-size: 90%">${elem.definition}</td>
@@ -255,13 +255,17 @@ td,th {
     </c:forEach>
   </table>
   
+  <br />
+  <br />
+  <h2 id="coverageanalysis"><b>Coverage Analysis: Elements' Justifications</b></h2>
+  <br />
   
   <!------------------------  HORIZONTAL MAPPINGS  ------------------------>
   <br />
   <br />
   <hr size="5" noshade/>
   <br />
-  <h2><b>Content Horizontal Mappings</b></h2>
+  <h2><b>Content Horizontal Mappings</b> (Standard to Standard)</h2>
   <c:forEach items="${hmapsMatrix}" var="table" varStatus="mloop">
     <c:set var="hmap" value="${allhmaps[mloop.index]}" />
     <h3 id="${hmap.id}"><b>${hmap}</b> (Coverage: ${hmap.coverage}%)</h3>
@@ -285,7 +289,7 @@ td,th {
               <c:if test="${data[2] != 0}">
                 <td rowspan="${data[2]}" class="${data[1]}" title="${match.source.definition}">${match.source}</td>
               </c:if>
-              <td>${match.coverage}&nbsp;
+              <td>${match.matchType}&nbsp;
                 <c:if test="${match.deduced}">
                   (<span title="Deduced Match">D</span>)
                 </c:if>

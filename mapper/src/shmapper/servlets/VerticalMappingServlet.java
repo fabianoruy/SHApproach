@@ -59,6 +59,7 @@ public class VerticalMappingServlet extends HttpServlet {
 				request.setAttribute("ontoJson", ontoJson);
 				request.setAttribute("standard", std);
 				request.setAttribute("ontology", seon);
+				request.setAttribute("analysis", mapping.getAnalysis());
 				request.setAttribute("stdCoords", mapper.createNotionsCoordsHash(std.getDiagram()));
 				request.setAttribute("ontoCoords", mapper.createNotionsCoordsHash(seon.getDiagram()));
 
@@ -122,7 +123,11 @@ public class VerticalMappingServlet extends HttpServlet {
 				mapper.restoreElement(elemId);
 
 				updatePage(request, response);
-
+			
+			} else if (request.getParameter("action").equals("saveAnalysis")) {
+				// Saving the Mapping Analysis.
+				String text = request.getParameter("text");
+				mapper.saveAnalysis(text);
 			}
 
 		} catch (Exception e) {

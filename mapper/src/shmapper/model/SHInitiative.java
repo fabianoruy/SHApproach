@@ -1,7 +1,6 @@
 package shmapper.model;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -22,11 +21,11 @@ public class SHInitiative extends SerializableObject {
 	private String					scope;
 	private String					people;
 	private String					description;
-	private String					astahPath;
 	private InitiativeStatus		status;
 	private List<Package>			packages;
 	private List<Mapping>			structmaps;
 	private List<Mapping>			contentmaps;
+	private List<AnalysisDecision>	decisions;
 	private Map<String, Notion>		notionMap;
 	private Map<String, Element>	discardedMap;
 	private transient String		datafile;
@@ -37,12 +36,7 @@ public class SHInitiative extends SerializableObject {
 
 	public SHInitiative(String domain) {
 		this.domain = domain;
-		this.packages = new ArrayList<Package>();
-		this.structmaps = new ArrayList<Mapping>();
-		this.contentmaps = new ArrayList<Mapping>();
-		this.notionMap = new HashMap<String, Notion>();
-		this.discardedMap = new HashMap<String, Element>();
-		this.status = InitiativeStatus.INITIATED;
+		this.resetInitiative();
 	}
 
 	/* Resets all the initiative's packages, mappings and notions. */
@@ -51,6 +45,7 @@ public class SHInitiative extends SerializableObject {
 		this.packages = new ArrayList<Package>();
 		this.structmaps = new ArrayList<Mapping>();
 		this.contentmaps = new ArrayList<Mapping>();
+		this.decisions = new ArrayList<AnalysisDecision>();
 		this.notionMap = new HashMap<String, Notion>();
 		this.discardedMap = new HashMap<String, Element>();
 		this.status = InitiativeStatus.INITIATED;
@@ -119,9 +114,9 @@ public class SHInitiative extends SerializableObject {
 	// return astahPath;
 	// }
 
-	public void setAstahPath(String path) {
-		this.astahPath = path;
-	}
+	// public void setAstahPath(String path) {
+	// this.astahPath = path;
+	// }
 
 	public InitiativeStatus getStatus() {
 		return status;
@@ -341,6 +336,18 @@ public class SHInitiative extends SerializableObject {
 		this.structmaps.add(mapping);
 	}
 
+	public List<AnalysisDecision> getDecisions() {
+		return decisions;
+	}
+
+	public void addDecision(AnalysisDecision decision) {
+		this.decisions.add(decision);
+	}
+
+	public void removeDecision(AnalysisDecision decision) {
+		this.decisions.remove(decision);
+	}
+
 	public List<Notion> getAllNotions() {
 		return new ArrayList<Notion>(notionMap.values());
 	}
@@ -447,7 +454,7 @@ public class SHInitiative extends SerializableObject {
 
 	/* Saves this initiative. */
 	public void saveInitiative() throws IOException {
-		//this.discardedMap = new HashMap<String, Element>();
+		// this.discardedMap = new HashMap<String, Element>();
 		new File(datafile).getParentFile().mkdirs();
 		FileOutputStream fileOut = new FileOutputStream(datafile);
 		ObjectOutputStream out = new ObjectOutputStream(fileOut);

@@ -71,6 +71,23 @@
                     });
           });
 
+  /* Shows the Structural Mappings set. */
+  function showStructuralMappings() {
+    $.ajax({
+      type : 'POST',
+      url : 'PhaseSelectServlet',
+      data : {
+        action : 'getStructuralMappings',
+      },
+      success : function(responseXml) {
+        $('#smapdiv').html($(responseXml).find('smapinfo').html());
+        $("#smapdiv").dialog({
+          width : 1000
+        });
+      }
+    });
+  }
+  
   /* Shows a question message dialog. */
   function showQuestion(text) {
     $('#questionText').empty().append(text);
@@ -189,10 +206,10 @@
       <c:otherwise>
         <div class="done">
           <div style="display: inline-block">
-            <b>3) Structural Mapping</b><br />All Structural Mappings created <br />
+            <b>3) Structural Mapping</b><br />All Structural Mappings created<br />
           </div>
           <div style="float: right">
-            <button class="phasebutton" id="structuralbutton" disabled>Do Mapping</button>
+            <button class="phasebutton" id="seemappingbutton" onclick="showStructuralMappings()">See Mappings</button>
           </div>
         </div>
       </c:otherwise>
@@ -354,6 +371,12 @@
     <div id="questionText"></div>
     </p>
   </div>
+  
+  <!-- Information Dialog -->
+  <div id="smapdiv" title="Structural Mappings" hidden>
+    <p>Structural Mappings defined for this initiative.</p>
+  </div>
+
   <!-- ***** Dialog Boxes ***** -->
 
 </BODY>

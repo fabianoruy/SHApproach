@@ -26,8 +26,8 @@ import shmapper.model.VerticalMapping;
 
 /** Responsible for process the previously defined structural mapping. */
 public class StructuralMappingApp {
-	private ManagerApp main;
-	private SHInitiative initiative;
+	private ManagerApp		main;
+	private SHInitiative	initiative;
 
 	public StructuralMappingApp(ManagerApp main, SHInitiative initiative) {
 		this.main = main;
@@ -37,17 +37,18 @@ public class StructuralMappingApp {
 
 	/* Performs the creation of all structural mappings and matches. */
 	public void performStructuralMapping() {
-		createStructuralMappings();
-		populateStructuralMappings(main.getMapperpath() + "initiative/structmap.txt");
-		deduceHorizontalMappings();
-		finishStructuralMappings();
-		initiative.setStatus(InitiativeStatus.STRUCTURED);
-		main.log.println("Structural Mappings Created (" + initiative.getStructuralMappings().size() + "): " + initiative.getStructuralMappings());
+		if (initiative.getStructuralMappings().isEmpty()) {
+			createStructuralMappings();
+			populateStructuralMappings(main.getMapperpath() + "initiative/SMAP." + initiative.getDomain().replaceAll("\\s", "") + ".txt");
+			deduceHorizontalMappings();
+			finishStructuralMappings();
+			initiative.setStatus(InitiativeStatus.STRUCTURED);
+			main.log.println("Structural Mappings Created (" + initiative.getStructuralMappings().size() + "): " + initiative.getStructuralMappings());
+		}
 	}
 
 	/* Creates the structural mappings with the predefined structural matches. */
 	private void createStructuralMappings() {
-		// TODO: develop a front-end for the user inform this. structuralMappings = new ArrayList<Mapping>();
 		// Getting the models
 		SeonView seon = initiative.getSeonView();
 		IntegratedModel integrated = initiative.getIntegratedSM();
@@ -75,7 +76,7 @@ public class StructuralMappingApp {
 		String structmaps = null;
 		try {
 			// Reading the file to a String
-			new File(smapfile.substring(0, smapfile.lastIndexOf(File.separator))).mkdirs();
+			// new File(smapfile.substring(0, smapfile.lastIndexOf(File.separator))).mkdirs();
 			structmaps = FileUtils.readFileToString(new File(smapfile), StandardCharsets.UTF_8);
 		} catch (IOException e) {
 			e.printStackTrace(main.log);

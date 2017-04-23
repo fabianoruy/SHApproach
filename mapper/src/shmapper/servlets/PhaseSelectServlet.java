@@ -14,25 +14,25 @@ import javax.servlet.http.HttpServletResponse;
 import shmapper.applications.ManagerApp;
 import shmapper.applications.MappingApp;
 import shmapper.applications.StructuralMappingApp;
-import shmapper.model.MatchType;
+import shmapper.model.Concept;
 import shmapper.model.DiagonalMapping;
 import shmapper.model.Element;
 import shmapper.model.HorizontalMapping;
 import shmapper.model.Issue;
 import shmapper.model.Mapping;
 import shmapper.model.Match;
+import shmapper.model.MatchType;
 import shmapper.model.Notion.UFOType;
 import shmapper.model.SHInitiative;
 import shmapper.model.SimpleMatch;
 import shmapper.model.StandardModel;
 import shmapper.model.VerticalMapping;
-import shmapper.util.GraphDataWriter;
 
 /* Servlet implementation class PhaseSelectServlet */
 @WebServlet("/PhaseSelectServlet")
 public class PhaseSelectServlet extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-	ManagerApp main;
+	private static final long	serialVersionUID	= 1L;
+	ManagerApp					main;
 
 	/* HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response). */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
@@ -58,10 +58,17 @@ public class PhaseSelectServlet extends HttpServlet {
 
 				request.getRequestDispatcher("phaseselector.jsp").forward(request, response);
 
+			} else if (request.getParameter("action").equals("getStructuralMappings")) {
+				// Preparing the table with the Structural Mappings (and Matches)
+				this.prepareStructuralMappingsTable(request);
+
+				//request.getRequestDispatcher("phaseselector.jsp").forward(request, response);
+				request.getRequestDispatcher("smatches.jsp").forward(request, response);
+				
 			} else if (request.getParameter("action").equals("openResults")) {
 				// Opening the results page
 				main.log.println("# Harmonization Results");
-				this.prepareResults(request, response);
+				this.prepareResults(request);
 
 				request.getRequestDispatcher("harmonizationresults.jsp").forward(request, response);
 
@@ -71,12 +78,13 @@ public class PhaseSelectServlet extends HttpServlet {
 				response.getWriter().println("Application Finished!\n");
 				response.getWriter().println(initiative.getContentMappings().size() + " Content Mappings were created:");
 				for (Mapping map : initiative.getContentMappings()) {
-					response.getWriter().println("(" + map.getClass().getSimpleName() + ") " + map.getBase() + " --> " + map.getTarget() + ": "
-							+ map.getStatus() + " (" + map.getCoverage() + "%)");
+					response.getWriter().println(
+							"(" + map.getClass().getSimpleName() + ") " + map.getBase() + " --> " + map.getTarget() + ": " + map.getStatus() + " (" + map.getCoverage() + "%)");
 				}
 				// Writing the nodes files
-				//new GraphDataWriter(initiative, main.getMapperpath() + main.getInitpath() + "data/").generateDataFiles();
-				
+				// new GraphDataWriter(initiative, main.getMapperpath() + main.getInitpath() +
+				// "data/").generateDataFiles();
+
 				// TODO: put the logfile here. Needs to be HTML.
 				request.getSession().invalidate();
 
@@ -93,8 +101,78 @@ public class PhaseSelectServlet extends HttpServlet {
 		}
 	}
 
+	/** Prepares the matrix of data for the Structural Mappings table. */
+	private void prepareStructuralMappingsTable(HttpServletRequest request) {
+		// Selecting the core concepts
+		List<Concept> allConcepts = main.getInitiative().getSeonView().getConcepts();
+		List<Concept> coreConcepts = new ArrayList<>();
+		for (Concept conc : allConcepts) {
+			if (conc.isBasetype())
+				coreConcepts.add(conc);
+		}
+		// Getting the Vertical Mappings
+		List<VerticalMapping> vmappings = main.getInitiative().getVerticalStructuralMappings();
+
+		// Creating header
+		String[] matchesLine = new String[vmappings.size() + 1];
+		matchesLine[0] = "SEON Core Concept";
+		for (int i = 0; i < vmappings.size(); i++) {
+			matchesLine[i + 1] = vmappings.get(i).getBase().getName() + " Element";
+		}
+		request.setAttribute("smaptableHeader", matchesLine);
+
+		List<String[]> matchesTable = new ArrayList<String[]>();
+		// For each Core Concept, find its matches in all mappings
+		for (Concept concept : coreConcepts) {
+			boolean hasMatches = false;
+			matchesLine = new String[vmappings.size() + 1];
+			matchesLine[0] = concept.getName() + " (" + concept.getIndirectUfotype() + ")";
+			// For each Vertical Mapping, get the corresponding matches
+			for (int i = 0; i < vmappings.size(); i++) {
+				List<SimpleMatch> matches = vmappings.get(i).getSimpleMatchesByTarget(concept);
+				// For each match, put the source name in the cell
+				matchesLine[i + 1] = "";
+				for (SimpleMatch match : matches) {
+					matchesLine[i + 1] += match.getSource().getName() + " (" + match.getSource().getIndirectUfotype() + ")<br/>";
+					hasMatches = true;
+				}
+			}
+			if (hasMatches) {
+				matchesTable.add(matchesLine);
+			}
+		}
+
+		// Selecting the ISM Elements
+		List<Element> ISMElements = main.getInitiative().getIntegratedSM().getElements();
+		// Getting the Diagonal Mappings
+		List<DiagonalMapping> dmappings = main.getInitiative().getDiagonalStructuralMappings();
+
+		// For each ISM Element, find its matches in all mappings
+		for (Element elem : ISMElements) {
+			boolean hasMatches = false;
+			matchesLine = new String[dmappings.size() + 1];
+			matchesLine[0] = "<i>" + elem.getName() + "* (" + elem.getIndirectUfotype() + ")</i>";
+			// For each Diagonal Mapping, get the corresponding matches
+			for (int i = 0; i < dmappings.size(); i++) {
+				List<SimpleMatch> matches = dmappings.get(i).getSimpleMatchesByTarget(elem);
+				// For each match, put the source name in the cell
+				matchesLine[i + 1] = "";
+				for (SimpleMatch match : matches) {
+					matchesLine[i + 1] += match.getSource().getName() + " (" + match.getSource().getIndirectUfotype() + ")<br/>";
+					hasMatches = true;
+				}
+			}
+			if (hasMatches) {
+				matchesTable.add(matchesLine);
+			}
+		}
+
+		request.setAttribute("smaptable", matchesTable);
+		System.out.println("Table "+matchesTable.size()+ " lines");
+	}
+
 	/** Prepares the data to be shown in the results page. */
-	private void prepareResults(HttpServletRequest request, HttpServletResponse response) {
+	private void prepareResults(HttpServletRequest request) {
 		SHInitiative initiative = main.getInitiative();
 		List<StandardModel> standards = initiative.getStandardCMs();
 		List<VerticalMapping> vmappings = initiative.getVerticalContentMappings();
@@ -108,7 +186,8 @@ public class PhaseSelectServlet extends HttpServlet {
 		} // last is null
 
 		///// Matrix of Vertical Matches
-		Object[][][][] vmapsMatrix = new Object[vmappings.size()][ufotypes.length][][]; // HMappings x UFOTypes x Matches x Data
+		Object[][][][] vmapsMatrix = new Object[vmappings.size()][ufotypes.length][][]; // HMappings x UFOTypes x
+																						// Matches x Data
 		Map<Element, Integer> rowspan = new HashMap<Element, Integer>();
 		for (int m = 0; m < vmappings.size(); m++) {
 			VerticalMapping vmap = vmappings.get(m);
@@ -251,7 +330,8 @@ public class PhaseSelectServlet extends HttpServlet {
 		System.out.println("HMappings.size(): " + hmappings.size());
 
 		///// MatchType Index
-		Object[][][] coverageIndex = new Object[standards.size()][standards.size() + 2][2]; // Bases x Targets x Data: c%, id
+		Object[][][] coverageIndex = new Object[standards.size()][standards.size() + 2][2]; // Bases x Targets x Data:
+																							// c%, id
 		for (int i = 0; i < standards.size(); i++) {
 			StandardModel base = standards.get(i);
 			VerticalMapping vmap = initiative.getVerticalContentMapping(base);

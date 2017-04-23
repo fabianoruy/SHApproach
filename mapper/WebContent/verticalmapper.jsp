@@ -156,6 +156,20 @@
     });
   }
   
+  /* Saves the Mapping Analysis. */
+  function saveAnalysis() {
+    var txt = $('#analysisfield').val();
+    $.ajax({
+      type : 'POST',
+      url : 'VerticalMappingServlet',
+      data : {
+        action : 'saveAnalysis',
+        text : txt,
+      }
+    });
+  }
+
+  
   /* Calls (the servlet via ajax) for discarding an element. */
   function doDiscard(elemId) {
     $.ajax({
@@ -240,6 +254,7 @@
     });
     
     $('#finishbutton').click(function(e) {
+      saveAnalysis();
       if(previouscmatchescount < cmatchescount) {
         showQuestion("This mapping has some possible Composite Matches. Do you want to deal with them now?",
           function() {showCoverageStatus();},
@@ -447,11 +462,15 @@
 
   <h2>Map the Standards' Models to the Domain Ontologies</h2>
   <p align="justify" style="width: 98%"><b>The standards' elements shall be mapped to the domain ontologies'
-      concepts (vertical mapping).</b> <br /> This tool supports the mapping by providing features for selecting the
-    desired elements and concepts and establishing different types of matches between them. Select an element from the
-    left-hand side model (the Standard Model) and select a concept from the right-hand side model (the SEON View). Then,
-    choose the suitable <a href=#nothing onclick="showCoverageInfo()">coverage relation</a> and add comments for the
-    match. Try to achieve a larger standard coverage by making as many suitable matches as possible.</p>
+      concepts (vertical mapping).</b> <br />
+      This tool supports the mapping by providing features for selecting the desired elements and concepts and
+      establishing different types of matches between them. Select an <b>Element</b> from the left-hand side model
+      (the ${standard.name}'s Model) and select a <b>Concept</b> from the right-hand side model (the SEON View).
+      Then, choose a proper <a href=#nothing onclick="showCoverageInfo()"><b>Match Type</b></a> and add comments
+      for the match. Try to achieve a larger standard coverage by making as many suitable matches as possible.<br />
+      At the end, check the <a href=#nothing onclick="showCoverageStatus()">coverage status</a> defining the composite
+      matches, and describe an analysis for this mapping.
+  </p>
 
   <!-- ##### Diagrams Blocks ##### -->
   <div>
@@ -562,7 +581,7 @@
   
   <div style="width: 1000px; margin: 15px 0 0 0">
     <b>Mapping Analysis</b> <br />
-    <textarea id="analysisfield" title="Describe the analysis about this mapping, e.g., which are the main parts/types not covered." rows="5" cols="139"></textarea>
+    <textarea id="analysisfield" title="Describe the analysis about this mapping, e.g., which are the main parts/types not covered." rows="5" cols="139">${analysis}</textarea>
   </div>
   
 
