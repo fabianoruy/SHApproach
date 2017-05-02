@@ -1,6 +1,8 @@
 package shmapper.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import com.change_vision.jude.api.inf.model.IPackage;
@@ -26,7 +28,7 @@ public abstract class Model extends Package<Element> {
 	public List<Element> getElements() {
 		return this.elements;
 	}
-	
+
 	@Override
 	public List<Element> getNotions() {
 		return getElements();
@@ -35,7 +37,7 @@ public abstract class Model extends Package<Element> {
 	public void addElement(Element elem) {
 		this.elements.add(elem);
 	}
-	
+
 	/* Removes an Element from this Model. */
 	public void removeElement(Element elem) {
 		this.elements.remove(elem);
@@ -58,6 +60,30 @@ public abstract class Model extends Package<Element> {
 			}
 		}
 		return null;
+	}
+
+	/** Sorts the elements according to their position in the diagram (top to down). */
+	public void sortElementsByPresentation() {
+		final List<NotionPosition> positions = this.getDiagram().getPositions();
+		Comparator<Element> comparator = new Comparator<Element>() {
+			public int compare(Element e1, Element e2) {
+				int pos1 = Integer.MAX_VALUE, pos2 = Integer.MAX_VALUE;
+				for (NotionPosition pos : positions) {
+					if (pos.getNotion().equals(e1)) {
+						pos1 = pos.getYpos();
+						break;
+					}
+				}
+				for (NotionPosition pos : positions) {
+					if (pos.getNotion().equals(e2)) {
+						pos2 = pos.getYpos();
+						break;
+					}
+				}
+				return pos1 - pos2;
+			}
+		};
+		Collections.sort(elements, comparator);
 	}
 
 }

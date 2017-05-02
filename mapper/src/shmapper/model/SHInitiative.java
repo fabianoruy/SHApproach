@@ -348,6 +348,14 @@ public class SHInitiative extends SerializableObject {
 		this.decisions.remove(decision);
 	}
 
+	public AnalysisDecision getDecision(Element elem) {
+		for (AnalysisDecision decision : decisions) {
+			if (decision.getElement().equals(elem))
+				return decision;
+		}
+		return null;
+	}
+
 	public List<Notion> getAllNotions() {
 		return new ArrayList<Notion>(notionMap.values());
 	}

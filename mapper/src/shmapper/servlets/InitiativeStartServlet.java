@@ -41,28 +41,6 @@ public class InitiativeStartServlet extends HttpServlet {
 				}
 
 				// this.startApp = new InitiativeStartApp(mapperdir);
-
-				// RECOVERING THE INITIATIVE
-//				this.initiative = startApp.openInitiative(title, pword);
-//				if (initiative != null) {
-					// SETTING THE INITIATIVE TO THE SESSION.
-//					request.getSession().setAttribute("initiative", initiative);
-
-					// Creating and setting the logfile and initiative directory to the session.
-//					initdir = "initiative/" + title.toLowerCase().replaceAll("[^a-zA-Z0-9.-]", "") + File.separator;
-//					System.out.println("initdir: " + initdir);
-//					String logfile = startApp.createLogOutput();
-//					request.getSession().setAttribute("initdir", initdir);
-//					request.getSession().setAttribute("logfile", logfile);
-
-//					System.out.println("\n### STARTING APPLICATION ###");
-//					System.out.println("\n# Initiative Identification: " + initiative);
-
-					// Creating and Setting the MappingApp to the Session
-//					MappingApp mapp = new MappingApp(initiative);
-//					request.getSession().setAttribute("mappingapp", mapp);
-
-
 			} else {
 				main = (ManagerApp) request.getSession().getAttribute("main");
 				request.setAttribute("initiative", main.getInitiative());
@@ -79,8 +57,6 @@ public class InitiativeStartServlet extends HttpServlet {
 					main.getInitiative().setPurpose(purpose);
 					main.getInitiative().setScope(scope);
 					main.getInitiative().setPeople(people);
-					// main.getInitiative().saveInitiative();
-					// main.log.println(".");
 					// Accessing Menu
 					request.getRequestDispatcher("phaseselector.jsp").forward(request, response);
 				}

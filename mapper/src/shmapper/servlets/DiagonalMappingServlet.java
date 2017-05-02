@@ -131,28 +131,58 @@ public class DiagonalMappingServlet extends HttpServlet {
 			List<VerticalMapping> vmappings = initiative.getVerticalContentMappings();
 			List<DiagonalMapping> dmappings = initiative.getDiagonalContentMappings();
 
-			// Number of Base Standards
-			int bcount = vmappings.size();
 			// Copying UFOTypes
 			UFOType[] ufotypes = new UFOType[UFOType.values().length + 1];
 			for (int i = 0; i < UFOType.values().length; i++) {
 				ufotypes[i] = UFOType.values()[i];
 			}
+			// Number of Base Standards
+			int bcount = vmappings.size();
+
+			// Selecting the Uncovered Elements from each base standard
+			List<Element>[] elementsByBase = new List[bcount];
+			for (int i = 0; i < vmappings.size(); i++) {
+				VerticalMapping vmap = vmappings.get(i);
+				StandardModel base = vmap.getBase();
+				elementsByBase[i] = new ArrayList<>();
+				for (Element elem : base.getElements()) {
+					CoverageSituation sit = vmap.getCoverageSituation(elem);
+					if (sit != CoverageSituation.FULLY && sit != CoverageSituation.DISCARDED) {
+						elementsByBase[i].add(elem);
+					}
+				}
+			}
 
 			Object[][][][] typesMatrix = new Object[ufotypes.length][][][]; // UFOType x BaseElems x Bases x Data
 			for (int t = 0; t < ufotypes.length; t++) {
 				// Determining the max row number for the type (Elements)
+				// int ecount = 0;
+				// for (Mapping vmap : vmappings) {
+				// List<Element> elems = vmap.getNonFullyCoveredElementsByUfotype(ufotypes[t]);
+				// if (elems.size() > ecount) {
+				// ecount = elems.size();
+				// }
+				// }
 				int ecount = 0;
-				for (Mapping vmap : vmappings) {
-					List<Element> elems = vmap.getNonFullyCoveredElementsByUfotype(ufotypes[t]);
-					if (elems.size() > ecount) {
-						ecount = elems.size();
+				for (List<Element> elements : elementsByBase) {
+					int nonCovered = 0;
+					for (Element elem : elements) {
+						if (elem.getIndirectUfotype().equals(ufotypes[t]))
+							nonCovered++;
 					}
+					if (nonCovered > ecount)
+						ecount = nonCovered;
 				}
+
 				Object[][][] elements = new Object[ecount][bcount][3]; // BaseElems x Bases x Data
 				for (int i = 0; i < bcount; i++) {
 					// Getting the non covered elements of each type
-					List<Element> elems = vmappings.get(i).getNonFullyCoveredElementsByUfotype(ufotypes[t]);
+					List<Element> elems = new ArrayList<>();
+					for (Element elem : elementsByBase[i]) {
+						if (elem.getIndirectUfotype().equals(ufotypes[t]))
+							elems.add(elem);
+					}
+					// List<Element> elems = vmappings.get(i).getNonFullyCoveredElementsByUfotype(ufotypes[t]);
 					for (int j = 0; j < ecount; j++) {
 						if (elems.size() > j) {
 							Element elem = elems.get(j);
@@ -237,12 +267,6 @@ public class DiagonalMappingServlet extends HttpServlet {
 			// Number of Base Standards
 			int bcount = vmappings.size();
 
-			// Elements with Decisions
-			List<Element> decidedElems = new ArrayList<>();
-			for (AnalysisDecision decision : initiative.getDecisions()) {
-				decidedElems.add(decision.getElement());
-			}
-
 			// Selecting the Uncovered Elements from each base standard
 			List<Element>[] elementsByBase = new List[bcount];
 			for (int i = 0; i < elementsByBase.length; i++) {
@@ -251,7 +275,7 @@ public class DiagonalMappingServlet extends HttpServlet {
 				for (Element elem : base.getElements()) {
 					CoverageSituation sit = initiative.getCoverageSituation(elem);
 					if (sit != CoverageSituation.FULLY && sit != CoverageSituation.DISCARDED) {
-						if (!decidedElems.contains(elem)) {
+						if (initiative.getDecision(elem) == null) {
 							elementsByBase[i].add(elem);
 						}
 					}

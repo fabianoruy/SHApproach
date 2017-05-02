@@ -16,14 +16,14 @@
   border-radius: 8px;
   border: 2px solid blue;
   padding: 8px;
-  min-height: 140px;
+  min-height: 150px;
 }
 
 .concbox {
   border-radius: 8px;
   border: 2px solid green;
   padding: 8px;
-  min-height: 140px;
+  min-height: 150px;
 }
 
 </style>
@@ -61,7 +61,8 @@
         action : 'match',
         elem : $('#elementidfield').val(),
         conc : $('#conceptidfield').val(),
-        cover : $('#coveringfield').val(),
+        type : $('#matchselect').val(),
+        cover : $('input[name=coveradio]:checked').val(),
         comm : $('#commentsfield').val(),
         force : forceBT  // forces Basetype
       },
@@ -72,14 +73,14 @@
   }
 
   /* Calls (the servlet via ajax) for creating a Composite Match. */
-  function doCompositeMatch(cover) {
+  function doCompositeMatch(type) {
     $.ajax({
       type : 'POST',
       url : 'VerticalMappingServlet',
       data : {
         action : 'compositeMatch',
         elem : elemSavedId,
-        cover : cover
+        type : type
       },
       success : function(responseXml) {
         updateMapping(responseXml);
@@ -233,7 +234,12 @@
     $('#matchingsdiv').html($(responseXml).find('matchestable').html());
     $('#messagediv').html($(responseXml).find('messagetext').html());
     $('#messagediv').scrollTop(1E10);
-    $('#coveringfield').prop("selectedIndex", 0);
+    $('#matchselect').prop("selectedIndex", 0);
+    $('#rfull').prop('checked', true);
+    $('#rfull').prop('disabled', false);
+    $("#rpart").prop("disabled", true);
+    $("#rlarge").prop("disabled", true);
+
     $('#commentsfield').val("");
     $('#coveragediv').html($(responseXml).find('coveragetable').html());
     $('#covernumber').text($(responseXml).find('coveragetext').html());
@@ -252,6 +258,26 @@
         doMatch(false);
       }
     });
+    
+    $('#matchselect').change(function() {
+      $('#rfull').prop('checked', false);
+      $('#rpart').prop('checked', false);
+      $('#rlarge').prop('checked', false);
+      if($(this).val() == 'EQUIVALENT' || $(this).val() == 'PARTIAL') {
+        $('#rfull').prop('checked', true);
+        $('#rfull').prop('disabled', false);
+        $("#rpart").prop("disabled", true);
+        $("#rlarge").prop("disabled", true);
+      } else if($(this).val() == 'WIDER' || $(this).val() == 'OVERLAP') {
+        $('#rfull').prop('disabled', true);
+        $("#rpart").prop("disabled", false);
+        $("#rlarge").prop("disabled", false);
+      } else {
+        $('#rfull').prop('disabled', false);
+        $("#rpart").prop("disabled", false);
+        $("#rlarge").prop("disabled", false);
+      }
+	});
     
     $('#finishbutton').click(function(e) {
       saveAnalysis();
@@ -307,7 +333,7 @@
     });
     
     // Clears the concept box when "NORELATION" is selected
-    $('#coveringfield').change(function() {
+    $('#matchselect').change(function() {
       if ($(this).val() == 'NORELATION') {
         $('#conceptidfield').val('');
         $('#conceptfield').text('');
@@ -344,30 +370,34 @@
     // getting values
     var elem = $('#elementidfield').val();
     var conc = $('#conceptidfield').val();
-    var relc = $('#coveringfield').val();
+    var type = $('#matchselect').val();
     var comm = $('#commentsfield').val();
+    var cover = $('input[name=coveradio]:checked').val();
 
     // verifying
-    if (elem == '' || (conc == '' && relc != 'NORELATION')) {
+    if (elem == '' || (conc == '' && type != 'NORELATION')) {
       showMessage("Select an element from each diagram.");
       return false;
     }
-    if (comm == '' && (relc == 'WIDER' || relc == 'OVERLAP')) {
-      showMessage("WIDER and OVERLAP matches require a comment explaining the non-covered part(s).");
-      return false;
-    }
-    if (comm == '' && (relc == 'SPECIALIZATION')) {
-      showMessage("SPECIALIZATION matches require a comment explaining the specialization restrictions (conditions to be satisfied for specializing).");
+    if (cover != 'FULL' && comm == '') {
+      showMessage("Matches <b>not FULLY</b> covered require a comment explaining the uncovered part(s).");
       return false;
     }
     return true;
   }
 
-  function showCoverageInfo() {
-    $("#coverinfo").dialog({
+  function showMatchtypeInfo() {
+    $("#matchinfo").dialog({
       width : 1000
     });
   }
+  
+  function showCoverageInfo() {
+    $("#coverinfo").dialog({
+      width : 600
+    });
+  }
+
 
   function showCoverageStatus() {
     $("#coveragediv").dialog({
@@ -466,7 +496,7 @@
       This tool supports the mapping by providing features for selecting the desired elements and concepts and
       establishing different types of matches between them. Select an <b>Element</b> from the left-hand side model
       (the ${standard.name}'s Model) and select a <b>Concept</b> from the right-hand side model (the SEON View).
-      Then, choose a proper <a href=#nothing onclick="showCoverageInfo()"><b>Match Type</b></a> and add comments
+      Then, choose a proper <a href=#nothing onclick="showMatchtypeInfo()"><b>Match Type</b></a> and add comments
       for the match. Try to achieve a larger standard coverage by making as many suitable matches as possible.<br />
       At the end, check the <a href=#nothing onclick="showCoverageStatus()">coverage status</a> defining the composite
       matches, and describe an analysis for this mapping.
@@ -508,9 +538,9 @@
   <!-- ***** Diagrams Blocks ***** -->
 
   <!-- ##### Match Blocks ##### -->
-  <h3>How do the Standard's Elements cover the Ontology's Concepts?</h3>
+  <h3>How do the Standard's Elements match to the Ontology's Concepts?</h3>
   <div style="display: inline-block; width: 1000px">
-    <div style="width: 410px; float: left">
+    <div style="width: 400px; float: left">
       <label> <b>Standard Element</b>&nbsp;&nbsp; </label>
       <img id="discardbutton" src="images/favicon-discarded.ico" title="Discard element (remove it from the initiative scope)" width="16px" style="cursor:pointer" onclick="discardElement()" hidden/>
       <img id="restorebutton" src="images/favicon-restore.ico" title="Recover element (bring it back to the initiative scope)" width="16px" style="cursor:pointer" onclick="restoreElement()" hidden/>
@@ -521,10 +551,10 @@
       </div>
     </div>
 
-    <div style="width: 150px; float: left; margin: 0 20px 0 10px">
+    <div style="width: 170px; float: left; margin: 0 20px 0 10px">
       <div style="display: inline-block">
-        <b>Match Type (<a href=#nothing onclick="showCoverageInfo()">?</a>)
-        </b> <br /> <select id="coveringfield" title="Which is the coverage of the Element on the Concept?">
+        <b>Match Type (<a href=#nothing onclick="showMatchtypeInfo()">?</a>)
+        </b> <br /> <select id="matchselect" title="Which is the match type of the Element on the Concept?">
           <option value="EQUIVALENT">[E] EQUIVALENT</option>
           <option disabled>──────────</option>
           <option value="PARTIAL">[P] PART OF</option>
@@ -539,14 +569,23 @@
           <!-- <option disabled>──────────</option> -->
           <!-- <option value="NORELATION">[-]  NO RELATION</option> -->
         </select>
+        <br/>
+        <br/>
+        <form id="coveradio" action="">
+          <b>Coverage (<a href=#nothing onclick="showCoverageInfo()">?</a>)</b><br/>
+          <input id="rpart" type="radio" name="coveradio" value="PARTIAL" disabled title="The concept covers less than 50% of the element."> Partially<br/>
+          <input id="rlarge" type="radio" name="coveradio" value="LARGE" disabled title="The concept covers more than 50% of the element."> Largely<br/>
+          <input id="rfull" type="radio" name="coveradio" value="FULL" checked title="The concept totally covers the element."> Fully<br/>
+        </form>
       </div>
-      <div style="display: inline-block; width: 140px; height: 138px; position: relative">
+      
+      <div style="display: inline-block; width: 170px; height: 55px; position: relative">
         <button id="matchbutton"
-          style="width: 80px; height: 30px; font-weight: bold; position: absolute; top: 25px; right: 25px;">MATCH!</button>
+          style="width: 80px; height: 30px; font-weight: bold; position: absolute; bottom: 0px; left: 50px;">MATCH!</button>
       </div>
     </div>
 
-    <div style="width: 410px; float: left">
+    <div style="width: 400px; float: left">
       <label> <b>Ontology Concept</b>
       </label> <br />
       <div class="concbox" title="Select a Concept from the Ontology model.">
@@ -601,7 +640,7 @@
     style="font-size: 95%; overflow: auto; border: 1px solid gray; width: 500px; height: 500px" hidden></div>
 
   <!-- Information Dialog -->
-  <div id="coverinfo" title="Types of Match" hidden>
+  <div id="matchinfo" title="Types of Match" hidden>
     <p>Some Match Types are used to establish a relation between a <b>Standard&rsquo;s Element</b> and an <b>Ontology&rsquo;s
         Concept</b> (or between two Elements from different Standards). It is a binary relation comparing the <b>notions</b>. <br />
         For example, <b>A [P] O</b> (A is PART OF O), means that &ldquo;<em>Element A represents a notion that <b>is part of</b> the notion
@@ -610,9 +649,10 @@
     <table border=1 cellpadding=6 style="width: 100%; font-size: 95%">
       <tbody style="border: 1px solid gray">
         <tr style="background-color: #F0F0F0">
-          <th width="140"><b>Type of Match</b></th>
+          <th width="120"><b>Type of Match</b></th>
           <th width="60"><b>Symbol</b></th>
-          <th width="250"><b>Meaning</b></th>
+          <th width="240"><b>Meaning</b></th>
+          <th width="120"><b>Application</b></th>
           <!-- <th width="150"><b>Representation</b></th> -->
           <th width="250"><b>Example</b></th>
         </tr>
@@ -620,6 +660,7 @@
           <td><b>[E] EQUIVALENT</b></td>
           <td><b>A [E] O</b></td>
           <td>A is Equivalent to O.<br /> Element A represents a notion that <b>is equivalent to</b> the notion represented by Concept O.</td>
+          <td><b>Equality Match</b><br/>Apply to any type of notion.</td>
           <!-- <td style="text-align: center"><IMG src="images/Equivalent.png"><br/><IMG src="images/Equivalent2.png"></td> -->
           <td>(Element) Risk Plan<br /> <b>[E]</b> <br /> (Concept) Plan of Risks
           </td>
@@ -629,6 +670,7 @@
           <td><b>A [P] O</b></td>
           <td>A is Part of O<br /> Element A represents a notion that <b>is part of</b> the notion represented by Concept O.<br/>(O includes A)</td>
           <!-- <td style="text-align: center"><IMG src="images/Partof.png"><br/><IMG src="images/Partof2.png"></td> -->
+          <td rowspan="3"><b>Composition Matches</b><br/>Apply to matches involving complex notions such as complex objects, events, and collective agents (e.g., Artifacts, Processes/Activities, and Teams).</td>
           <td>(Element) Risk Plan<br /> <b>[P]</b> <br /> (Concept) Project Plan
           </td>
         </tr>
@@ -653,6 +695,7 @@
           <td><b>A [S] O</b></td>
           <td>A is a Specialization of O.<br /> Element A represents a notion that <b>specializes</b> the notion represented by Concept O.</td>
           <!-- <td style="text-align: center"><IMG src="images/Specialization.png"></td> -->
+          <td rowspan="2"><b>Specialization/Generalization Matches</b><br/>Apply preferably for objects and agents (e.g., Artifacts and Stakeholders).</td>
           <td>(Element) Software Designer <br /> <b>[S]</b> <br /> (Concept) Developer
           </td>
         </tr>
@@ -669,6 +712,7 @@
           <td><b>A [A] O</b></td>
           <td>A Acts as O.<br /> Element A represents a notion that can <b>act as</b> the <i>role</i> represented by Concept O.<br/></td>
           <!-- <td style="text-align: center"><IMG src="images/Acts.png"></td> -->
+          <td rowspan="2"><b>Role-related Matches</b><br/>Apply when one of the notions is a role, usually objects and agents (e.g., Artifacts and Stakeholders roles).</td>
           <td>(Element) System Analyst <br /> <b>[A]</b> <br /> (Concept) Requirements Reviewer <br/> <small><i><br/>(a System Analyst can play the role of Requirements Reviewer)</i></small>
           </td>
         </tr>
@@ -680,15 +724,15 @@
           <td>(Element) Requirements Agreement <br /> <b>[B]</b> <br /> (Concept) Client E-mail <br/> <small><i><br/>(a Client E-mail can play the role of Requirements Agreement)</i></small>
           </td>
         </tr>
-        <tr>
+<!--         <tr>
           <td><b>[-] </b></td>
           <td><b>A [-]</b></td>
           <td>A has no relation.<br /> Element A represents a notion that <b>has no corresponding relation</b> with any notion in the target model.<br/></td>
-          <!-- <td style="text-align: center">-</td> -->
+          <td style="text-align: center">-</td>
           <td>(Element) Sequence Diagram <br /> <b>[-]</b> <br /> <small><i><br/>(there is no corresponding concept in the ontology)</i></small>
           </td>
         </tr>
-        
+ -->        
       </tbody>
     </table>
     <p>Elements with no matches are considered <b>non covered</b>.
@@ -698,8 +742,20 @@
     </p>
   </div>
 
+  <div id="coverinfo" title="Elements Coverage" hidden>
+    <p>In a match, the Ontology Concept covers the Standard Element in some extension. Please, inform the
+      approximate coverage:<br />
+    <ul>
+      <li><b>Partially</b>: The concept covers less than 50% of the element.</li>
+      <li><b>Largely</b>: The concept covers more than 50% of the element.</li>
+      <li><b>Fully</b>: The concept totally covers the element.</li>
+    </ul>
+    This information will be used in the mapping covering numbers. 
+    </p>
+    </div>
 
-  <!-- ##### Dialog Boxes ##### -->
+
+    <!-- ##### Dialog Boxes ##### -->
 
   <!-- Simple Message -->
   <div id="dialog-message" title="Message" hidden>

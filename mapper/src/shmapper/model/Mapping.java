@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import shmapper.model.Element.CoverageSituation;
+import shmapper.model.Match.Coverage;
 import shmapper.model.Notion.UFOType;
 import shmapper.model.Relation.RelationType;
 
@@ -16,7 +17,7 @@ public abstract class Mapping extends SerializableObject {
 	private StandardModel		base;
 	private SHInitiative		initiative;
 	private boolean				structural;
-	private String analysis;
+	private String				analysis;
 	private List<Match>			matches;
 	private MappingStatus		status;
 
@@ -49,26 +50,67 @@ public abstract class Mapping extends SerializableObject {
 		this.structural = structural;
 	}
 
+	/** Returns the coverage of a single element. */
+	public double getCoverage(Element element) {
+		double cover = 0.0;
+		List<Match> matches = getMatchesBySource(element);
+		for (Match match : matches) {
+			if (match.getCoverage() == Coverage.FULL)
+				return Coverage.FULL.getValue();
+			cover += match.getCoverage().getValue();
+		}
+		if (cover >= Coverage.FULL.getValue())
+			cover = ((double) matches.size()) / (matches.size() + 1);
+		return cover;
+	}
+
 	/** Returns the coverage of the matches over the Standard's Elements (base). */
 	public int getCoverage() {
-		// coverage (%): baseModel.elements.([E] + [P] + [W]/2 + [O]/2) / baseModel.elements;
-		int all = getBase().getElements().size() - getDiscardedElements().size();
-		int partially = getPartiallyCoveredElements().size();
-		int noncovered = getNonCoveredElements().size();
-		int fully = all - partially - noncovered;
-		double coverage = ((partially * 0.35 + fully) / all) * 100;
-		if (fully == all) {
+		//System.out.println("\n" + this + " COVERAGE");
+		// coverage (%): SOMA(baseModel.elements.coverage) / baseModel.elements;
+		int coverage;
+		List<Element> elements = new ArrayList<>(getBase().getElements());
+		elements.removeAll(getDiscardedElements());
+
+		int total = elements.size();
+		double sum = 0.0;
+		for (Element elem : elements) {
+			double cover = getCoverage(elem);
+			sum += cover;
+			//if (cover > 0) System.out.println(elem + ": " + cover);
+		}
+		coverage = (int) Math.round(sum * 100 / total);
+		//System.out.println("COVERAGE: (" + sum + "/" + total + ") = " + coverage + "\n");
+		if (coverage == 100) {
 			this.status = MappingStatus.FINISHED;
-			return 100;
-		} else if (coverage > 0.1) {
+		} else if (coverage > 0) {
 			this.status = MappingStatus.STARTED;
 		} else {
 			this.status = MappingStatus.PLANNED;
 		}
-		// System.out.println(this + ": All(" + all + "), Full(" + fully + "), Part(" + partially + "), Non("
-		// +noncovered + "): Cover(" + coverage + "%)");
-		return (int) Math.round(coverage);
+		return coverage;
 	}
+
+	/** Returns the coverage of the matches over the Standard's Elements (base). */
+//	public int getCoverage0() {
+//		// coverage (%): baseModel.elements.([E] + [P] + [W]/2 + [O]/2) / baseModel.elements;
+//		int all = getBase().getElements().size() - getDiscardedElements().size();
+//		int partially = getPartiallyCoveredElements().size();
+//		int noncovered = getNonCoveredElements().size();
+//		int fully = all - partially - noncovered;
+//		double coverage = ((partially * 0.35 + fully) / all) * 100;
+//		if (fully == all) {
+//			this.status = MappingStatus.FINISHED;
+//			return 100;
+//		} else if (coverage > 0.1) {
+//			this.status = MappingStatus.STARTED;
+//		} else {
+//			this.status = MappingStatus.PLANNED;
+//		}
+//		// System.out.println(this + ": All(" + all + "), Full(" + fully + "), Part(" + partially + "), Non("
+//		// +noncovered + "): Cover(" + coverage + "%)");
+//		return (int) Math.round(coverage);
+//	}
 
 	public MappingStatus getStatus() {
 		return status;
@@ -186,8 +228,7 @@ public abstract class Mapping extends SerializableObject {
 		}
 		return tmatches;
 	}
-	
-	
+
 	/** Returns a map of the current situations of all elements of this mapping. */
 	public Map<Element, Element.CoverageSituation> getElementsSituations() {
 		Map<Element, Element.CoverageSituation> situations = new HashMap<>();
@@ -211,7 +252,6 @@ public abstract class Mapping extends SerializableObject {
 		return CoverageSituation.PARTIALLY;
 	}
 
-
 	/** Returns the current discared elements of the mapping. */
 	public List<Element> getDiscardedElements() {
 		List<Element> elems = new ArrayList<Element>();
@@ -224,50 +264,50 @@ public abstract class Mapping extends SerializableObject {
 	}
 
 	/** Returns the current non covered elements of the mapping. */
-	public List<Element> getNonCoveredElements() {
-		List<Element> elems = new LinkedList<Element>(base.getElements());
-		for (Match match : matches) {
-			elems.remove(match.getSource());
-		}
-		elems.removeAll(getDiscardedElements());
-		return elems;
-	}
+//	public List<Element> getNonCoveredElements() {
+//		List<Element> elems = new LinkedList<Element>(base.getElements());
+//		for (Match match : matches) {
+//			elems.remove(match.getSource());
+//		}
+//		elems.removeAll(getDiscardedElements());
+//		return elems;
+//	}
 
 	/** Returns the current fully covered elements of the mapping. */
-	public List<Element> getFullyCoveredElements() {
-		List<Element> elems = new ArrayList<Element>();
-		for (Match match : matches) {
-			MatchType cover = match.getMatchType();
-			// adding all elements with Equivalent or Partial matches
-			if (cover == MatchType.EQUIVALENT || cover == MatchType.PARTIAL) {
-				elems.add(match.getSource());
-			}
-		}
-		return elems;
-	}
+//	public List<Element> getFullyCoveredElements() {
+//		List<Element> elems = new ArrayList<Element>();
+//		for (Match match : matches) {
+//			MatchType cover = match.getMatchType();
+//			// adding all elements with Equivalent or Partial matches
+//			if (cover == MatchType.EQUIVALENT || cover == MatchType.PARTIAL) {
+//				elems.add(match.getSource());
+//			}
+//		}
+//		return elems;
+//	}
 
 	/** Returns the current partially covered elements of the mapping. */
-	public List<Element> getPartiallyCoveredElements() {
-		List<Element> elems = new LinkedList<Element>(base.getElements());
-		// removing discarded, non covered and fully covered elements
-		elems.removeAll(getDiscardedElements());
-		elems.removeAll(getNonCoveredElements());
-		elems.removeAll(getFullyCoveredElements());
-		return elems;
-	}
-	
+//	public List<Element> getPartiallyCoveredElements() {
+//		List<Element> elems = new LinkedList<Element>(base.getElements());
+//		// removing discarded, non covered and fully covered elements
+//		elems.removeAll(getDiscardedElements());
+//		elems.removeAll(getNonCoveredElements());
+//		elems.removeAll(getFullyCoveredElements());
+//		return elems;
+//	}
+
 	/** Returns the current non/partially covered elements of the given type in the mapping. */
-	public List<Element> getNonFullyCoveredElementsByUfotype(UFOType type) {
-		List<Element> elems = new LinkedList<Element>(base.getElementsByUfotype(type));
-		for (Match match : matches) {
-			MatchType cover = match.getMatchType();
-			// removing elements with Equivalent or Partial (fully covered).
-			if (cover == MatchType.EQUIVALENT || cover == MatchType.PARTIAL) {
-				elems.remove(match.getSource());
-			}
-		}
-		return elems;
-	}
+//	public List<Element> getNonFullyCoveredElementsByUfotype(UFOType type) {
+//		List<Element> elems = new LinkedList<Element>(base.getElementsByUfotype(type));
+//		for (Match match : matches) {
+//			MatchType cover = match.getMatchType();
+//			// removing elements with Equivalent or Partial (fully covered).
+//			if (cover == MatchType.EQUIVALENT || cover == MatchType.PARTIAL) {
+//				elems.remove(match.getSource());
+//			}
+//		}
+//		return elems;
+//	}
 
 	/** Adds a match to the mapping. */
 	public void addMatch(Match match) {
@@ -297,7 +337,7 @@ public abstract class Mapping extends SerializableObject {
 	public void removeMatch(Match rmatch) {
 		matches.remove(rmatch);
 	}
-	
+
 	public String getAnalysis() {
 		return analysis;
 	}

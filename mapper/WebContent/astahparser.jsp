@@ -107,7 +107,7 @@
       Regardless of other packages, this tool will read the packages named <i>Initiative</i> and <i>Standards
         Structural Models</i>.
       <ul>
-        <li><i>Initiative</i> package: must have a single subpackage for your initiative (e.g. <i>${initiative.domain}</i>)
+        <li><i>Initiative</i> package: must have a single subpackage for your initiative (e.g. <i>Quality Assurance</i>)
           with 3 subpackages:
           <ul>
             <li><i>1.SEON View</i>: with a single diagram representing this view, and the selected portion of SEON

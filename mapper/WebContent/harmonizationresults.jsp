@@ -172,6 +172,7 @@ td,th {
           </c:forEach>
         </c:forEach>
       </table>
+      <p>${vmap.analysis}</p>
     </div>
     <br />
   </c:forEach>
@@ -242,12 +243,16 @@ td,th {
           <c:forEach items="${row}" var="cell">
             <c:set var="element" value="${cell[0]}" />
             <c:set var="matches" value="${cell[1]}" />
-            <c:set var="situation" value="${cell[2]}" />
+            <c:set var="justif" value="${cell[2]}" />
+            <c:set var="situation" value="${cell[3]}" />
             <td class='${situation}'>
               <div style="font-size: 90%">
                 <c:if test="${not empty element}">
                   <label title="${element.definition}">${element}</label>
                   <div style="float: right; display: inline">
+                    <c:if test="${not empty justif}">
+                      <label title="${justif}">[J]</label>
+                    </c:if>
                     <c:if test="${not empty matches}">
                       <label title="${matches}">[M]</label>
                     </c:if>
@@ -266,8 +271,8 @@ td,th {
   <h2 id="coverageanalysis"><b>Coverage Analysis: Elements' Justifications</b></h2>
   <table>
     <tr style="background-color: #999999">
-      <th style="width: 40%">ELEMENT</th>
-      <th style="width: 60%">ANALYSIS</th>
+      <th style="width: 25%">ELEMENT</th>
+      <th style="width: 75%">ANALYSIS</th>
     </tr>
     <c:forEach items="${decisionsMatrix}" var="stdDecisions" varStatus="sloop">
       <c:forEach items="${stdDecisions}" var="decision" varStatus="loop">
@@ -276,7 +281,7 @@ td,th {
             <td colspan="100%"><b>${stdDecisions[0].element.model}</b></td>
           </tr>
         </c:if>
-        <tr>
+        <tr style="font-size: 90%">
           <c:set var="color" value="#eeeedd"/>
           <c:if test="${decision.reason == 'OUTOFSCOPE'}"><c:set var="color" value="#ffe0cc"/></c:if>
           <c:if test="${decision.reason == 'ALREADYCOVERED'}"><c:set var="color" value="#ccffcc"/></c:if>

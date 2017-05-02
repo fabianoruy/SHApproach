@@ -55,7 +55,7 @@
       <td style="width: 300px" title="${elem.definition}">(${elem.indirectUfotype})&nbsp;${elem}</td>
       <td style="width: 80px"><b>${decision.reason.text}</b></td>
       <td style="width: 400px">
-        <span style="cursor:pointer" onclick="editJustification('${elem.id}', '${decision.justification}')">${decision.justification}</span>
+        <span style="cursor:pointer" title="Edit" onclick="editJustification('${elem.id}', '${decision.justification}')">${decision.justification}</span>
       </td>
       <td><img src="images/favicon-remove.ico" title="Remove Decision" width="16px" style="cursor: pointer"
             onclick="showQuestion('Do you want to remove the <b>decision (${decision.reason.text})</b> on the element <b>${elem}</b>?', function() {removeDecision('${elem.id}');})" />

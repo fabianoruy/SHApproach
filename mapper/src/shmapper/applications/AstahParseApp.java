@@ -216,7 +216,7 @@ public class AstahParseApp {
 
 	/* Reads the content model package and creates the SCMs. */
 	private void parseContentModels(IPackage contentpack) throws ParserException {
-		// Creates the Standards Content Models (SCMs) and their element.
+		// Creates the Standards Content Models (SCMs) and their elements.
 		addResult("Standards' Content Models created: \n");
 		for (INamedElement node : contentpack.getOwnedElements()) {
 			if (node instanceof IPackage) {
@@ -232,6 +232,7 @@ public class AstahParseApp {
 				parseElements(stdmodel, stdpack);
 				Diagram diagram = parseDiagram(stdpack, DiagramType.SCM);
 				stdmodel.setDiagram(diagram);
+				stdmodel.sortElementsByPresentation();
 			}
 		}
 
@@ -246,6 +247,7 @@ public class AstahParseApp {
 		parseIMElements(icm, contentpack);
 		Diagram diagram = parseDiagram(contentpack, DiagramType.ICM);
 		icm.setDiagram(diagram);
+		icm.sortElementsByPresentation();
 	}
 
 	/* Reads the classes of an Ontology package and creates the Concepts. */

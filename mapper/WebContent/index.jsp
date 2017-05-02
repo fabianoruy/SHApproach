@@ -27,6 +27,8 @@
         <b>Select an Initiative:</b><br/>
         <select name="user" size="5" style="width:250px" required>
             <option value="Quality Assurance">Quality Assurance (test)</option>
+            <option value="Software Measurement">Software Measurement</option>
+            <option value="Dynamic Testing">Dynamic Testing</option>
             <option value="Configuration Management">Configuration Management</option>
             <option value="Requirements Development">Requirements Development</option>
             <option value="Software Design">Software Design</option>
@@ -47,20 +49,21 @@
         . Parse your astah file<br />
         . Import and process Structural Mappings<br/>
         . Do Vertical Mappings (simple and composite matches, disjoint and basetype validations)<br/>
+        + Use eight distinct Match Types<br/>
         . Do ICM Mappings<br />
-        . Do Horizontal Mappings<br />
-        . Deduce matches in Horizontal Mappings <br/>
+        + Justify decisions on uncovered elements <br/>
         . Monitor mappings' coverage<br/>
-        . Save progress
-        + See initiative results<br />
+        . Save progress<br />
+        . See initiative results<br />
       </p>
       <p>
         <b>In this version, you can't:</b><br />
-        - Justify decisions on uncovered elements
+        . Do Horizontal Mappings<br />
+        . Deduce matches in Horizontal Mappings <br/>
       </p>
       <br/>
       <br/>
-      <p><b> Version 0.6 - 2016-12-07</b></p>
+      <p><b> Version 0.7 - 2016-05-02</b></p>
     </code>
   </div>
 </BODY>

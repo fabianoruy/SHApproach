@@ -23,7 +23,6 @@ public class ManagerApp {
 	private StructuralMappingApp smapApp;
 	private MappingApp mapApp;
 	private SHInitiative initiative;
-	// private String astahpath;
 	private String mapperpath;
 	private String initpath;
 	private String logpath;
@@ -154,7 +153,7 @@ public class ManagerApp {
 
 	//////////////////////////// STATIC ////////////////////////////
 	public static void manageUsers(String path) {
-		//createUsers(path); //only once!!
+		createUsers(path); //only once!!
 		if (!readUsers) {
 			recoverUsers(path);
 		}
@@ -181,6 +180,8 @@ public class ManagerApp {
 		// Creates the users and save them in a index file
 		List<User> users = new ArrayList<User>();
 		users.add(new User("Quality Assurance", "."));
+		users.add(new User("Software Measurement", "SM15"));
+		users.add(new User("Dynamic Testing", "DT16"));
 		users.add(new User("Configuration Management", "CM17"));
 		users.add(new User("Requirements Development", "RD18"));
 		users.add(new User("Software Design", "SD19"));

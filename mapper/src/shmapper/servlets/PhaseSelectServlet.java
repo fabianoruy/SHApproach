@@ -63,9 +63,9 @@ public class PhaseSelectServlet extends HttpServlet {
 				// Preparing the table with the Structural Mappings (and Matches)
 				this.prepareStructuralMappingsTable(request);
 
-				//request.getRequestDispatcher("phaseselector.jsp").forward(request, response);
+				// request.getRequestDispatcher("phaseselector.jsp").forward(request, response);
 				request.getRequestDispatcher("smatches.jsp").forward(request, response);
-				
+
 			} else if (request.getParameter("action").equals("openResults")) {
 				// Opening the results page
 				main.log.println("# Harmonization Results");
@@ -169,7 +169,17 @@ public class PhaseSelectServlet extends HttpServlet {
 		}
 
 		request.setAttribute("smaptable", matchesTable);
-		System.out.println("Table "+matchesTable.size()+ " lines");
+		System.out.println("Table " + matchesTable.size() + " lines");
+	}
+
+	private List<Element> getValidElementsByUfotype(Mapping map, UFOType type) {
+		List<Element> elems = map.getBase().getElementsByUfotype(type);
+		List<Element> result = new ArrayList<>();
+		for (Element elem : elems) {
+			if (!map.getInitiative().isDiscarded(elem))
+				result.add(elem);
+		}
+		return result;
 	}
 
 	/** Prepares the data to be shown in the results page. */
@@ -179,6 +189,10 @@ public class PhaseSelectServlet extends HttpServlet {
 		List<VerticalMapping> vmappings = initiative.getVerticalContentMappings();
 		List<DiagonalMapping> dmappings = initiative.getDiagonalContentMappings();
 		List<HorizontalMapping> hmappings = initiative.getHorizontalContentMappings();
+
+		for (StandardModel std : standards) {
+			std.sortElementsByPresentation();
+		}
 
 		// UFOTypes
 		UFOType[] ufotypes = new UFOType[UFOType.values().length + 1];
@@ -195,7 +209,7 @@ public class PhaseSelectServlet extends HttpServlet {
 			for (int t = 0; t < ufotypes.length; t++) {
 				List<Match> allMatches = new ArrayList<Match>();
 				// Getting the elements of each type
-				for (Element elem : vmap.getBase().getElementsByUfotype(ufotypes[t])) {
+				for (Element elem : getValidElementsByUfotype(vmap, ufotypes[t])) {
 					List<Match> elemMatches = vmap.getMatchesBySource(elem);
 					if (!elemMatches.isEmpty()) {
 						allMatches.addAll(elemMatches);
@@ -235,21 +249,21 @@ public class PhaseSelectServlet extends HttpServlet {
 			dmapsMatrix[i][1] = matches;
 		}
 
-		///// Matrix of Elements MatchType
+		///// Matrix of Elements Coverage
 		Object[][][][] coverageMatrix = new Object[ufotypes.length][][][]; // UFOType x BaseElems x Bases x Data
 		for (int t = 0; t < ufotypes.length; t++) {
 			// Determining the max row number for the type (Elements)
 			int ecount = 0;
 			for (StandardModel std : initiative.getStandardCMs()) {
-				List<Element> elems = std.getElementsByUfotype(ufotypes[t]);
+				List<Element> elems = getValidElementsByUfotype(initiative.getVerticalContentMapping(std), ufotypes[t]);
 				if (elems.size() > ecount) {
 					ecount = elems.size();
 				}
 			}
-			Object[][][] elementsMatrix = new Object[ecount][standards.size()][3]; // BaseElems x Bases x Data
+			Object[][][] elementsMatrix = new Object[ecount][standards.size()][4]; // BaseElems x Bases x Data
 			for (int i = 0; i < standards.size(); i++) {
 				// Getting the elements of each type
-				List<Element> elems = standards.get(i).getElementsByUfotype(ufotypes[t]);
+				List<Element> elems = getValidElementsByUfotype(initiative.getVerticalContentMapping(standards.get(i)), ufotypes[t]);
 				for (int j = 0; j < ecount; j++) {
 					if (elems.size() > j) {
 						Element elem = elems.get(j);
@@ -271,13 +285,21 @@ public class PhaseSelectServlet extends HttpServlet {
 								strmatches += "\u2022 " + match + "\n";
 							}
 						}
+						String strjustif = null;
+						AnalysisDecision decision = initiative.getDecision(elem);
+						if (decision != null) {
+							strjustif = "This element is justified\n" + decision.getReason() + ": " + decision.getJustification();
+						}
+
 						elementsMatrix[j][i][0] = elem;
 						elementsMatrix[j][i][1] = strmatches;
-						elementsMatrix[j][i][2] = initiative.getCoverageSituation(elem);
+						elementsMatrix[j][i][2] = strjustif;
+						elementsMatrix[j][i][3] = initiative.getCoverageSituation(elem);
 					} else {
 						elementsMatrix[j][i][0] = null;
 						elementsMatrix[j][i][1] = null;
-						elementsMatrix[j][i][2] = "EMPTY";
+						elementsMatrix[j][i][2] = null;
+						elementsMatrix[j][i][3] = "EMPTY";
 					}
 				}
 			}
@@ -286,19 +308,18 @@ public class PhaseSelectServlet extends HttpServlet {
 		}
 		main.log.println("");
 
-		
 		///// Matrix of Analysis Decisions
 		List<AnalysisDecision>[] decisionsMatrix = new List[standards.size()];
 		List<AnalysisDecision> decisions = initiative.getDecisions();
 		for (int i = 0; i < standards.size(); i++) {
 			decisionsMatrix[i] = new ArrayList<>();
 			for (AnalysisDecision decision : decisions) {
-				if(decision.getElement().getModel().equals(standards.get(i))) {
+				if (decision.getElement().getModel().equals(standards.get(i))) {
 					decisionsMatrix[i].add(decision);
 				}
 			}
 		}
-		
+
 		///// Matrix of Horizontal Matches
 		Object[][][][] hmapsMatrix = new Object[2 * hmappings.size()][ufotypes.length][][]; // HMappings x UFOTypes x
 																							// Matches x Data
@@ -313,7 +334,7 @@ public class PhaseSelectServlet extends HttpServlet {
 			for (int t = 0; t < ufotypes.length; t++) {
 				List<Match> allMatches = new ArrayList<Match>();
 				// Getting the elements of each type
-				for (Element elem : hmap.getBase().getElementsByUfotype(ufotypes[t])) {
+				for (Element elem : getValidElementsByUfotype(hmap, ufotypes[t])) {
 					List<Match> elemMatches = hmap.getMatchesBySource(elem);
 					if (!elemMatches.isEmpty()) {
 						allMatches.addAll(elemMatches);

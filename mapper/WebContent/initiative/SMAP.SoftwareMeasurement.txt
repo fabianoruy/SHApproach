@@ -1,0 +1,37 @@
+﻿
+Mapping	Vertical	CMMI	SEON
+Process Area	Performed Process	EVENT
+Specific Goal	Performed Process	EVENT
+Specific Goal	Performed Activity	EVENT
+Generic Goal	Performed Process	EVENT
+Generic Goal	Performed Activity	EVENT
+Specific Practice	Performed Activity	EVENT
+Generic Practice	Performed Activity	EVENT
+Work Product	Artifact	OBJECT
+Stakeholder	Stakeholder	AGENT
+
+Mapping	Vertical	12207	SEON
+Process	Performed Process	EVENT
+Process	Performed Activity	EVENT
+Activity	Performed Process	EVENT
+Activity	Performed Activity	EVENT
+Task	Performed Activity	EVENT
+Artifact	Artifact	OBJECT
+Stakeholder	Stakeholder	AGENT
+
+Mapping	Vertical	29110	SEON
+Process	Performed Process	EVENT
+Activity	Performed Process	EVENT
+Activity	Performed Activity	EVENT
+Task	Performed Activity	EVENT
+Product	Artifact	OBJECT
+Role	Stakeholder	AGENT
+
+Mapping	Diagonal	CMMI	ISM
+Purpose	Purpose	MOMENT
+
+Mapping	Diagonal	12207	ISM
+Purpose	Purpose	MOMENT
+
+Mapping	Diagonal	29110	ISM
+Purpose	Purpose	MOMENT

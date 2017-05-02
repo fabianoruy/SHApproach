@@ -33,10 +33,16 @@
                     <select class="covers" id="${cell[0].id}"
                       title="Which is the coverage of the Element on the new Element?">
                       <option value="EMPTY"></option>
-                      <option value="EQUIVALENT">[E]</option>
-                      <option value="PARTIAL">[P]</option>
-                      <option value="WIDER">[W]</option>
-                      <option value="OVERLAP">[O]</option>
+                      <option value="EQUIVALENT" title="EQUIVALENT">[E]</option>
+                      <option value="PARTIAL" title="PARTIAL">[P]</option>
+                      <option value="WIDER" title="WIDER">[W]</option>
+                      <option value="OVERLAP" title="OVERLAP">[O]</option>
+                      <option disabled>──</option>
+                      <option value="SPECIALIZATION" title="SPECIALIZATION">[S]</option>
+                      <option value="GENERALIZATION" title="GENERALIZATION">[G]</option>
+                      <option disabled>──</option>
+                      <option value="ACTS" title="ACTS AS">[A]</option>
+                      <option value="BYACTED" title="IS ACTED BY">[B]</option>
                     </select>
                   </c:if>
                 </div>
@@ -63,14 +69,14 @@
     <c:set var="rows" value="${elementline[1].size()}" />
     <c:forEach items="${elementline[1]}" var="match" varStatus="loop">
       <c:set var="color" value="style='background-color:#F0F0F0'"/>
-      <c:if test="${loop.index%2 == 0}"><c:set var="color" value=""/></c:if>
+      <c:if test="${loopout.index%2 == 0}"><c:set var="color" value=""/></c:if>
       <tr ${color}>
         <td style="width: 250px" title="${match.source.definition}">${match.source.model}:&nbsp;${match.source}</td>
         <td style="text-align: center">${match.matchType.abbreviation}</td>
         <c:if test="${loop.index == 0}">
           <td style="width: 150px" rowspan="${rows}"><b>${elem}</b> <br />(${elem.basetypes[0]})</td>
           <td style="width: 400px" rowspan="${rows}" style="font-size: 90%">
-            <span style="cursor:pointer" onclick="editDefinition('${elem.id}', '${elem.definition}')"> ${elem.definition}</span>
+            <span style="cursor:pointer" title="Edit" onclick="editDefinition('${elem.id}', '${elem.definition}')"> ${elem.definition}</span>
           </td>
           <td rowspan="${rows}">
             <img src="images/favicon-remove.ico" title="Remove Element" width="16px" style="cursor: pointer"

@@ -160,6 +160,13 @@ Abr.23
 + Coverage Analysis (complete)
 + Coverage Analysis results
 
+Abr.24
++ Match individual Coverage
+
+May.01
++ QA example
++ Diverse fixes coverage numbers
++ Diverse fixes in report
 
 TODO
 - Update validations and deductions for new types

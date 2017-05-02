@@ -16,6 +16,7 @@ import shmapper.model.HorizontalMapping;
 import shmapper.model.IntegratedModel;
 import shmapper.model.Mapping;
 import shmapper.model.Match;
+import shmapper.model.Match.Coverage;
 import shmapper.model.MatchType;
 import shmapper.model.Notion;
 import shmapper.model.NotionPosition;
@@ -87,13 +88,14 @@ public class MappingApp {
 	//////////////////////////// VERTICAL MAPPING ////////////////////////////
 
 	/** Creates a new (simple) Match. */
-	public SimpleMatch createSimpleMatch(String elemId, String concId, String typeName, String comm, boolean forceBT) {
+	public SimpleMatch createSimpleMatch(String elemId, String concId, String typeName, String coverName, String comm, boolean forceBT) {
 		Element source = (Element) initiative.getNotionById(elemId);
 		Concept target = (Concept) initiative.getNotionById(concId);
-		System.out.println("typeName: " + typeName);
+		//System.out.println("typeName: " + typeName);
 		MatchType type = MatchType.valueOf(typeName);
 
 		SimpleMatch match = new SimpleMatch(source, target, type, comm);
+		match.setCoverage(Coverage.valueOf(coverName));
 		if (!initiative.isDiscarded(source)) {
 			if (validateMatchUniqueness(match)) {
 				if (validateFullCoverage(match)) {
@@ -218,9 +220,9 @@ public class MappingApp {
 	}
 
 	/** Creates a new Composite Match (only [E] and [W] coverages). */
-	public CompositeMatch createCompositeMatch(String elemId, String coverName) {
+	public CompositeMatch createCompositeMatch(String elemId, String typeName) {
 		Element source = (Element) initiative.getNotionById(elemId);
-		MatchType cover = MatchType.valueOf(coverName);
+		MatchType cover = MatchType.valueOf(typeName);
 		List<SimpleMatch> components = ((VerticalMapping) mapping).getCMatchComponents(source);
 		CompositeMatch compMatch = null;
 		if (components.size() >= 2) {

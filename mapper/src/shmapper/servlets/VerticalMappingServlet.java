@@ -73,10 +73,12 @@ public class VerticalMappingServlet extends HttpServlet {
 				// Creating a new Simple Match
 				String elemId = request.getParameter("elem");
 				String concId = request.getParameter("conc");
-				String type = request.getParameter("cover");
+				String type = request.getParameter("type");
+				String cover = request.getParameter("cover");
 				String comm = request.getParameter("comm");
 				boolean force = Boolean.valueOf(request.getParameter("force"));
-				mapper.createSimpleMatch(elemId, concId, type, comm, force);
+				if (cover == null) cover = "UNDEFINED";
+				mapper.createSimpleMatch(elemId, concId, type, cover, comm, force);
 
 				updatePage(request, response);
 
@@ -90,8 +92,8 @@ public class VerticalMappingServlet extends HttpServlet {
 			} else if (request.getParameter("action").equals("compositeMatch")) {
 				// Creating a new Composite Match.
 				String elemId = request.getParameter("elem");
-				String cover = request.getParameter("cover");
-				mapper.createCompositeMatch(elemId, cover);
+				String type = request.getParameter("type");
+				mapper.createCompositeMatch(elemId, type);
 
 				updatePage(request, response);
 
@@ -123,7 +125,7 @@ public class VerticalMappingServlet extends HttpServlet {
 				mapper.restoreElement(elemId);
 
 				updatePage(request, response);
-			
+
 			} else if (request.getParameter("action").equals("saveAnalysis")) {
 				// Saving the Mapping Analysis.
 				String text = request.getParameter("text");
@@ -140,12 +142,12 @@ public class VerticalMappingServlet extends HttpServlet {
 		// Setting attributes and calling the page
 		if (mapper != null) {
 			Map<Element, CoverageSituation> coverages = mapper.getCurrentMapping().getElementsSituations();
-			System.out.println("Coverages: "+ coverages);
+			// System.out.println("Coverages: "+ coverages);
 			request.setAttribute("message", mapper.getMessage());
 			request.setAttribute("question", mapper.getQuestion());
 			request.setAttribute("qtype", mapper.getQuestionType());
 			request.setAttribute("mapping", mapper.getCurrentMapping());
-			//request.setAttribute("coveragemap", coverages);
+			// request.setAttribute("coveragemap", coverages);
 			request.setAttribute("coveragelist", createJSON(coverages));
 			request.getRequestDispatcher("vmatches.jsp").forward(request, response);
 		}
