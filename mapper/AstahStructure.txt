@@ -168,9 +168,14 @@ May.01
 + Diverse fixes coverage numbers
 + Diverse fixes in report
 
+May.02 (mapper)
++ Information texts update
++ Diverse fixes and small improvements
++ Published 
+
 TODO
+- Horizontal Mapping
 - Update validations and deductions for new types
-- Information texts update
 - Approach in the tool
 
 

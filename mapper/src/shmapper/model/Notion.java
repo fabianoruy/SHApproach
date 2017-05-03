@@ -90,7 +90,6 @@ public abstract class Notion extends SerializableObject {
 			return UFOType.EVENT;
 		}
 		System.out.println("#No UFOType# " + this);
-		
 		return null;
 	}
 

@@ -10,28 +10,26 @@ Generic Practice	Performed Activity	EVENT
 Work Product	Artifact	OBJECT
 Stakeholder	Stakeholder	AGENT
 
-Mapping	Vertical	12207	SEON
+Mapping	Vertical	MR-MPS-SW	SEON
 Process	Performed Process	EVENT
-Process	Performed Activity	EVENT
-Activity	Performed Process	EVENT
-Activity	Performed Activity	EVENT
-Task	Performed Activity	EVENT
-Artifact	Artifact	OBJECT
+Process Attribute	Performed Process	EVENT
+Expected Result	Performed Activity	EVENT
+Process Attribute Result	Performed Activity	EVENT
+Work Product	Artifact	OBJECT
 Stakeholder	Stakeholder	AGENT
 
-Mapping	Vertical	29110	SEON
+Mapping	Vertical	ISO 15939	SEON
 Process	Performed Process	EVENT
-Activity	Performed Process	EVENT
 Activity	Performed Activity	EVENT
 Task	Performed Activity	EVENT
-Product	Artifact	OBJECT
-Role	Stakeholder	AGENT
+Work Product	Artifact	OBJECT
+Stakeholder	Stakeholder	AGENT
 
 Mapping	Diagonal	CMMI	ISM
 Purpose	Purpose	MOMENT
 
-Mapping	Diagonal	12207	ISM
+Mapping	Diagonal	MR-MPS-SW	ISM
 Purpose	Purpose	MOMENT
 
-Mapping	Diagonal	29110	ISM
+Mapping	Diagonal	ISO 15939	ISM
 Purpose	Purpose	MOMENT

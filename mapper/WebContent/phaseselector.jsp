@@ -269,8 +269,8 @@
           <div class="open">
             <div style="display: inline-block">
               <c:set var="vcover" value="${initiative.getVerticalContentMapping(map.base).coverage}" />
-              <c:set var="tcover" value="${vcover+map.coverage}" />
-              <b>Standard: ${map.base}</b><br /> Coverage: (${vcover}% + ${map.coverage}%) = ${tcover}%
+              <c:set var="tcover" value="${vcover+map.coverage+map.decisionsCoverage}" />
+              <b>Standard: ${map.base}</b><br /> Coverage: ${vcover}% + (${map.coverage}% + ${map.decisionsCoverage}%) = ${tcover}%
             </div>
             <!--             <div style="float: right"> -->
             <%--               <c:choose> --%>

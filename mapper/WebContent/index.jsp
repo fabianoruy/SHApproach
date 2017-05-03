@@ -28,7 +28,7 @@
         <select name="user" size="5" style="width:250px" required>
             <option value="Quality Assurance">Quality Assurance (test)</option>
             <option value="Software Measurement">Software Measurement</option>
-            <option value="Dynamic Testing">Dynamic Testing</option>
+            <option value="Software Testing">Software Testing</option>
             <option value="Configuration Management">Configuration Management</option>
             <option value="Requirements Development">Requirements Development</option>
             <option value="Software Design">Software Design</option>

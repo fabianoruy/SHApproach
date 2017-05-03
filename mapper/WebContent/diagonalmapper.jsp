@@ -264,7 +264,9 @@ td, th {
     In this phase, new elements can be added to the Integrated Content Model (ICM) (originally a copy of the <a
       href=#nothing onclick="showSeonView()">SEON View</a>) in order to provide new matches, raising the Standards’
     coverage. The elements from each standard whose remain not or only partially covered are listed. Select the related
-    ones and match them with a New ICM Element.
+    ones and match them with a New ICM Element. It is important, while creating the new elements, to add them to the
+    ICM Model (in the astah tool), defining also the relations with other elements.<br/>
+    Finally, when all the proper New ICM Elements were created, the remaining uncovered elements can be justified using the Coverage Analysis.
   </p>
 
   <!-- ##### Main Table Blocks ##### -->
@@ -338,7 +340,7 @@ td, th {
       <div style="margin: 10px 10px 10px 10px; display: inline-block">
         <form action="DiagonalMappingServlet" method="POST">
           <input type="hidden" name="action" value="startAnalysis">
-          <button id="analysisbutton">Coverage Analysis</button>
+          <button id="analysisbutton" title="Justify the remaining uncovered Elements">Coverage Analysis</button>
         </form>
       </div>
       <div style="margin: 10px 10px 10px 10px; display: inline-block">

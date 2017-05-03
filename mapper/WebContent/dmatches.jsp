@@ -56,9 +56,9 @@
 </table>
 </uncovereddiv>
 
-<coveragelabel>
+<coveragelabel>&nbsp;&nbsp;&nbsp;Coverages: 
   <c:forEach items="${coverages}" var="stdcover">
-    &nbsp;&nbsp;&nbsp;(Coverage ${stdcover[0]}: ${stdcover[1]}% + ${stdcover[2]}%)
+    &nbsp;&nbsp;&nbsp;(${stdcover[0]}: ${stdcover[1]}% + ${stdcover[2]}%)
   </c:forEach>
 </coveragelabel>
   

@@ -287,6 +287,7 @@ public class AstahParseApp {
 						model.addElement(element);
 						initiative.addNotion(element);
 						astahClassMap.put(node.getId(), (IClass) node);
+						System.out.println(". "+ element);
 					} else {
 						main.log.println("Discarded Element: " + node.getName());
 					}
@@ -393,10 +394,10 @@ public class AstahParseApp {
 				List<Notion> basetypes = notion.getBasetypes();
 				if (basetypes.isEmpty()) {
 					if (notion instanceof Concept) {
-						addResult("The concept " + notion + " (package " + notion.getPackage()
+						addResult("{W} The concept " + notion + " (package " + notion.getPackage()
 								+ ") has no generalization to a Core/Foundational Ontology Concept.\n");
 					} else if (notion instanceof Element) {
-						addResult("The element " + notion + " (package " + notion.getPackage() + ") has no generalization to a Structural Model Element.\n");
+						addResult("{W} The element " + notion + " (package " + notion.getPackage() + ") has no generalization to a Structural Model Element.\n");
 					}
 					count++;
 				}

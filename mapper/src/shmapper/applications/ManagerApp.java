@@ -181,7 +181,7 @@ public class ManagerApp {
 		List<User> users = new ArrayList<User>();
 		users.add(new User("Quality Assurance", "."));
 		users.add(new User("Software Measurement", "SM15"));
-		users.add(new User("Dynamic Testing", "DT16"));
+		users.add(new User("Software Testing", "ST16"));
 		users.add(new User("Configuration Management", "CM17"));
 		users.add(new User("Requirements Development", "RD18"));
 		users.add(new User("Software Design", "SD19"));

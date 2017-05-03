@@ -92,7 +92,7 @@ public class StructuralMappingApp {
 				tktype = tkzr.nextToken();
 				tkbase = tkzr.nextToken();
 				tktarg = tkzr.nextToken();
-				// System.out.println(tktype + ": " + tkbase + "-->" + tktarg);
+				//System.out.println(tktype + ": " + tkbase + "-->" + tktarg);
 				if (tktype.equals("Vertical")) {
 					for (VerticalMapping vmap : initiative.getVerticalStructuralMappings()) {
 						if (vmap.getBase().getName().contains(tkbase)) {
@@ -113,7 +113,7 @@ public class StructuralMappingApp {
 				tksource = token;
 				tktarg = tkzr.nextToken();
 				tkufo = tkzr.nextToken();
-				// System.out.println(tksource + " x " + tktarg + " (" + tkufo + ")");
+				System.out.println(tksource + " x " + tktarg + " (" + tkufo + ")");
 				SimpleMatch match = null;
 				Element source = currentMap.getBase().getElementByName(tksource);
 				Notion target = null;

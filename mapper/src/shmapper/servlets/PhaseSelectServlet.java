@@ -62,8 +62,6 @@ public class PhaseSelectServlet extends HttpServlet {
 			} else if (request.getParameter("action").equals("getStructuralMappings")) {
 				// Preparing the table with the Structural Mappings (and Matches)
 				this.prepareStructuralMappingsTable(request);
-
-				// request.getRequestDispatcher("phaseselector.jsp").forward(request, response);
 				request.getRequestDispatcher("smatches.jsp").forward(request, response);
 
 			} else if (request.getParameter("action").equals("openResults")) {
@@ -372,7 +370,8 @@ public class PhaseSelectServlet extends HttpServlet {
 			VerticalMapping vmap = initiative.getVerticalContentMapping(base);
 			DiagonalMapping dmap = initiative.getDiagonalContentMapping(base);
 			coverageIndex[i][0][0] = base;
-			coverageIndex[i][1][0] = vmap.getCoverage() + dmap.getCoverage();
+			//coverageIndex[i][1][0] = vmap.getCoverage() + dmap.getCoverage();
+			coverageIndex[i][1][0] = vmap.getCoverage() + dmap.getCoverage() + dmap.getDecisionsCoverage();
 			coverageIndex[i][1][1] = "vcoverage";
 			for (int j = i; j < standards.size(); j++) {
 				StandardModel target = null;

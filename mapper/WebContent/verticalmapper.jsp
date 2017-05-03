@@ -496,8 +496,9 @@
       This tool supports the mapping by providing features for selecting the desired elements and concepts and
       establishing different types of matches between them. Select an <b>Element</b> from the left-hand side model
       (the ${standard.name}'s Model) and select a <b>Concept</b> from the right-hand side model (the SEON View).
-      Then, choose a proper <a href=#nothing onclick="showMatchtypeInfo()"><b>Match Type</b></a> and add comments
-      for the match. Try to achieve a larger standard coverage by making as many suitable matches as possible.<br />
+      Then, choose the proper <a href=#nothing onclick="showMatchtypeInfo()">Match Type</a> and
+      <a href=#nothing onclick="showCoverageInfo()">Element Coverage</a>, and add comments for the match.
+      Try to achieve a larger standard coverage by making as many suitable matches as possible.<br />
       At the end, check the <a href=#nothing onclick="showCoverageStatus()">coverage status</a> defining the composite
       matches, and describe an analysis for this mapping.
   </p>
@@ -555,17 +556,17 @@
       <div style="display: inline-block">
         <b>Match Type (<a href=#nothing onclick="showMatchtypeInfo()">?</a>)
         </b> <br /> <select id="matchselect" title="Which is the match type of the Element on the Concept?">
-          <option value="EQUIVALENT">[E] EQUIVALENT</option>
+          <option value="EQUIVALENT" title="The Element is Equivalent to the Concept">[E] EQUIVALENT</option>
           <option disabled>──────────</option>
-          <option value="PARTIAL">[P] PART OF</option>
-          <option value="WIDER">[W] WIDER</option>
-          <option value="OVERLAP">[O]  OVERLAP</option>
+          <option value="PARTIAL" title="The Element is Part of the Concept">[P] PART OF</option>
+          <option value="WIDER" title="The Element is Wider than the Concept">[W] WIDER</option>
+          <option value="OVERLAP" title="The Element Overlaps the Concept">[O]  OVERLAP</option>
           <option disabled>──────────</option>
-          <option value="SPECIALIZATION">[S] SPECIALIZATION</option>
-          <option value="GENERALIZATION">[G] GENERALIZATION</option>
+          <option value="SPECIALIZATION" title="The Element Specializes the Concept">[S] SPECIALIZATION</option>
+          <option value="GENERALIZATION" title="The Element Generalizes the Concept">[G] GENERALIZATION</option>
           <option disabled>──────────</option>
-          <option value="ACTS">[A] ACTS AS</option>
-          <option value="BYACTED">[B] IS ACTED BY</option>
+          <option value="ACTS" title="The Element can Act as the Concept">[A] ACTS AS</option>
+          <option value="BYACTED" title="The Element can be Acted By the Concept">[B] IS ACTED BY</option>
           <!-- <option disabled>──────────</option> -->
           <!-- <option value="NORELATION">[-]  NO RELATION</option> -->
         </select>

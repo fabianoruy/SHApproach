@@ -222,11 +222,11 @@ td, th {
 
   <h2>Analyze the remaining uncovered Elements and Justify</h2>
   <p align="justify" style="width: 98%">
-    <b>The remaining uncovered elements (after finishing the Vertical and Integrated Mappings) shall be justified.</b>
+    <b>The remaining uncovered elements (after finishing the Vertical and ICM Mappings) shall be justified.</b>
     <br />
-    In this phase, the remaining uncovered Standards portions (if there) can be analyzed and the uncovered element justified.
-    Thus, elements not considered covered in the Vertical and Integrated Mappings can be explained. For doind this, just select
-    an uncovered element and give a reason and a justification. The main reasons are: <br/>
+    In this phase, the remaining uncovered Standards portions (if there are) can be analyzed and the uncovered elements justified.
+    Thus, elements not considered covered in the Vertical and ICM Mappings can be explained. For doind this, just select an uncovered
+    element and give a reason and a justification. The main reasons are: <br/>
     <b>ALREADY COVERED</b>, when the element itself has no enough matches, but all its aspects are already covered by the matches of other elements; and<br/>
     <b>OUT OF SCOPE</b>, when the element (or its unconvered portion) is not relevant for the initiative scope.    
   </p>
