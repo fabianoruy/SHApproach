@@ -91,7 +91,6 @@ public class MappingApp {
 	public SimpleMatch createSimpleMatch(String elemId, String concId, String typeName, String coverName, String comm, boolean forceBT) {
 		Element source = (Element) initiative.getNotionById(elemId);
 		Concept target = (Concept) initiative.getNotionById(concId);
-		//System.out.println("typeName: " + typeName);
 		MatchType type = MatchType.valueOf(typeName);
 
 		SimpleMatch match = new SimpleMatch(source, target, type, comm);
@@ -222,11 +221,11 @@ public class MappingApp {
 	/** Creates a new Composite Match (only [E] and [W] coverages). */
 	public CompositeMatch createCompositeMatch(String elemId, String typeName) {
 		Element source = (Element) initiative.getNotionById(elemId);
-		MatchType cover = MatchType.valueOf(typeName);
+		MatchType type = MatchType.valueOf(typeName);
 		List<SimpleMatch> components = ((VerticalMapping) mapping).getCMatchComponents(source);
 		CompositeMatch compMatch = null;
 		if (components.size() >= 2) {
-			compMatch = new CompositeMatch(source, cover, null, components);
+			compMatch = new CompositeMatch(source, type, null, components);
 			mapping.addMatch(compMatch); // At this moment the match is registered
 			message = CHECKED + "Composite Match <b>" + compMatch + "</b> created!";
 			main.log.println("(" + mapping.getMatches().size() + ") " + compMatch);
@@ -369,11 +368,11 @@ public class MappingApp {
 			}
 		}
 	}
-	
+
 	/** Replaces the justification of a decision for a given element. */
 	public void changeDecisionJustification(String elemId, String justif) {
 		for (AnalysisDecision decision : initiative.getDecisions()) {
-			if(decision.getElement().getId().equals(elemId)) {
+			if (decision.getElement().getId().equals(elemId)) {
 				decision.setJustification(justif);
 				break;
 			}
@@ -383,39 +382,42 @@ public class MappingApp {
 	//////////////////////////// HORIZONTAL MAPPING ////////////////////////////
 
 	/** Creates a new (simple) Match in a Horizontal Mapping. */
-	public SimpleMatch createHSimpleMatch(String sourceId, String targetId, String coverName, String comm, boolean forceBT) {
+	public SimpleMatch createHSimpleMatch(String sourceId, String targetId, String typeName, String coverName, String comm, boolean forceBT) {
 		Element source = (Element) initiative.getNotionById(sourceId);
 		Element target = (Element) initiative.getNotionById(targetId);
-		MatchType cover = MatchType.valueOf(coverName);
+		MatchType type = MatchType.valueOf(typeName);
 
 		// Creating the match and its mirror
-		SimpleMatch match = new SimpleMatch(source, target, cover, comm);
-		SimpleMatch hctam = new SimpleMatch(target, source, cover.getReflex(), comm);
+		SimpleMatch match = new SimpleMatch(source, target, type, comm);
+		SimpleMatch hctam = new SimpleMatch(target, source, type.getReflex(), comm);
+		match.setCoverage(Coverage.valueOf(coverName));
 		HorizontalMapping mirror = ((HorizontalMapping) mapping).getMirror();
-		if (validateMatchUniqueness(match)) {
-			if (forceBT || validateBasetypesCorrespondence(match)) {
-				mapping.addMatch(match); // At this moment the match is registered
-				main.log.println("(" + mapping.getMatches().size() + "/" + mirror.getMatches().size() + ") " + match);
+		if (!initiative.isDiscarded(source)) {
+			if (validateMatchUniqueness(match)) {
+				if (forceBT || validateBasetypesCorrespondence(match)) {
+					mapping.addMatch(match); // At this moment the match is registered
+					main.log.println("(" + mapping.getMatches().size() + "/" + mirror.getMatches().size() + ") " + match);
 
-				mirror.addMatch(hctam); // At this moment the match is registered
-				main.log.println("(" + mapping.getMatches().size() + "/" + mirror.getMatches().size() + ") " + hctam);
+					mirror.addMatch(hctam); // At this moment the match is registered
+					main.log.println("(" + mapping.getMatches().size() + "/" + mirror.getMatches().size() + ") " + hctam);
 
-				message = CHECKED + "Match <b>" + match + "</b> created!";
-				return match;
+					message = CHECKED + "Match <b>" + match + "</b> created!";
+					return match;
+				}
 			}
 		}
 		return null;
 	}
 
 	/** Creates a new Composite Match (only [E] and [W] coverages) in a Horizontal Mapping. */
-	public CompositeMatch createHCompositeMatch(String sourceId, String coverName) {
+	public CompositeMatch createHCompositeMatch(String sourceId, String typeName) {
 		Element source = (Element) initiative.getNotionById(sourceId);
 		HorizontalMapping hmap = mapping.getBase().equals(source.getModel()) ? (HorizontalMapping) mapping : ((HorizontalMapping) mapping).getMirror();
-		MatchType cover = MatchType.valueOf(coverName);
+		MatchType type = MatchType.valueOf(typeName);
 		// System.out.printf("Creating HCMatch: %s, %s\n", source, cover);
 
 		List<SimpleMatch> smatches = hmap.getSimpleMatchesBySource(source);
-		CompositeMatch compMatch = new CompositeMatch(source, cover, null, smatches);
+		CompositeMatch compMatch = new CompositeMatch(source, type, null, smatches);
 		hmap.addMatch(compMatch); // At this moment the match is registered
 		message = CHECKED + "Composite Match <b>" + compMatch + "</b> created!";
 		main.log.println("(" + mapping.getMatches().size() + "/" + ((HorizontalMapping) mapping).getMirror().getMatches().size() + ") " + compMatch);
@@ -522,32 +524,43 @@ public class MappingApp {
 		// For each element from the HM Base
 		for (Element source : stdBase.getElements()) {
 			for (SimpleMatch bvmatch : vmapBase.getSimpleMatchesBySource(source)) {
-				// Get all EQUIVALENT matches in the Base VM
+				// Get all matches in the Base VM
 				Notion concept = bvmatch.getTarget();
 				// Use the matches targets to get the source element in the Target VM
 				for (SimpleMatch tvmatch : vmapTarg.getSimpleMatchesByTarget(concept)) {
 					Element target = tvmatch.getSource();
+					// Calculating the match type
+					MatchType btype = bvmatch.getMatchType();
+					MatchType ttype = tvmatch.getMatchType();
+					MatchType type = sumMatchTypes(btype, ttype);
 					String bcomment = null, tcomment = null;
-					// Calculating the coverage
-					MatchType bcover = bvmatch.getMatchType();
-					MatchType tcover = tvmatch.getMatchType();
-					MatchType cover = sumCoverage(bcover, tcover);
-					if (cover != null) {
-						// Create new match: source from Base VM, target form Target VM
-						if (tcover == MatchType.EQUIVALENT && (bcover == MatchType.WIDER || bcover == MatchType.OVERLAP))
+					Coverage bcover = null, tcover = null;
+					// if there is a conclusion
+					if (type != null) {
+						// Create new match: source element from Base VM; target element from Target VM
+						if (ttype == MatchType.EQUIVALENT) {
 							bcomment = bvmatch.getComment();
-						SimpleMatch match = new SimpleMatch(source, target, cover, bcomment);
+							bcover = bvmatch.getCoverage();
+						}
+						SimpleMatch match = new SimpleMatch(source, target, type, bcomment);
+						match.setCoverage(bcover);
 						match.setDeduced(true);
 						hmapping.addMatch(match);
 
 						// And the corresponding mirror
-						if (bcover == MatchType.EQUIVALENT && (tcover == MatchType.WIDER || tcover == MatchType.OVERLAP))
+						if (btype == MatchType.EQUIVALENT) {
 							tcomment = tvmatch.getComment();
-						SimpleMatch hctam = new SimpleMatch(target, source, cover.getReflex(), tcomment);
+							tcover = tvmatch.getCoverage();
+						}
+						SimpleMatch hctam = new SimpleMatch(target, source, type.getReflex(), tcomment);
+						hctam.setCoverage(tcover);
 						hctam.setDeduced(true);
 						hmapping.getMirror().addMatch(hctam);
 
 						mcount += 2;
+						System.out.println("[" + mcount / 2 + "] (" + bvmatch + ") + (" + tvmatch + ") == (" + match + ")");
+					} else {
+						System.out.println("[x] (" + bvmatch + ") + (" + tvmatch + ") = {No Conclusion}");
 					}
 				}
 			}
@@ -569,23 +582,27 @@ public class MappingApp {
 		// For each element from the HM Base
 		for (Element source : stdBase.getElements()) {
 			for (SimpleMatch bdmatch : dmapBase.getSimpleMatchesBySource(source)) {
-				// Get all EQUIVALENT matches in the Base DM
+				// Get all matches in the Base DM
 				Notion concept = bdmatch.getTarget();
 				// Use the matches targets to get the source element in the Target DM
 				for (SimpleMatch tdmatch : dmapTarg.getSimpleMatchesByTarget(concept)) {
 					Element target = tdmatch.getSource();
 					// Calculating the coverage
-					MatchType cover = sumCoverage(bdmatch.getMatchType(), tdmatch.getMatchType());
-					if (cover != null) {
-						// Create new match: source from Base VM, target form Target VM
-						SimpleMatch match = new SimpleMatch(source, target, cover, null);
+					MatchType type = sumMatchTypes(bdmatch.getMatchType(), tdmatch.getMatchType());
+					// if there is a conclusion
+					if (type != null) {
+						// Create new match: source element from Base DM; target element from Target DM
+						SimpleMatch match = new SimpleMatch(source, target, type, null);
 						match.setDeduced(true);
 						hmapping.addMatch(match);
 						// And the corresponding mirror
-						SimpleMatch hctam = new SimpleMatch(target, source, cover.getReflex(), null);
+						SimpleMatch hctam = new SimpleMatch(target, source, type.getReflex(), null);
 						hctam.setDeduced(true);
 						hmapping.getMirror().addMatch(hctam);
 						mcount += 2;
+						System.out.println("[" + mcount / 2 + "] (" + bdmatch + ") + (" + tdmatch + ") == (" + match + ")");
+					} else {
+						System.out.println("[x] (" + bdmatch + ") + (" + tdmatch + ") = {No Conclusion}");
 					}
 				}
 			}
@@ -593,16 +610,20 @@ public class MappingApp {
 		return mcount;
 	}
 
-	/** Returns the 'sum' of two coverages, considering Table 3 (T3 - Deductions). */
-	private MatchType sumCoverage(MatchType coverA, MatchType coverB) {
-		if (coverA == MatchType.EQUIVALENT) // E+E=E; E+P=W; E+W=P; E+O=O; E+*=*;
-			return coverB.getReflex();
-		if (coverB == MatchType.EQUIVALENT) // P+E=P; W+E=W; O+E=O; *+E=*;
-			return coverA;
-		if (coverA == MatchType.PARTIAL && coverB == MatchType.WIDER) // P+W=P;
-			return coverA;
-		if (coverA == MatchType.WIDER && coverB == MatchType.PARTIAL) // W+P=W
-			return coverA;
+	/** Returns the 'sum' of two match types, considering Table 3 (T3 - Deductions). */
+	private MatchType sumMatchTypes(MatchType mtypeA, MatchType mtypeB) {
+		if (mtypeA == MatchType.EQUIVALENT) // E+E=E; E+P=W; E+W=P; E+O=O; E+*=*;
+			return mtypeB.getReflex();
+		if (mtypeB == MatchType.EQUIVALENT) // P+E=P; W+E=W; O+E=O; *+E=*;
+			return mtypeA;
+		if (mtypeA == MatchType.PARTIAL && mtypeB == MatchType.WIDER) // P+W=P;
+			return mtypeA;
+		if (mtypeA == MatchType.WIDER && mtypeB == MatchType.PARTIAL) // W+P=W
+			return mtypeA;
+		if (mtypeA == MatchType.SPECIALIZATION && mtypeB == MatchType.GENERALIZATION) // S+G=S;
+			return mtypeA;
+		if (mtypeA == MatchType.GENERALIZATION && mtypeB == MatchType.SPECIALIZATION) // G+S=G
+			return mtypeA;
 		return null; // Other: no conclusion
 	}
 

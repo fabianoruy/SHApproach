@@ -1,6 +1,7 @@
 package shmapper.servlets;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -14,10 +15,12 @@ import com.google.gson.JsonObject;
 import shmapper.applications.ManagerApp;
 import shmapper.applications.MappingApp;
 import shmapper.model.Diagram;
+import shmapper.model.Element;
 import shmapper.model.HorizontalMapping;
 import shmapper.model.Notion;
 import shmapper.model.NotionPosition;
 import shmapper.model.SHInitiative;
+import shmapper.model.Element.CoverageSituation;
 
 /* Servlet implementation class HorizontalMappingServlet */
 @WebServlet("/HorizontalMappingServlet")
@@ -64,10 +67,12 @@ public class HorizontalMappingServlet extends HttpServlet {
 				// Creating a new Simple Match
 				String sourceId = request.getParameter("source");
 				String targetId = request.getParameter("target");
+				String type = request.getParameter("type");
 				String cover = request.getParameter("cover");
 				String comm = request.getParameter("comm");
 				boolean force = Boolean.valueOf(request.getParameter("force"));
-				mapper.createHSimpleMatch(sourceId, targetId, cover, comm, force);
+				if (cover == null) cover = "UNDEFINED";
+				mapper.createHSimpleMatch(sourceId, targetId, type, cover, comm, force);
 
 				updatePage(request, response);
 
@@ -82,8 +87,8 @@ public class HorizontalMappingServlet extends HttpServlet {
 			} else if (request.getParameter("action").equals("compositeMatch")) {
 				// Creating a new Composite Match.
 				String sourceId = request.getParameter("source");
-				String cover = request.getParameter("cover");
-				mapper.createHCompositeMatch(sourceId, cover);
+				String type = request.getParameter("type");
+				mapper.createHCompositeMatch(sourceId, type);
 
 				updatePage(request, response);
 
@@ -121,10 +126,12 @@ public class HorizontalMappingServlet extends HttpServlet {
 	private void updatePage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// Setting attributes and calling the page
 		if (mapper != null) {
+			//Map<Element, CoverageSituation> coverages = mapper.getCurrentMapping().getElementsSituations();
 			request.setAttribute("message", mapper.getMessage());
 			request.setAttribute("question", mapper.getQuestion());
 			request.setAttribute("qtype", mapper.getQuestionType());
 			request.setAttribute("mapping", mapper.getCurrentMapping());
+			//request.setAttribute("coveragelist", createJSON(coverages));
 			if (!((HorizontalMapping) mapper.getCurrentMapping()).isDeduced()) {
 				request.setAttribute("deductionresults", "ready");
 			}
@@ -150,5 +157,15 @@ public class HorizontalMappingServlet extends HttpServlet {
 		jobj.addProperty("basetype", notion.getBasetypes().toString().replaceAll("\\[|\\]", ""));
 		return jobj;
 	}
+	
+//	/* Creates the JSON for the elements' situations. */
+//	private JsonElement createJSON(Map<Element, Element.CoverageSituation> situations) {
+//		JsonObject jobj = new JsonObject();
+//		for (Element elem : situations.keySet()) {
+//			jobj.addProperty(elem.getId(), situations.get(elem).name());
+//		}
+//		return jobj;
+//	}
+
 
 }

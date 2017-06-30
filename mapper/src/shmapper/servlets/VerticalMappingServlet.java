@@ -55,8 +55,8 @@ public class VerticalMappingServlet extends HttpServlet {
 				JsonElement ontoJson = createJSON(seon.getDiagram());
 
 				// Setting attributes and calling the page
-				request.setAttribute("stdJson", stdJson);
-				request.setAttribute("ontoJson", ontoJson);
+				request.setAttribute("baseJson", stdJson);
+				request.setAttribute("targJson", ontoJson);
 				request.setAttribute("standard", std);
 				request.setAttribute("ontology", seon);
 				request.setAttribute("analysis", mapping.getAnalysis());

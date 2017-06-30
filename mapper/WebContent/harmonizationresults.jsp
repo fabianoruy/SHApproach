@@ -161,7 +161,7 @@ td,th {
               <c:if test="${data[2] != 0}">
                 <td rowspan="${data[2]}" class="${data[1]}" title="${match.source.definition}">${match.source}</td>
               </c:if>
-              <td>${match.matchType}<c:if test="${not empty match.comment}">
+              <td title="Coverage: ${match.coverage}">${match.matchType}<c:if test="${not empty match.comment}">
                   <br />{<i>${match.comment}</i>}</c:if>
               </td>
               <c:if test="${match['class'].simpleName eq 'SimpleMatch'}">
@@ -322,7 +322,7 @@ td,th {
               <c:if test="${data[2] != 0}">
                 <td rowspan="${data[2]}" class="${data[1]}" title="${match.source.definition}">${match.source}</td>
               </c:if>
-              <td>${match.matchType}&nbsp;
+              <td title="Coverage: ${match.coverage}">${match.matchType}&nbsp;
                 <c:if test="${match.deduced}">
                   (<span title="Deduced Match">D</span>)
                 </c:if>

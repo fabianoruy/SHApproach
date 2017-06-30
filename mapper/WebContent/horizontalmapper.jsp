@@ -16,15 +16,16 @@
   border-radius: 8px;
   border: 2px solid blue;
   padding: 8px;
-  min-height: 140px;
+  min-height: 150px;
 }
 
 .targetbox {
   border-radius: 8px;
   border: 2px solid #6600cc;
   padding: 8px;
-  min-height: 140px;
+  min-height: 150px;
 }
+
 </style>
 <script src="js/jquery.min.js"></script>
 <script src="js/jquery-ui.js"></script>
@@ -33,7 +34,9 @@
 <script>
   var baseJson = JSON.parse('${baseJson}');
   var targJson = JSON.parse('${targJson}');
-  //console.log(json);
+  //var coverJson;
+  //var cmatchescount = 0;
+  //var previouscmatchescount = -1;
 
   $(document).ready(function() {
     $('#matchbutton').click(function() {
@@ -88,10 +91,10 @@
         action : 'match',
         source : $('#sourceidfield').val(),
         target : $('#targetidfield').val(),
-        cover : $('#coveringfield').val(),
+        type : $('#matchselect').val(),
+        cover : $('input[name=coveradio]:checked').val(),
         comm : $('#commentsfield').val(),
-        force : forceBT
-      // force Basetype
+        force : forceBT  // forces Basetype
       },
       success : function(responseXml) {
         updateMapping(responseXml);
@@ -100,14 +103,14 @@
   }
 
   /* Calls (the servlet via ajax) for creating a Composite Match. */
-  function doCompositeMatch(cover) {
+  function doCompositeMatch(type) {
     $.ajax({
       type : 'POST',
       url : 'HorizontalMappingServlet',
       data : {
         action : 'compositeMatch',
         source : elemSavedId,
-        cover : cover
+        type : type
       },
       success : function(responseXml) {
         updateMapping(responseXml);
@@ -126,6 +129,22 @@
         action : 'checkCompositeMatch',
         mapping : mapId,
         source : elemId
+      },
+      success : function(responseXml) {
+        updateMapping(responseXml);
+      }
+    });
+  }
+
+
+  /* Calls (the servlet via ajax) for removing a Match. */
+  function removeMatch(matchId) {
+    $.ajax({
+      type : 'POST',
+      url : 'HorizontalMappingServlet',
+      data : {
+        action : 'removeMatch',
+        matchId : matchId
       },
       success : function(responseXml) {
         updateMapping(responseXml);
@@ -168,19 +187,16 @@
       }
     });
   }
-
-  /* Calls (the servlet via ajax) for removing a Match. */
-  function removeMatch(matchId) {
-    console.log(matchId);
+  
+  /* Saves the Mapping Analysis. */
+  function saveAnalysis() {
+    var txt = $('#analysisfield').val();
     $.ajax({
       type : 'POST',
-      url : 'HorizontalMappingServlet',
+      url : 'VerticalMappingServlet',
       data : {
-        action : 'removeMatch',
-        matchId : matchId
-      },
-      success : function(responseXml) {
-        updateMapping(responseXml);
+        action : 'saveAnalysis',
+        text : txt,
       }
     });
   }
@@ -198,9 +214,9 @@
       showCompositeQuestionP(question, doCompositeMatch);
       break;
     case 'Basetype':
-      showQuestion(question, function() {
-        doMatch(true);
-      });
+      showQuestion(question,
+        function() {doMatch(true);}
+      );
       return;
       break;
     default:
@@ -210,7 +226,12 @@
     $('#mirrormappingdiv').html($(responseXml).find('mirrormatchestable').html());
     $('#messagediv').html($(responseXml).find('messagetext').html());
     $('#messagediv').scrollTop(1E10);
-    $('#coveringfield').prop("selectedIndex", 0);
+    $('#matchselect').prop("selectedIndex", 0);
+    $('#rfull').prop('checked', true);
+    $('#rfull').prop('disabled', false);
+    $("#rpart").prop("disabled", true);
+    $("#rlarge").prop("disabled", true);
+
     $('#commentsfield').val("");
     $('#basecoverdiv').html($(responseXml).find('basecovertable').html());
     $('#targcoverdiv').html($(responseXml).find('targcovertable').html());
@@ -219,12 +240,20 @@
     $('.icon').remove();
     $('#basediv').append($(responseXml).find('baseicons').html());
     $('#targdiv').append($(responseXml).find('targicons').html());
+    //coverJson = JSON.parse($(responseXml).find('coveragelist').html());
+    //cmatchescount = JSON.parse($(responseXml).find('cmatchescount').html());
+    //if(previouscmatchescount == -1) previouscmatchescount = cmatchescount; 
+    //console.log("conter: "+cmatchescount);
 
     if ($(responseXml).find('deduceresults').html() == 'ready') {
       $('#matchbutton').prop('disabled', true);
+      $('#matchselect').prop('disabled', true);
+      $('#coveradio').prop('disabled', true);
       $('#deducebutton').prop('hidden', false);
     } else {
       $('#matchbutton').prop('disabled', false);
+      $('#matchselect').prop('disabled', false);
+      $('#coveradio').prop('disabled', false);
       $('#deducebutton').prop('hidden', true);
     }
   }
@@ -259,6 +288,39 @@
       $('#targetbtfield').text("(" + btype + ")");
       $('#targetdeffield').text(def);
     });
+    
+    $('#matchselect').change(function() {
+      $('#rfull').prop('checked', false);
+      $('#rpart').prop('checked', false);
+      $('#rlarge').prop('checked', false);
+      if($(this).val() == 'EQUIVALENT' || $(this).val() == 'PARTIAL') {
+        $('#rfull').prop('checked', true);
+        $('#rfull').prop('disabled', false);
+        $("#rpart").prop("disabled", true);
+        $("#rlarge").prop("disabled", true);
+      } else if($(this).val() == 'WIDER' || $(this).val() == 'OVERLAP') {
+        $('#rfull').prop('disabled', true);
+        $("#rpart").prop("disabled", false);
+        $("#rlarge").prop("disabled", false);
+      } else {
+        $('#rfull').prop('disabled', false);
+        $("#rpart").prop("disabled", false);
+        $("#rlarge").prop("disabled", false);
+      }
+	});
+    
+    $('#finishbutton').click(function(e) {
+       saveAnalysis();
+//       if(previouscmatchescount < cmatchescount) {
+//         showQuestion("This mapping has some possible Composite Matches. Do you want to deal with them now?",
+//           function() {showCoverageStatus();},
+//           function() {$('#finishform').submit();}
+//         );
+//       } else {
+        $('#finishform').submit();
+//       }
+    });
+
   });
 
   /* Cleans the Target Element when Not Covered is selected. */
@@ -274,24 +336,31 @@
     // getting values
     var source = $('#sourceidfield').val();
     var target = $('#targetidfield').val();
-    var relc = $('#coveringfield').val();
+    var type = $('#matchselect').val();
+    var cover = $('input[name=coveradio]:checked').val();
     var comm = $('#commentsfield').val();
 
     // verifying
-    if (source == '' || (target == '' && relc != 'NOCOVERAGE')) {
+    if (source == '' || (target == '' && type != 'NORELATION')) {
       showMessage("Select an Element from each diagram.");
       return false;
     }
-    if (comm == '' && (relc == 'PARTIAL' || relc == 'WIDER' || relc == 'OVERLAP')) {
-      showMessage("PARTIAL, WIDER and OVERLAP matches require a comment explaining the non-covered part(s).");
+    if (cover != 'FULL' && comm == '') {
+      showMessage("Matches <b>not FULLY</b> covered require a comment explaining the uncovered part(s).");
       return false;
     }
     return true;
   }
 
+  function showMatchtypeInfo() {
+    $("#matchinfo").dialog({
+      width : 1000
+    });
+  }
+  
   function showCoverageInfo() {
     $("#coverinfo").dialog({
-      width : 1000,
+      width : 600
     });
   }
 
@@ -440,37 +509,50 @@
   <!-- ##### Match Blocks ##### -->
   <h3>How do the ${mapping.base}'s Elements cover the ${mapping.target}'s Elements?</h3>
   <div style="display: inline-block; width: 1000px">
-    <div style="width: 410px; float: left">
-      <label> <b>Source Element</b>
-      </label> <br />
+    <div style="width: 400px; float: left">
+      <label> <b>Source Element</b> </label> <br />
       <div class="sourcebox" title="Select an Element from the base model">
         <input id="sourceidfield" type="hidden" /> <span id="sourcefield" style="font-weight: bold">(select an
           element)</span> <br /> <span id="sourcebtfield"></span> <br /> <span id="sourcedeffield" style="font-size: 90%"></span>
       </div>
     </div>
 
-    <div style="width: 140px; float: left; margin: 0 20px 0 20px">
+    <div style="width: 170px; float: left; margin: 0 20px 0 10px">
       <div style="display: inline-block">
-        <b>Coverage (<a href=#nothing onclick="showCoverageInfo()">?</a>)
-        </b> <br /> <select id="coveringfield" title="Which is the coverage of the Source Element on the Target Element?"
-          onchange="cleanOC(this)">
-          <option value="EQUIVALENT">[E] EQUIVALENT</option>
-          <option value="PARTIAL">[P] PART OF</option>
-          <option value="WIDER">[W] WIDER</option>
-          <option value="OVERLAP">[O] OVERLAP</option>
-          <!--         <option value="NOCOVERAGE">[-] NO COVERAGE</option> -->
+        <b>Match Type (<a href=#nothing onclick="showMatchtypeInfo()">?</a>)
+        </b> <br /> <select id="matchselect" title="Which is the match type of the Source Element on the Target Element?">
+          <option value="EQUIVALENT" title="The Source is Equivalent to the Target">[E] EQUIVALENT</option>
+          <option disabled>──────────</option>
+          <option value="PARTIAL" title="The Source is Part of the Target">[P] PART OF</option>
+          <option value="WIDER" title="The Source is Wider than the Target">[W] WIDER</option>
+          <option value="OVERLAP" title="The Source Overlaps the Target">[O]  OVERLAP</option>
+          <option disabled>──────────</option>
+          <option value="SPECIALIZATION" title="The Source Specializes the Target">[S] SPECIALIZATION</option>
+          <option value="GENERALIZATION" title="The Source Generalizes the Target">[G] GENERALIZATION</option>
+          <option disabled>──────────</option>
+          <option value="ACTS" title="The Source can Act as the Target">[A] ACTS AS</option>
+          <option value="BYACTED" title="The Source can be Acted By the Target">[B] IS ACTED BY</option>
         </select>
+        <br/>
+        <br/>
+        <form id="coveradio" action="">
+          <b>Coverage (<a href=#nothing onclick="showCoverageInfo()">?</a>)</b><br/>
+          <input id="rpart" type="radio" name="coveradio" value="PARTIAL" disabled title="The concept covers less than 50% of the element."> Partially<br/>
+          <input id="rlarge" type="radio" name="coveradio" value="LARGE" disabled title="The concept covers more than 50% of the element."> Largely<br/>
+          <input id="rfull" type="radio" name="coveradio" value="FULL" checked title="The concept totally covers the element."> Fully<br/>
+        </form>
       </div>
-      <div style="display: inline-block; width: 140px; height: 138px; position: relative">
+
+      <div style="display: inline-block; width: 170px; height: 55px; position: relative">
         <button id="matchbutton"
           style="width: 80px; height: 30px; font-weight: bold; position: absolute; top: 25px; right: 30px" disabled>MATCH!</button>
         <button id="deducebutton"
-          style="width: 130px; height: 60px; font-weight: bold; position: absolute; top: 80px; right: 5px" hidden>Deduce
+          style="width: 160px; height: 45px; font-weight: bold; position: absolute; top: 10px; right: 0px" hidden>Deduce
           Matches from previous Mappings</button>
       </div>
     </div>
 
-    <div style="width: 410px; float: left">
+    <div style="width: 400px; float: left">
       <label> <b>Target Element</b>
       </label> <br />
       <div class="targetbox" title="Select an Element from the target model.">
@@ -512,22 +594,24 @@
         </strong>
       </div>
     </div>
-    <!--     <strong>Matches Established.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Coverage:&nbsp;&nbsp;&nbsp; -->
-    <%--       <a href=#nothing onclick="showCoverageStatus('basecoverdiv')">${mapping.base}: <span id="basecovernumber">0</span>%</a> --%>
-    <!--         &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; -->
-    <%--       <a href=#nothing onclick="showCoverageStatus('targcoverdiv')">${mapping.target}: <span id="targcovernumber">0</span>%</a>) --%>
-    <!--     </strong> -->
     <div id="matchingsdiv" style="font-size: 95%; overflow: auto; border: 1px solid gray; height: 400px; padding: 3px">
       <!-- Matches included here by ajax -->
     </div>
   </div>
+  
+  <div style="width: 1000px; margin: 15px 0 0 0">
+    <b>Mapping Analysis</b> <br />
+    <textarea id="analysisfield" title="Describe the analysis about this mapping, e.g., which are the main parts/types not covered." rows="5" cols="139">${analysis}</textarea>
+  </div>
 
   <div style="text-align: center; width: 1000px; margin: 15px 0 0 0">
-    <form action="PhaseSelectServlet" method="POST">
-      <input type="hidden" name="action" value="openSelection">
-      <button id="finishbutton">SAVE and Return to Menu</button>
-    </form>
+    <button id="finishbutton">SAVE and Return to Menu</button>
   </div>
+  
+  <form action="PhaseSelectServlet" method="POST" id="finishform">
+    <input type="hidden" name="action" value="openSelection">
+  </form>
+
   <!-- ***** Match Blocks ***** -->
 
   <!-- Information Dialog -->
@@ -541,68 +625,104 @@
   </div>
 
   <!-- Information Dialog -->
-  <div id="coverinfo" title="Coverage Relations" hidden>
-    <p>Some symbols are used to establish a relation between a <b>Standard&rsquo;s Element</b> and an <b>Ontology&rsquo;s
-        Concept</b> (or between two Elements from different Standards). It is always a binary relation comparing the <b>notions&rsquo;
-        coverage</b> on the domain, i.e. <em>how the domain portion covered by an Element is related to the domain
-        portion covered by a Concept (or by another Element</em>). <br /> For example, <b>A [P] O</b> (A is PART OF O),
-      means that &ldquo;<em>Element A covers a portion of the domain that <b>is part of</b> the portion covered by
-        Concept O
-    </em>&rdquo;.
+  <div id="coveragediv" title="Coverage Status"
+    style="font-size: 95%; overflow: auto; border: 1px solid gray; width: 500px; height: 500px" hidden></div>
+
+  <!-- Information Dialog -->
+  <div id="matchinfo" title="Types of Match" hidden>
+    <p>Some Match Types are used to establish a relation between a <b>Standard&rsquo;s Element</b> and an <b>Ontology&rsquo;s
+        Concept</b> (or between two Elements from different Standards). It is a binary relation comparing the <b>notions</b>. <br />
+        For example, <b>A [P] O</b> (A is PART OF O), means that &ldquo;<em>Element A represents a notion that <b>is part of</b> the notion
+        represented by Concept O</em>&rdquo;.
     </p>
-    <p>For the matches where an Element remains with non-covered portions (WIDER or OVERLAP relations), a comment is
-      required for explaining such portions.</p>
     <table border=1 cellpadding=6 style="width: 100%; font-size: 95%">
       <tbody style="border: 1px solid gray">
         <tr style="background-color: #F0F0F0">
-          <th width="140"><b>Coverage</b></th>
+          <th width="120"><b>Type of Match</b></th>
           <th width="60"><b>Symbol</b></th>
-          <th width="300"><b>Meaning</b></th>
-          <!-- <th width="150"><b>View</b></th> -->
+          <th width="240"><b>Meaning</b></th>
+          <th width="120"><b>Application</b></th>
+          <!-- <th width="150"><b>Representation</b></th> -->
           <th width="250"><b>Example</b></th>
         </tr>
         <tr>
           <td><b>[E] EQUIVALENT</b></td>
           <td><b>A [E] O</b></td>
-          <td>A is Equivalent to O.<br /> Element A covers a portion of the domain that <b>is equivalent to</b>
-            the portion covered by Concept O.</td>
-          <!-- <td style="text-align: center"><IMG src="images/Equivalent.png"></td> -->
+          <td>A is Equivalent to O.<br /> Element A represents a notion that <b>is equivalent to</b> the notion represented by Concept O.</td>
+          <td><b>Equality Match</b><br/>Apply to any type of notion.</td>
           <td>(Element) Risk Plan<br /> <b>[E]</b> <br /> (Concept) Plan of Risks
           </td>
         </tr>
         <tr>
           <td><b>[P] PART OF</b></td>
           <td><b>A [P] O</b></td>
-          <td>A is Part of O<br /> Element A covers a portion of the domain that <b>is part of</b> the portion
-            covered by Concept O (O includes A).</td>
-          <!-- <td style="text-align: center"><IMG src="images/Partof.png"></td> -->
+          <td>A is Part of O<br /> Element A represents a notion that <b>is part of</b> the notion represented by Concept O.<br/>(O includes A)</td>
+          <td rowspan="3"><b>Composition Matches</b><br/>Apply to matches involving complex notions such as complex objects, events, and collective agents (e.g., Artifacts, Processes/Activities, and Teams).</td>
           <td>(Element) Risk Plan<br /> <b>[P]</b> <br /> (Concept) Project Plan
           </td>
         </tr>
         <tr>
           <td><b>[W] WIDER</b></td>
           <td><b>A [W] O</b></td>
-          <td>A is Wider than O.<br /> Element A covers a portion of the domain that <b>is wider than</b> the
-            portion covered by Concept O (A includes O).</td>
-          <!-- <td style="text-align: center"><IMG src="images/Wider.png"></td> -->
-          <td>(Element) Risk Plan<br /> <b>[W]</b> <br /> (Concept) Mitigation Plan<br /> <br /> <b>{contingency
-              actions not covered}</b>
+          <td>A is Wider than O.<br /> Element A represents a notion that <b>is wider than</b> the notion represented by Concept O.<br/>(A includes O)</td>
+          <td>(Element) Risk Plan<br /> <b>[W]</b> <br /> (Concept) Mitigation Plan<br /> <br /> <b>{contingency actions not covered}</b>
           </td>
         </tr>
         <tr>
           <td><b>[O] OVERLAP</b></td>
           <td><b>A [O] O</b></td>
-          <td>A has Overlap with O.<br /> Element A covers a portion of the domain that <b>has overlap with</b>
-            the portion covered by Concept O.</td>
-          <td>(Element) Risk Plan<br /> <b>[O]</b> <br /> (Concept) Internal Project Plan<br /> <br /> <b>{external
-              risks not covered}</b>
+          <td>A has Overlap with O.<br /> Element A represents a notion that <b>has overlap with</b> the notion represented by Concept O.<br/> (A and O include P)</td>
+          <td>(Element) Requirements Verification and Validation<br /> <b>[O]</b> <br /> (Concept) Requirements Validation and Agreement<br /> <br /> <b>{verification not covered}</b>
+          </td>
+        </tr>
+        <tr>
+          <td><b>[S] SPECIALIZATION</b></td>
+          <td><b>A [S] O</b></td>
+          <td>A is a Specialization of O.<br /> Element A represents a notion that <b>specializes</b> the notion represented by Concept O.</td>
+          <td rowspan="2"><b>Specialization/Generalization Matches</b><br/>Apply preferably for objects and agents (e.g., Artifacts and Stakeholders).</td>
+          <td>(Element) Software Designer <br /> <b>[S]</b> <br /> (Concept) Developer
+          </td>
+        </tr>
+        <tr>
+          <td><b>[G] GENERALIZATION</b></td>
+          <td><b>A [G] O</b></td>
+          <td>A is a Generalization of O.<br /> Element A represents a notion that <b>generalizes</b> the notion represented by Concept O.<br/>(O specializes A)</td>
+          <td>(Element) Requirement <br /> <b>[G]</b> <br /> (Concept) Functional Requirement
+          </td>
+        </tr>
+        <tr>
+          <td><b>[A] ACTS</b></td>
+          <td><b>A [A] O</b></td>
+          <td>A Acts as O.<br /> Element A represents a notion that can <b>act as</b> the <i>role</i> represented by Concept O.<br/></td>
+          <td rowspan="2"><b>Role-related Matches</b><br/>Apply when one of the notions is a role, usually objects and agents (e.g., Artifacts and Stakeholders roles).</td>
+          <td>(Element) System Analyst <br /> <b>[A]</b> <br /> (Concept) Requirements Reviewer <br/> <small><i><br/>(a System Analyst can play the role of Requirements Reviewer)</i></small>
+          </td>
+        </tr>
+        <tr>
+          <td><b>[B] IS ACTED BY</b></td>
+          <td><b>A [B] O</b></td>
+          <td>A is acted By O.<br /> Element A represents the notion of a <i>role</i> that can be <b>acted by</b> the notion represented by Concept O.<br/>(O acts as A)</td>
+          <td>(Element) Requirements Agreement <br /> <b>[B]</b> <br /> (Concept) Client E-mail <br/> <small><i><br/>(a Client E-mail can play the role of Requirements Agreement)</i></small>
           </td>
         </tr>
       </tbody>
     </table>
-    <p>A Base Element that is EQUIVALENT or PART OF any Target Element is considered <b>fully covered</b> <img
-      src="images/favicon-full.ico">. <br /> A Base Element that is WIDER than or OVERLAPs any
-      Target Element is considered <b>partially covered</b> <img src="images/favicon-part.ico">.
+    <p>Elements with no matches are considered <b>non covered</b>.
+    <br />Elements with Equivalent or Part of relations are considered <b>fully covered</b> <img width="16" src="images/favicon-full.ico">
+    <br />Element with other matches are considered <b>partially covered</b> <img width="16" src="images/favicon-part.ico">
+    <br />Elements said out of scope are considered <b>discarded</b> <img width="16" src="images/favicon-discarded.ico">
+    </p>
+  </div>
+
+  <div id="coverinfo" title="Elements Coverage" hidden>
+    <p>In a match, the Ontology Concept covers the Standard Element in some extension. Please, inform the
+      approximate coverage:<br />
+    <ul>
+      <li><b>Partially</b>: The concept covers less than 50% of the element.</li>
+      <li><b>Largely</b>: The concept covers more than 50% of the element.</li>
+      <li><b>Fully</b>: The concept totally covers the element.</li>
+    </ul>
+    This information will be used in the mapping covering numbers. 
     </p>
   </div>
 

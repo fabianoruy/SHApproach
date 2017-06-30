@@ -173,9 +173,11 @@ May.02 (mapper)
 + Diverse fixes and small improvements
 + Published 
 
-TODO
-- Horizontal Mapping
+June.30 (mapper2, v0.8)
+- Horizontal Mapping (new types and coverages)
 - Update validations and deductions for new types
+
+TODO
 - Approach in the tool
 
 
@@ -185,17 +187,17 @@ TODO
 ----------------------------------------------------
 Future
 - Composite Matches between VM and DM
-- Composite Matches at the end
-- Coverage Analysis (for mapping)
-  . Coverage Justification (uncovered)
+- Composite Matches at the end [done]
+- Coverage Analysis (for mapping) [done]
+  . Coverage Justification (uncovered) [done]
 - Consistency check presentation
 - Asserted Relations results
-- New Relations ([S,G,A,B,-])
-  . All the calculation involved
+- New Relations ([S,G,A,B,-]) [done]
+  . All the calculation involved [done]
 
 - ICM elements relations
 - Structural Mapping edition
-- Approach information
+- Approach information [done]
 - New Structure for Astah file (package-diagram-classes)
 
 - Astah file edition (new elements/relations, matches as dependencies)

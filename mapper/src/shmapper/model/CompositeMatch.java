@@ -7,8 +7,8 @@ public class CompositeMatch extends Match {
 	private static final long	serialVersionUID	= -6126451502312008378L;
 	private List<SimpleMatch>	components;
 
-	public CompositeMatch(Element source, MatchType cover, String comm, List<SimpleMatch> matches) {
-		super(source, cover, comm);
+	public CompositeMatch(Element source, MatchType type, String comm, List<SimpleMatch> matches) {
+		super(source, type, comm);
 		this.components = matches;
 	}
 

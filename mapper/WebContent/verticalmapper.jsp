@@ -12,14 +12,14 @@
 <link rel="stylesheet" href="css/jquery-ui.css">
 
 <style>
-.elembox {
+.sourcebox {
   border-radius: 8px;
   border: 2px solid blue;
   padding: 8px;
   min-height: 150px;
 }
 
-.concbox {
+.targetbox {
   border-radius: 8px;
   border: 2px solid green;
   padding: 8px;
@@ -32,8 +32,8 @@
 <script src="js/maphilight.js"></script>
 
 <script>
-  var stdJson = JSON.parse('${stdJson}');
-  var ontoJson = JSON.parse('${ontoJson}');
+  var baseJson = JSON.parse('${baseJson}');
+  var targJson = JSON.parse('${targJson}');
   var coverJson;
   var cmatchescount = 0;
   var previouscmatchescount = -1;
@@ -204,7 +204,7 @@
   	  	$('#discardbutton').show();
       	$('#restorebutton').hide();
       	$('#matchbutton').prop('disabled', false);
-      	$('#elementfield').text(stdJson[elemId].name);
+      	$('#elementfield').text(baseJson[elemId].name);
       }
     });
   }
@@ -223,8 +223,7 @@
       break;
     case 'Basetype':
       showQuestion(question,
-        function() {doMatch(true);},
-        function() {}
+        function() {doMatch(true);}
       );
       return;
       break;
@@ -293,7 +292,7 @@
     
 
     $('.map').maphilight();
-    //     $('.elembox').mouseover(function(e) {
+    //     $('.sourcebox').mouseover(function(e) {
     //       console.log($('#elementidfield').val());
     //       var id = $('#elementidfield').val();
     //       $('.EVENT').mouseover();
@@ -302,9 +301,9 @@
     // Fills the Element field from the map click
     $('#StandardMap').click(function(e) {
       var id = e.target.id;
-      var name = stdJson[id].name;
-      var btype = stdJson[id].basetype;
-      var def = stdJson[id].definition;
+      var name = baseJson[id].name;
+      var btype = baseJson[id].basetype;
+      var def = baseJson[id].definition;
       $('#elementidfield').val(id);
       $('#elementfield').text(name);
       $('#ebasetypefield').text("(" + btype + ")");
@@ -323,9 +322,9 @@
 
     // Fill the Concept field from the map click
     $('#OntologyMap').click(function(e) {
-      var name = ontoJson[e.target.id].name;
-      var btype = ontoJson[e.target.id].basetype;
-      var def = ontoJson[e.target.id].definition;
+      var name = targJson[e.target.id].name;
+      var btype = targJson[e.target.id].basetype;
+      var def = targJson[e.target.id].definition;
       $('#conceptidfield').val(e.target.id);
       $('#conceptfield').text(name);
       $('#cbasetypefield').text("(" + btype + ")");
@@ -350,7 +349,7 @@
       showMessage("This element already has matches. Remove them if you want to discard it.");
       return false;
     }
-    showQuestion("Are you sure to discard <b>" + stdJson[id].name + "</b> from the initiative? It will be disregarded from all mappings.",
+    showQuestion("Are you sure to discard <b>" + baseJson[id].name + "</b> from the initiative? It will be disregarded from all mappings.",
       function() {doDiscard(id);},
       function() {}
     );
@@ -359,7 +358,7 @@
   /* Restores the selected element to the initiative. */
   function restoreElement() {
     var id = $('#elementidfield').val();
-    showQuestion("Do you want to bring <b>" + stdJson[id].name + "</b> back to the initiative?",
+    showQuestion("Do you want to bring <b>" + baseJson[id].name + "</b> back to the initiative?",
       function() {doRestore(id);},
       function() {}
     );
@@ -371,12 +370,12 @@
     var elem = $('#elementidfield').val();
     var conc = $('#conceptidfield').val();
     var type = $('#matchselect').val();
-    var comm = $('#commentsfield').val();
     var cover = $('input[name=coveradio]:checked').val();
+    var comm = $('#commentsfield').val();
 
     // verifying
     if (elem == '' || (conc == '' && type != 'NORELATION')) {
-      showMessage("Select an element from each diagram.");
+      showMessage("Select a notion from each diagram.");
       return false;
     }
     if (cover != 'FULL' && comm == '') {
@@ -546,7 +545,7 @@
       <img id="discardbutton" src="images/favicon-discarded.ico" title="Discard element (remove it from the initiative scope)" width="16px" style="cursor:pointer" onclick="discardElement()" hidden/>
       <img id="restorebutton" src="images/favicon-restore.ico" title="Recover element (bring it back to the initiative scope)" width="16px" style="cursor:pointer" onclick="restoreElement()" hidden/>
       <br />
-      <div class="elembox" title="Select an Element from the Standard model">
+      <div class="sourcebox" title="Select an Element from the Standard model">
         <input id="elementidfield" type="hidden" /> <span id="elementfield" style="font-weight: bold">(select an
           element)</span> <br /> <span id="ebasetypefield"></span> <br /> <span id="edefinitionfield" style="font-size: 90%"></span>
       </div>
@@ -579,17 +578,17 @@
           <input id="rfull" type="radio" name="coveradio" value="FULL" checked title="The concept totally covers the element."> Fully<br/>
         </form>
       </div>
-      
+
       <div style="display: inline-block; width: 170px; height: 55px; position: relative">
         <button id="matchbutton"
-          style="width: 80px; height: 30px; font-weight: bold; position: absolute; bottom: 0px; left: 50px;">MATCH!</button>
+          style="width: 80px; height: 30px; font-weight: bold; position: absolute; bottom: 0px; left: 50px">MATCH!</button>
       </div>
     </div>
 
     <div style="width: 400px; float: left">
       <label> <b>Ontology Concept</b>
       </label> <br />
-      <div class="concbox" title="Select a Concept from the Ontology model.">
+      <div class="targetbox" title="Select a Concept from the Ontology model.">
         <input id="conceptidfield" type="hidden" /> <span id="conceptfield" style="font-weight: bold">(select a
           concept)</span> <br /> <span id="cbasetypefield"></span> <br /> <span id="cdefinitionfield" style="font-size: 90%"></span>
       </div>
@@ -623,17 +622,15 @@
     <b>Mapping Analysis</b> <br />
     <textarea id="analysisfield" title="Describe the analysis about this mapping, e.g., which are the main parts/types not covered." rows="5" cols="139">${analysis}</textarea>
   </div>
-  
 
   <div style="text-align: center; width: 1000px; margin: 15px 0 0 0">
-      <button id="finishbutton">SAVE and Return to Menu</button>
+    <button id="finishbutton">SAVE and Return to Menu</button>
   </div>
   
   <form action="PhaseSelectServlet" method="POST" id="finishform">
     <input type="hidden" name="action" value="openSelection">
   </form>
-      
-        
+
   <!-- ***** Match Blocks ***** -->
 
   <!-- Information Dialog -->
@@ -686,7 +683,7 @@
         <tr>
           <td><b>[O] OVERLAP</b></td>
           <td><b>A [O] O</b></td>
-          <td>A has OVERLAP with O.<br /> Element A represents a notion that <b>has overlap with</b> the notion represented by Concept O.<br/> (A and O include P)</td>
+          <td>A has Overlap with O.<br /> Element A represents a notion that <b>has overlap with</b> the notion represented by Concept O.<br/> (A and O include P)</td>
           <!-- <td style="text-align: center"><IMG src="images/Intersection.png"><br/><IMG src="images/Intersection2.png"></td> -->
           <td>(Element) Requirements Verification and Validation<br /> <b>[O]</b> <br /> (Concept) Requirements Validation and Agreement<br /> <br /> <b>{verification not covered}</b>
           </td>
@@ -753,10 +750,10 @@
     </ul>
     This information will be used in the mapping covering numbers. 
     </p>
-    </div>
+  </div>
 
 
-    <!-- ##### Dialog Boxes ##### -->
+  <!-- ##### Dialog Boxes ##### -->
 
   <!-- Simple Message -->
   <div id="dialog-message" title="Message" hidden>

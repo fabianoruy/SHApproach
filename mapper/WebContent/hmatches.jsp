@@ -9,7 +9,7 @@
         <c:if test="${loop.index%2 == 0}"><c:set var="color" value=""/></c:if>
         <tr ${color}>
           <td width="400px" title="${match.source.definition}"><b>${match.source}</b></td>
-          <td width="180px">${match.matchType.text}</td>
+          <td width="180px" title="Coverage: ${match.coverage}">${match.matchType.text}</td>
           <c:set var="tdef" value="title='[]'"/>
           <c:if test="${match['class'].simpleName eq 'SimpleMatch'}">
             <c:set var="tdef" value="title='${match.target.definition}'"/>
@@ -44,7 +44,7 @@
         <c:if test="${loop.index%2 == 0}"><c:set var="color" value=""/></c:if>
         <tr ${color}>
           <td width="400px" title="${match.source.definition}"><b>${match.source}</b></td>
-          <td width="180px">${match.matchType.text}</td>
+          <td width="180px" title="Coverage: ${match.coverage}">${match.matchType.text}</td>
           <c:set var="tdef" value="title='[]'"/>
           <c:if test="${match['class'].simpleName eq 'SimpleMatch'}">
             <c:set var="tdef" value="title='${match.target.definition}'"/>

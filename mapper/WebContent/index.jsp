@@ -49,21 +49,18 @@
         . Parse your astah file<br />
         . Import and process Structural Mappings<br/>
         . Do Vertical Mappings (simple and composite matches, disjoint and basetype validations)<br/>
-        + Use eight distinct Match Types<br/>
+        . Use eight distinct Match Types<br/>
         . Do ICM Mappings<br />
-        + Justify decisions on uncovered elements <br/>
+        . Justify decisions on uncovered elements <br/>
+        + Do Horizontal Mappings<br />
+        + Deduce matches in Horizontal Mappings <br/>
         . Monitor mappings' coverage<br/>
         . Save progress<br />
-        . See initiative results<br />
-      </p>
-      <p>
-        <b>In this version, you can't:</b><br />
-        . Do Horizontal Mappings<br />
-        . Deduce matches in Horizontal Mappings <br/>
+        . See the initiative results<br />
       </p>
       <br/>
       <br/>
-      <p><b> Version 0.7 - 2016-05-02</b></p>
+      <p><b> Version 0.8 - 2016-06-30</b></p>
     </code>
   </div>
 </BODY>

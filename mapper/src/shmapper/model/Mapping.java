@@ -94,12 +94,16 @@ public abstract class Mapping extends SerializableObject {
 	protected double getCoverage(List<Match> matches) {
 		double cover = 0.0;
 		for (Match match : matches) {
+			// TODO: exclude!
+//			if (match.getMatchType() == MatchType.EQUIVALENT || match.getMatchType() == MatchType.PARTIAL)
+//				match.setCoverage(Coverage.FULL);
+
 			if (match.getCoverage() == Coverage.FULL)
-				return Coverage.FULL.getValue();
+				return Coverage.FULL.getValue(); // 1.0
 			cover += match.getCoverage().getValue();
 		}
 		if (cover >= Coverage.FULL.getValue())
-			cover = ((double) matches.size()) / (matches.size() + 1);
+			cover = ((double) matches.size()) / (matches.size() + 1); // < 1.0
 		return cover;
 	}
 
@@ -259,8 +263,9 @@ public abstract class Mapping extends SerializableObject {
 		if (matches.isEmpty())
 			return CoverageSituation.NONCOVERED;
 		for (Match match : matches) {
-			if (match.getMatchType() == MatchType.EQUIVALENT || match.getMatchType() == MatchType.PARTIAL)
+			if (match.getCoverage() == Coverage.FULL) {
 				return CoverageSituation.FULLY;
+			}
 		}
 		return CoverageSituation.PARTIALLY;
 	}

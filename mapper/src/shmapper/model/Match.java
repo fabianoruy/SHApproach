@@ -56,7 +56,11 @@ public abstract class Match extends SerializableObject {
 	}
 
 	public void setCoverage(Coverage coverage) {
-		this.coverage = coverage;
+		if (type == MatchType.EQUIVALENT || type == MatchType.PARTIAL)
+			this.coverage = Coverage.FULL;
+		if (coverage == null)
+			this.coverage = Coverage.UNDEFINED;
+		else this.coverage = coverage;
 	}
 
 	public boolean isDeduced() {
