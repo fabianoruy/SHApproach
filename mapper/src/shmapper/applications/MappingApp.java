@@ -241,7 +241,10 @@ public class MappingApp {
 			Notion notion = position.getNotion();
 			// it is not a basetype (is a Domain Concept or a Content Element)
 			if (!notion.isBasetype()) {
-				coordsHash.put(notion, position.getCoords());
+				// is not a discarded element in a Horizontal Mapping
+				if (!(getCurrentMapping() instanceof HorizontalMapping) || !(initiative.isDiscarded((Element) notion))) {
+					coordsHash.put(notion, position.getCoords());
+				}
 			}
 		}
 		return coordsHash;

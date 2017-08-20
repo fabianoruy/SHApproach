@@ -95,8 +95,8 @@ public abstract class Mapping extends SerializableObject {
 		double cover = 0.0;
 		for (Match match : matches) {
 			// TODO: exclude!
-//			if (match.getMatchType() == MatchType.EQUIVALENT || match.getMatchType() == MatchType.PARTIAL)
-//				match.setCoverage(Coverage.FULL);
+			if (match.getMatchType() == MatchType.EQUIVALENT || match.getMatchType() == MatchType.PARTIAL)
+				match.setCoverage(Coverage.FULL);
 
 			if (match.getCoverage() == Coverage.FULL)
 				return Coverage.FULL.getValue(); // 1.0
@@ -107,27 +107,6 @@ public abstract class Mapping extends SerializableObject {
 		return cover;
 	}
 
-
-	/** Returns the coverage of the matches over the Standard's Elements (base). */
-	// public int getCoverage0() {
-	// // coverage (%): baseModel.elements.([E] + [P] + [W]/2 + [O]/2) / baseModel.elements;
-	// int all = getBase().getElements().size() - getDiscardedElements().size();
-	// int partially = getPartiallyCoveredElements().size();
-	// int noncovered = getNonCoveredElements().size();
-	// int fully = all - partially - noncovered;
-	// double coverage = ((partially * 0.35 + fully) / all) * 100;
-	// if (fully == all) {
-	// this.status = MappingStatus.FINISHED;
-	// return 100;
-	// } else if (coverage > 0.1) {
-	// this.status = MappingStatus.STARTED;
-	// } else {
-	// this.status = MappingStatus.PLANNED;
-	// }
-	// // System.out.println(this + ": All(" + all + "), Full(" + fully + "), Part(" + partially + "), Non("
-	// // +noncovered + "): Cover(" + coverage + "%)");
-	// return (int) Math.round(coverage);
-	// }
 
 	public MappingStatus getStatus() {
 		return status;
@@ -222,19 +201,6 @@ public abstract class Mapping extends SerializableObject {
 		return null;
 	}
 
-	// /** Returns the single composite match, in this mapping, for the simple match. */
-	// public CompositeMatch getCompositeMatchByComponent(SimpleMatch match) {
-	// for (CompositeMatch cmatch : getCompositeMatches()) {
-	// for (SimpleMatch smatch : cmatch.getComponents()) {
-	// // is the simple match part of a composite match?
-	// if (match.equals(smatch)) {
-	// return cmatch;
-	// }
-	// }
-	// }
-	// return null;
-	// }
-
 	/** Returns the matchs of this mapping with the given UFOType . */
 	public List<Match> getMatchesBySourceUfotype(UFOType type) {
 		List<Match> tmatches = new ArrayList<Match>();
@@ -263,6 +229,9 @@ public abstract class Mapping extends SerializableObject {
 		if (matches.isEmpty())
 			return CoverageSituation.NONCOVERED;
 		for (Match match : matches) {
+			if(match.getMatchType() == MatchType.EQUIVALENT || match.getMatchType() == MatchType.PARTIAL) { //TODO: remove it
+				match.setCoverage(Coverage.FULL);
+			}
 			if (match.getCoverage() == Coverage.FULL) {
 				return CoverageSituation.FULLY;
 			}
